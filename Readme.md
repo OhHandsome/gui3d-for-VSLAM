@@ -2,7 +2,7 @@
   please refer gui.h and demo.cpp  
   [exec] [scene.txt]  
   for example:   
-  vslam_gui_demo ./vslam_gui/vslam/data/scene.txt
+  gui3d_demo ./data/scene.txt
  
  - Dependency  
   [wxWidgets 2.9+][1]  
