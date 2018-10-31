@@ -1,8 +1,9 @@
+ gui3d for vslam
  - Usage  
   please refer gui.h and demo.cpp  
   [exec] [scene.txt]  
-  for example:   
-  gui3d_demo ./data/scene.txt
+  example:   
+    gui3d_demo ./data/scene.txt
  
  - Dependency  
   [wxWidgets 2.9+][1]  
