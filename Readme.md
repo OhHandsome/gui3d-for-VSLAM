@@ -1,6 +1,6 @@
  gui3d for vslam
  - Usage  
-  please refer gui.h and demo.cpp  
+  please refer [gui.h][3] and demo.cpp
   [exec] [scene.txt]  
   example:   
     gui3d_demo ./data/scene.txt
@@ -14,3 +14,4 @@
 
   [1]: https://wxwidgets.org/downloads/
   [2]: https://www.mrpt.org/download-mrpt/
+  [3]: https://github.com/gao-ouyang/vslam_gui/blob/master/inc/gui3d/gui.h
