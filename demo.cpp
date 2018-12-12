@@ -24,14 +24,8 @@ int main(int argc, char **argv)
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     volatile Gui3dOption& guiOpt = Option();
-    auto &bReadNextFrame = guiOpt.conOpt.ReadNextFrame;
-    auto &ReadFrameGap = guiOpt.conOpt.ReadFrameGap;
     auto &RequestToRefresh3DView = guiOpt.figOpt.RequestToRefresh3DView;
     auto &bExit = guiOpt.figOpt.bExit;
-    auto &bViewKeyframes = guiOpt.sceneOpt.bViewKeyframes;
-    auto &bViewLocalFrames = guiOpt.sceneOpt.bViewLocalFrames;
-    auto &bViewGlobalMapPoints = guiOpt.sceneOpt.bViewGlobalMapPoints;
-    auto &bViewRefMapPoints = guiOpt.sceneOpt.bViewRefMapPoints;
     auto &KFScale = guiOpt.sceneOpt.KFScale;
 
     std::string route = "./data/scene.txt";
@@ -61,11 +55,11 @@ int main(int argc, char **argv)
 
     addTextMessage(TEXT_X, TEXT_LOCALMAP_Y, file, TextID::LOCALMAP);
     setDataRoute(route.substr(0, pos).c_str());
-    renderFrames(sysChannel[LocalFrames], _vWindowKeyframePoses, LocalFramesOptions);
-    renderPath("Path", _vWindowKeyframePoses, PathOptions);
-    renderMapPoints(sysChannel[RefMapPoints], _vRefMapPoints, RefMapPointsOptions);
+    renderFrames(sysChannel[LocalFrames], _vWindowKeyframePoses);
+    renderPath(sysChannel[Path], _vWindowKeyframePoses);
+    renderMapPoints(sysChannel[RefMapPoints], _vRefMapPoints);
     auto Tp = _vWindowKeyframePoses[_vWindowKeyframePoses.size() - 2];
-    renderFrame(sysChannel[CurCamera], Tp, CurCameraOptions);
+    renderFrame(sysChannel[CurCamera], Tp);
 
     bool bNeedRefresh3DView = true;
     while (!bExit)

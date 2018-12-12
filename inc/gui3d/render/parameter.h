@@ -56,36 +56,32 @@ enum EVENT_TYPE {
 #define TEXT_NEED_KEYFRAME_Y    (TEXT_FREQ_Y + LINE_WIDTH)
 
 
+
+
+
 static const char* sysChannel[] = {
     "CurCamera",       // Camera Channel
     "PrediectCamera",
+    "GTCamera",
     "RefMapPoints",    // MapPoint Channel
     "GlobalMapPoints",
     "LocalFrames",     // PoseList Channel
     "KeyFrames",
-    "Depth",           // PointCloud Channel
+    "Path",
+    "DepthPointCloud", // PointCloud Channel
     "Model3d"
 };
 
 enum SysChannelType{
     CurCamera = 0,
     PrediectCamera,
+    GTCamera,
     RefMapPoints,    // MapPoint Channel
     GlobalMapPoints,
     LocalFrames,     // PoseList Channel
     KeyFrames,
-    Depth,     // PointCloud Channel
+    Path,
+    DepthPointCloud,     // PointCloud Channel
     Model3d
 };
 
-#define CurCameraOptions        tOptions(OrangeRed, 1, tOptions::HOLD_OFF)
-#define PrediectCameraOptions   tOptions(OrangeRed, 0.5, tOptions::HOLD_OFF)
-#define GTCameraOptions         tOptions(Red, 0.5, tOptions::HOLD_OFF)
-#define RefMapPointsOptions     tOptions(Red, 1, tOptions::HOLD_OFF)
-#define GlobalMapPointsOptions  tOptions(Yellow, 1, tOptions::HOLD_OFF)
-#define LocalFramesOptions      tOptions(Green, 0.25, tOptions::HOLD_OFF)
-#define KeyFramesOptions        tOptions(Cyan,  0.25, tOptions::HOLD_OFF)
-#define DepthCameraOptions      tOptions(White,  1.0f, tOptions::HOLD_OFF)
-#define Model3dOptions          tOptions(White,  1.0f, tOptions::HOLD_OFF)
-
-#define PathOptions             tOptions(Orange, 1.0f, tOptions::HOLD_OFF)

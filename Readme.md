@@ -1,9 +1,8 @@
- gui3d for vslam
  - Usage  
-  please refer [gui.h][3] and demo.cpp
+  please refer gui.h and demo.cpp  
   [exec] [scene.txt]  
-  example:   
-    gui3d_demo ./data/scene.txt
+  for example:   
+  vslam_gui_demo ./vslam_gui/vslam/data/scene.txt
  
  - Dependency  
   [wxWidgets 2.9+][1]  
@@ -14,4 +13,3 @@
 
   [1]: https://wxwidgets.org/downloads/
   [2]: https://www.mrpt.org/download-mrpt/
-  [3]: https://github.com/gao-ouyang/vslam_gui/blob/master/inc/gui3d/gui.h

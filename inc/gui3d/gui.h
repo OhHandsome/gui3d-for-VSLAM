@@ -39,12 +39,12 @@ struct tOptions{
 };
 
 
-
+// Gui3d include default window3d for vSLAM
 inline string Engine() {return "vSLAM for ArcSoft";}
 
 // Figure for 3d
 hObject nFigure(const string& name, int width = 640, int height = 480);
-void setAsOutputFigure(hObject fig);
+void setAsCurrentFigure(hObject fig); // same with gcf in matlab
 void addTextMessage(double x, double y, const string &text, size_t unique_index);
 void moveFigure(int x, int y);
 void destoryFigure(const string& name);
@@ -56,24 +56,25 @@ void waitKey(int delay_ms = 0);
 const string& workRoute();
 void setDataRoute(const char* data_path);
 volatile Gui3dOption& Option();
-hObject renderFrame     (const Channel& name, const Pose&  Twc,          const tOptions& options);
-hObject renderFrames    (const Channel& name, const PoseV& vTwc,         const tOptions& options,
+hObject renderFrame     (const Channel& name, const Pose&  Twc,          const tOptions& options = tOptions());
+hObject renderFrames    (const Channel& name, const PoseV& vTwc,         const tOptions& options = tOptions(),
                          const NameV& vLabels = NameV());
-hObject renderLines     (const Channel& name, const Position3dV& vPoint, const tOptions& options);
-hObject renderPath      (const Channel& name, const PoseV& vTwc,         const tOptions& options);
-hObject renderMapPoints (const Channel& name, const LandMark3dV& vPoint, const tOptions& options);
-hObject renderPointCloud(const Channel& name, const PointCloud& cloud,   const tOptions& options);
-hObject renderModel3d   (const Channel& name, const PoseV& Twc, const PointCloudV& cloud, const tOptions& options);
-hObject renderRobot     (const Channel& name, const Pose& Twb,           const tOptions& options);
+hObject renderLines     (const Channel& name, const Position3dV& vPoint, const tOptions& options = tOptions());
+hObject renderPath      (const Channel& name, const PoseV& vTwc,         const tOptions& options = tOptions());
+hObject renderMapPoints (const Channel& name, const LandMark3dV& vPoint, const tOptions& options = tOptions());
+hObject renderPointCloud(const Channel& name, const PointCloud& cloud,   const tOptions& options = tOptions());
+hObject renderModel3d   (const Channel& name,
+                         const PoseV&   Twc , const PointCloudV& cloud,  const tOptions& options = tOptions());
+hObject renderRobot     (const Channel& name, const Pose& Twb,           const tOptions& options = tOptions());
 hObject viewImage       (const cv::Mat& im);  // Render ViewPort, for example, imshow(), Aux Viewport
-hObject viewDepth       (const cv::Mat& im, const cv::Mat& depth);
+hObject viewDepth       (const cv::Mat& im, const cv::Mat& array2d_pt3d);
 hObject auxViewAt       (const Pose& pose);    // GL Camera Pose in Aux ViewPort for Multi-View
 void    update          (hObject obj, const Pose& Twc);
 void    repaint();
 
 // Image Display
 hObject im_show(const string& name, const cv::Mat& im);
-hObject im_show(const string& name, const cv::Mat& im, const cv::Mat& depth);
+hObject im_show(const string& name, const cv::Mat& im, const cv::Mat& array2d_pt3d);
 void waitExit(hObject hfig, int delay_ms = 0);
 
 void collectCloudFromRGBD(const cv::Mat& im, const cv::Mat& depth, PointCloud& cloud);

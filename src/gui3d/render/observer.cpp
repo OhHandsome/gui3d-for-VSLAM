@@ -271,7 +271,7 @@ void GuiObserver::DoEvent(mrptEventWindowChar ev)
 		case 'd':
 		case 'D':
         {
-            CPointCloudColouredPtr obj = m_figure->hPointCloud(sysChannel[Depth]);
+            CPointCloudColouredPtr obj = m_figure->hPointCloud(sysChannel[DepthPointCloud]);
             bViewPointCloud ^= true;
             m_figure->lock();
             VisiableModel(obj, bViewPointCloud);

@@ -1,7 +1,7 @@
 set(PROJECT_NAME gui3d)
 
 file(GLOB_RECURSE SRCS src/* inc/*.h inc/*.hpp)
-add_library(${PROJECT_NAME} STATIC ${SRCS})
+add_library(${PROJECT_NAME} STATIC ${SRCS} src/gui3d/render/sys_channel.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC ./inc)
 option(USE_SYSTEM_MRPT "Use System MRPT Lib" ON)
 if(USE_SYSTEM_MRPT)

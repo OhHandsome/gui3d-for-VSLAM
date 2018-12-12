@@ -28,9 +28,12 @@ std::string mFileRoute =
 #endif
 std::string mDataRoute = mFileRoute;
 
+void registerSystemChannelOptions();
+bool systemChannelOptions(const Channel& name, tOptions& options);
+
 // ----------------------- Engine Handle ----------------------------//
-// when delete figure, need set sCurrentFigure3d
-void resetCurFigure()
+// when delete figure, need choose and set sCurrentFigure3d
+void csCurFigureFromExistWindows()
 {
 	if(sSystemFigure3d.empty())
     {
@@ -74,26 +77,30 @@ bool bValidFigure(hObject fig)
 }
 
 // set fig as sCurrentFigure3d
-void setOutputFigure(hObject fig)
+void setAsCurrentFigure(hObject fig)
 {
     if(!bValidFigure(fig))
+    {
+        LOGE("None Valid Figure!!");
         return;
+    }
     sCurrentFigure3d = (Figure *)fig;
 }
 
 void destoryFigure(const string& name)
 {
     auto it = sSystemFigure3d.find(name);
-    if(it != sSystemFigure3d.end())
+    if(it == sSystemFigure3d.end())
     {
-        LOGD("Destory Figure: %s", name.c_str());
-        FigurePtr fig = it->second;
-        sSystemFigure3d.erase(it);
-        if(fig.get() == sCurrentFigure3d)
-        {
-            resetCurFigure();
-        }
+        LOGI("None Figure: %s", name.c_str());
+        return;
     }
+
+    LOGD("Destory Figure: %s", name.c_str());
+    FigurePtr fig = it->second;
+    sSystemFigure3d.erase(it);
+    if(fig.get() != sCurrentFigure3d) return;
+    csCurFigureFromExistWindows();
 }
 
 void destoryFigure(hObject hfig)
@@ -115,6 +122,7 @@ hObject nFigure(const string& name, int width, int height)
         return (hObject)it->second.get();
     }
 
+    registerSystemChannelOptions();
     LOGD("New     Figure: %s", name.c_str());
     FigurePtr fig = std::make_shared<Figure>(name, width, height);
     sSystemFigure3d[name] = fig;
@@ -222,10 +230,13 @@ hObject renderFrame(const Channel& name, const Pose& Twc, const tOptions& option
     if(!sCurrentFigure3d)
         nFigure("default", 640, 480);
 
+    tOptions real_options = options;
+    systemChannelOptions(name, real_options);
+
     CFrustumPtr obj = sCurrentFigure3d->hFrame(name);
     auto win = sCurrentFigure3d->mMainWindow;
     auto theScene = win->get3DSceneAndLock();
-    renderFrame(theScene, obj, Twc, options);
+    renderFrame(theScene, obj, Twc, real_options);
     win->unlockAccess3DScene();
     sCurrentFigure3d->mSysFrame[name] = obj;
     return (hObject)(obj.get());
@@ -236,10 +247,13 @@ hObject renderFrames(const Channel& name, const PoseV& vTwc, const tOptions& opt
     if(!sCurrentFigure3d)
         nFigure("default", 640, 480);
 
+    tOptions real_options = options;
+    systemChannelOptions(name, real_options);
+
     CSetOfObjectsPtr obj = sCurrentFigure3d->hPoseList(name);
     auto win = sCurrentFigure3d->mMainWindow;
     auto theScene = win->get3DSceneAndLock();
-    renderFrames(theScene, obj, vTwc, vLabels, options);
+    renderFrames(theScene, obj, vTwc, vLabels, real_options);
     win->unlockAccess3DScene();
     sCurrentFigure3d->mSysPoseList[name] = obj;
     return (hObject)(obj.get());
@@ -250,10 +264,13 @@ hObject renderLines(const Channel& name, const Position3dV& vPoint, const tOptio
     if(!sCurrentFigure3d)
         nFigure("default", 640, 480);
 
+    tOptions real_options = options;
+    systemChannelOptions(name, real_options);
+
     CSetOfLinesPtr obj = sCurrentFigure3d->hLine(name);
     auto win = sCurrentFigure3d->mMainWindow;
     auto theScene = win->get3DSceneAndLock();
-    renderLines(theScene, obj, vPoint, options);
+    renderLines(theScene, obj, vPoint, real_options);
     win->unlockAccess3DScene();
     sCurrentFigure3d->mSysLine[name] = obj;
     return (hObject)(obj.get());
@@ -272,10 +289,13 @@ hObject renderPath(const Channel& name, const PoseV& vTwc, const tOptions& optio
         vLines.push_back(Point1);
         vLines.push_back(Point2);
     }
+    tOptions real_options = options;
+    systemChannelOptions(name, real_options);
+
     CSetOfLinesPtr obj = sCurrentFigure3d->hLine(name);
     auto win = sCurrentFigure3d->mMainWindow;
     auto theScene = win->get3DSceneAndLock();
-    renderLines(theScene, obj, vLines, options);
+    renderLines(theScene, obj, vLines, real_options);
     win->unlockAccess3DScene();
     sCurrentFigure3d->mSysLine[name] = obj;
     return (hObject)(obj.get());
@@ -286,11 +306,14 @@ hObject renderMapPoints(const Channel& name, const LandMark3dV& vPoint,const tOp
 	if(!sCurrentFigure3d)
 		nFigure("default", 640, 480);
 
+    tOptions real_options = options;
+    systemChannelOptions(name, real_options);
+
 	CPointCloudPtr obj = sCurrentFigure3d->hMapPoint(name);
 	auto win = sCurrentFigure3d->mMainWindow;
 	auto theScene = win->get3DSceneAndLock();
     const Pose Twc = Pose::Identity();
-	renderMapPoints(theScene, obj, Twc, vPoint, options);
+	renderMapPoints(theScene, obj, Twc, vPoint, real_options);
 	win->unlockAccess3DScene();
 	sCurrentFigure3d->mSysMapPoint[name] = obj;
 	return (hObject)(obj.get());
@@ -301,11 +324,14 @@ hObject renderPointCloud(const Channel& name, const PointCloud& cloud,  const tO
 	if(!sCurrentFigure3d)
 		nFigure("default", 640, 480);
 
-	CPointCloudColouredPtr obj = sCurrentFigure3d->hPointCloud(name);
+    tOptions real_options = options;
+    systemChannelOptions(name, real_options);
+
+    CPointCloudColouredPtr obj = sCurrentFigure3d->hPointCloud(name);
 	auto win = sCurrentFigure3d->mMainWindow;
 	auto theScene = win->get3DSceneAndLock();
     const Pose Twc = Pose::Identity();
-	renderPointCloud(theScene, obj, Twc, cloud, options);
+	renderPointCloud(theScene, obj, Twc, cloud, real_options);
 	win->unlockAccess3DScene();
 	sCurrentFigure3d->mSysPointCloud[name] = obj;
 	return (hObject)(obj.get());
@@ -317,6 +343,9 @@ hObject renderModel3d(const Channel& name, const PoseV& vTwc, const PointCloudV&
     if(!sCurrentFigure3d)
         nFigure("default", 640, 480);
 
+    tOptions real_options = options;
+    systemChannelOptions(name, real_options);
+
     CSetOfObjectsPtr obj = sCurrentFigure3d->hModel3d(name);
     if(obj) obj->clear();
     else    obj = CSetOfObjects::Create();
@@ -325,7 +354,7 @@ hObject renderModel3d(const Channel& name, const PoseV& vTwc, const PointCloudV&
     for(int i = 0; i < vTwc.size(); i++)
     {
         CPointCloudColouredPtr o;
-        renderPointCloud(theScene, o, vTwc[i], cloud[i], options);
+        renderPointCloud(theScene, o, vTwc[i], cloud[i], real_options);
         o->setName(cv::format("%s/component_%d", name.c_str(), i));
         obj->insert(o);
     }
@@ -339,10 +368,13 @@ hObject renderRobot(const Channel& name, const Pose& Twb, const tOptions& option
 	if(!sCurrentFigure3d)
 		nFigure("default", 640, 480);
 
+    tOptions real_options = options;
+    systemChannelOptions(name, real_options);
+
 	CSetOfObjectsPtr obj = sCurrentFigure3d->hRobot(name);
 	auto win = sCurrentFigure3d->mMainWindow;
 	auto theScene = win->get3DSceneAndLock();
-	renderRobot(theScene, obj, Twb, options);
+	renderRobot(theScene, obj, Twb, real_options);
 	win->unlockAccess3DScene();
 	sCurrentFigure3d->mSysRobot[name] = obj;
 	return (hObject)(obj.get());
@@ -372,14 +404,17 @@ hObject viewDepth(const cv::Mat& im, const cv::Mat& depth_pts)
     if(!sCurrentFigure3d)
         nFigure("default", 640, 480);
 
-    const std::string& name = sysChannel[Depth];
+    const std::string& name = sysChannel[DepthPointCloud];
+    tOptions options;
+    systemChannelOptions(name, options);
+
     CPointCloudColouredPtr obj = sCurrentFigure3d->hPointCloud(name);
     auto win = sCurrentFigure3d->mMainWindow;
     auto theScene = win->get3DSceneAndLock();
     const Pose Twc = Pose::Identity();
     PointCloud cloud;
     collectCloudFromRGBD(im, depth_pts, cloud);
-    renderPointCloud(theScene, obj, Twc, cloud, DepthCameraOptions);
+    renderPointCloud(theScene, obj, Twc, cloud, options);
     win->unlockAccess3DScene();
     sCurrentFigure3d->mSysPointCloud[name] = obj;
     return (hObject)(obj.get());
@@ -462,7 +497,9 @@ hObject im_show(const string& name, const cv::Mat& im, const cv::Mat& depth)
     auto win = fig->mMainWindow;
     auto theScene = win->get3DSceneAndLock();
     CPointCloudColouredPtr obj;
-    renderPointCloud(theScene, obj, Twc, cloud, DepthCameraOptions);
+    tOptions options;
+    systemChannelOptions(sysChannel[DepthPointCloud], options);
+    renderPointCloud(theScene, obj, Twc, cloud, options);
     win->unlockAccess3DScene();
     win->repaint();
     return (hObject)fig.get();

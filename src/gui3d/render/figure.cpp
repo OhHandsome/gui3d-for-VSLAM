@@ -16,8 +16,8 @@ Figure::Figure(const string &name, int width, int height)
     CDisplayWindow3DPtr win = CDisplayWindow3DPtr(new CDisplayWindow3D(name, width, height));
     mMainWindow = win;
 	this->name = name;
-	mFigureID = mNextID;
-	mNextID++;
+	mFigureID = mNextID++;
+
     //  Get the smart pointer to the main viewport object in this mMainWindow:
     {
         COpenGLScenePtr &theScene = win->get3DSceneAndLock();
