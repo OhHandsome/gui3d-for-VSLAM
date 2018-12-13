@@ -29,7 +29,7 @@ struct tOptions{
     tOptions& setScale(const float scale)  { _scale = scale; }
     tOptions& setMethod(bool method)       { _method = method; }
 
-    tOptions() : _color(Color::Zero()), _scale(1.0f), _method(HOLD_OFF){}
+    tOptions() : _color(Blue), _scale(0.250f), _method(HOLD_OFF){}
     tOptions(const Color& color, float scale, bool flag) :
         _color(color), _scale(scale), _method(flag) {}
 
