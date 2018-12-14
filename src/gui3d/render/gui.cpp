@@ -278,9 +278,6 @@ hObject renderLines(const Channel& name, const Position3dV& vPoint, const tOptio
 
 hObject renderPath(const Channel& name, const PoseV& vTwc, const tOptions& options)
 {
-    if(!sCurrentFigure3d)
-        nFigure("default", 640, 480);
-
     Position3dV vLines;
     for(int i = 1; i < vTwc.size(); i++)
     {
@@ -289,16 +286,24 @@ hObject renderPath(const Channel& name, const PoseV& vTwc, const tOptions& optio
         vLines.push_back(Point1);
         vLines.push_back(Point2);
     }
-    tOptions real_options = options;
-    systemChannelOptions(name, real_options);
+    return renderLines(name, vLines, options);
+}
 
-    CSetOfLinesPtr obj = sCurrentFigure3d->hLine(name);
-    auto win = sCurrentFigure3d->mMainWindow;
-    auto theScene = win->get3DSceneAndLock();
-    renderLines(theScene, obj, vLines, real_options);
-    win->unlockAccess3DScene();
-    sCurrentFigure3d->mSysLine[name] = obj;
-    return (hObject)(obj.get());
+hObject renderPolygon(const Channel& name, const Pose& Twc, const Position3dV& vPoint, const tOptions& options)
+{
+    Position3dV vLines;
+    const int n_size = (int)vPoint.size();
+    for(int i = 0; i < n_size; i++)
+    {
+        LandMark3d Point1 = vPoint[i];
+        LandMark3d Point2 = vPoint[ (i+1) % n_size ];
+        vLines.push_back(Point1);
+        vLines.push_back(Point2);
+    }
+    hObject h = renderLines(name, vLines, options);
+    CSetOfLines* obj = (CSetOfLines*)(h);
+    obj->setPose(castPose(Twc));
+    return h;
 }
 
 hObject renderMapPoints(const Channel& name, const LandMark3dV& vPoint,const tOptions& options)

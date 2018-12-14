@@ -7,6 +7,9 @@
 using namespace gui3d;
 using namespace gui3d::system;
 
+#include <opencv/highgui.h>
+#include <gui3d/utils/cast_utils.h>
+
 void test_mrpt_opengl();
 void test_plots();
 void test_gui3d();
@@ -14,7 +17,8 @@ void test_gui3d();
 int main()
 {
 //    test_plots();
-    test_gui3d();
+//    test_gui3d();
+    test_mrpt_opengl();
     return 0;
 }
 
@@ -54,13 +58,13 @@ void test_gui3d()
     Pose Twc = Pose::Identity();
     string name = Engine();
     hObject fig1 = nFigure(name, 1080, 720);
-    renderFrame(sysChannel[CurCamera], Twc, CurCameraOptions);
+    renderFrame(sysChannel[CurCamera], Twc);
     waitExit(fig1);
     destoryFigure(fig1);
 
     {
         hObject fig2 = nFigure("Test For Gui3d", 1080, 720);
-        renderFrame(sysChannel[CurCamera], Twc, CurCameraOptions);
+        renderFrame(sysChannel[CurCamera], Twc);
         waitExit(fig2);
         destoryFigure(fig2);
     }
@@ -96,23 +100,63 @@ void test_mrpt_opengl()
 
     CDisplayWindow3DPtr win = CDisplayWindow3D::Create("main");
     COpenGLScenePtr theScene = win->get3DSceneAndLock();
-    CFrustumPtr obj = CFrustum::Create();
-    obj->setPose(CPose3D(1, 2, 3));
-    theScene->insert(obj);
+
+    // Axis
+    {
+        opengl::CAxisPtr obj = opengl::CAxis::Create(-6,-6,-6, 6,6,6, 2,2, true);
+        obj->setLocation(0,0,0);
+        theScene->insert( obj );
+
+        opengl::CTextPtr gl_txt = opengl::CText::Create("CAxis");
+        gl_txt->setLocation(0, 1 ,0);
+        theScene->insert(gl_txt);
+    }
+
+    {
+        CFrustumPtr obj = CFrustum::Create();
+        obj->setPose(CPose3D(1, 2, 3));
+        obj->setColor(TColorf(1, 0, 0));
+        theScene->insert(obj);
+    }
+
+    {
+        std::string file = "/media/oyg5285/developer/gitRespo/pratice/visp/tutorial/detection/tag/AprilTag.pgm";
+        cv::Mat im = cv::imread(file);
+        CImage cim = gui3d::castImage(im);
+//        CTexturedPlanePtr obj = CTexturedPlane::Create();
+//        obj->setPose(CPose3D(1, 2, 3));
+//        obj->assignImage(gui3d::castImage(im));
+//        theScene->insert(obj);
+
+        COpenGLViewportPtr gl_view_Image = theScene->createViewport("Image");
+        gl_view_Image->setCloneView("main");
+        gl_view_Image->setViewportPosition(0, 0, 320, 240);
+        gl_view_Image->setNormalMode();
+        gl_view_Image->setCloneCamera(true); //(theScene->getViewport()->getCamera());
+        gl_view_Image->setImageView_fast(cim);
+    }
+
     win->unlockAccess3DScene();
     win->repaint();
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
+//    {
+//        CDisplayWindow3DPtr win1 = CDisplayWindow3D::Create("sub_win");
+//        COpenGLScenePtr theScene1 = win1->get3DSceneAndLock();
+//        CFrustumPtr obj1 = CFrustum::Create();
+//        obj1->setPose(CPose3D(1, 2, 3));
+//        theScene1->insert(obj1);
+//        win1->unlockAccess3DScene();
+//        win1->repaint();
+//        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//    }
 
+    std::cout << "Close the window to end.\n";
+    while (win->isOpen())
     {
-        CDisplayWindow3DPtr win1 = CDisplayWindow3D::Create("sub_win");
-        COpenGLScenePtr theScene1 = win1->get3DSceneAndLock();
-        CFrustumPtr obj1 = CFrustum::Create();
-        obj1->setPose(CPose3D(1, 2, 3));
-        theScene1->insert(obj1);
-        win1->unlockAccess3DScene();
-        win1->repaint();
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        win->addTextMessage(5,5, format("%.02fFPS", win->getRenderingFPS()));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        win->repaint();
     }
 }
 

@@ -61,8 +61,11 @@ hObject renderFrames    (const Channel& name, const PoseV& vTwc,         const t
                          const NameV& vLabels = NameV());
 hObject renderLines     (const Channel& name, const Position3dV& vPoint, const tOptions& options = tOptions());
 hObject renderPath      (const Channel& name, const PoseV& vTwc,         const tOptions& options = tOptions());
+hObject renderPolygon   (const Channel& name, // name
+                         const Pose&    Twc , const Position3dV& vPoint, const tOptions& options = tOptions());
 hObject renderMapPoints (const Channel& name, const LandMark3dV& vPoint, const tOptions& options = tOptions());
 hObject renderPointCloud(const Channel& name, const PointCloud& cloud,   const tOptions& options = tOptions());
+
 hObject renderModel3d   (const Channel& name,
                          const PoseV&   Twc , const PointCloudV& cloud,  const tOptions& options = tOptions());
 hObject renderRobot     (const Channel& name, const Pose& Twb,           const tOptions& options = tOptions());
