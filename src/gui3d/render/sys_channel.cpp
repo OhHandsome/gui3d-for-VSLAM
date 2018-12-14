@@ -31,6 +31,7 @@ void registerSystemChannelOptions()
     RegisterOptions(Path);
     RegisterOptions(DepthPointCloud);
     RegisterOptions(Model3d);
+    assert(s_option_table.size() == Model3d + 1);
     bregister = true;
 }
 

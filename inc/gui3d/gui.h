@@ -43,7 +43,7 @@ struct tOptions{
 inline string Engine() {return "vSLAM for ArcSoft";}
 
 // Figure for 3d
-hObject nFigure(const string& name, int width = 640, int height = 480);
+hObject nFigure(const string& name, int width = 1080, int height = 720);
 void setAsCurrentFigure(hObject fig); // same with gcf in matlab
 void addTextMessage(double x, double y, const string &text, size_t unique_index);
 void moveFigure(int x, int y);
@@ -60,7 +60,7 @@ hObject renderFrame     (const Channel& name, const Pose&  Twc,          const t
 hObject renderFrames    (const Channel& name, const PoseV& vTwc,         const NameV& vLabels = NameV(),
                          const tOptions& options = tOptions());
 hObject renderLines     (const Channel& name, const Position3dV& vPoint, const tOptions& options = tOptions());
-hObject renderPath      (const Channel& name, const PoseV& vTwc,         const tOptions& options = tOptions());
+hObject renderPath      (const Channel& name, const Position3dV& vPoint, const tOptions& options = tOptions());
 hObject renderPolygon   (const Channel& name, // name
                          const Pose&    Twc , const Position3dV& vPoint, const tOptions& options = tOptions());
 hObject renderMapPoints (const Channel& name, const LandMark3dV& vPoint, const tOptions& options = tOptions());

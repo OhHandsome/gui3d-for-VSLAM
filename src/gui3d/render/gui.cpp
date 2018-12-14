@@ -276,15 +276,13 @@ hObject renderLines(const Channel& name, const Position3dV& vPoint, const tOptio
     return (hObject)(obj.get());
 }
 
-hObject renderPath(const Channel& name, const PoseV& vTwc, const tOptions& options)
+hObject renderPath(const Channel& name, const Position3dV& vPoints, const tOptions& options)
 {
     Position3dV vLines;
-    for(int i = 1; i < vTwc.size(); i++)
+    for(int i = 1; i < vPoints.size(); i++)
     {
-        LandMark3d Point1 = pickTranslation(vTwc[i-1]);
-        LandMark3d Point2 = pickTranslation(vTwc[i]);
-        vLines.push_back(Point1);
-        vLines.push_back(Point2);
+        vLines.push_back(vPoints[i-1]);
+        vLines.push_back(vPoints[i]);
     }
     return renderLines(name, vLines, options);
 }

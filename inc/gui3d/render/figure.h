@@ -12,7 +12,7 @@ using FigurePtr = std::shared_ptr<Figure>;
 class Figure
 {
 public:
-    Figure(const std::string& name, int width = 640, int height = 480);
+    explicit Figure(const std::string& name, int width = 640, int height = 480);
 
 	// get Figure3d's hObject
     CFrustumPtr            hFrame(const Channel& name);

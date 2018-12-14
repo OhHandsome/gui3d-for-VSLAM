@@ -3,7 +3,7 @@
 #include <gui3d/utils/cast_utils.h>
 
 #define DRAW_USE_EIGEN 1
-#define OPENGL_MATRIX  1
+#define OPENGL_MATRIX  0
 namespace gui3d {
 // memory stored by rows or cols
 Vector3f pickTranslation(const Pose &Twc)
