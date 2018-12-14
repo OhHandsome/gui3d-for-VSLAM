@@ -57,8 +57,8 @@ const string& workRoute();
 void setDataRoute(const char* data_path);
 volatile Gui3dOption& Option();
 hObject renderFrame     (const Channel& name, const Pose&  Twc,          const tOptions& options = tOptions());
-hObject renderFrames    (const Channel& name, const PoseV& vTwc,         const tOptions& options = tOptions(),
-                         const NameV& vLabels = NameV());
+hObject renderFrames    (const Channel& name, const PoseV& vTwc,         const NameV& vLabels = NameV(),
+                         const tOptions& options = tOptions());
 hObject renderLines     (const Channel& name, const Position3dV& vPoint, const tOptions& options = tOptions());
 hObject renderPath      (const Channel& name, const PoseV& vTwc,         const tOptions& options = tOptions());
 hObject renderPolygon   (const Channel& name, // name

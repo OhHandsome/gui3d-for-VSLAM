@@ -242,7 +242,7 @@ hObject renderFrame(const Channel& name, const Pose& Twc, const tOptions& option
     return (hObject)(obj.get());
 }
 
-hObject renderFrames(const Channel& name, const PoseV& vTwc, const tOptions& options, const NameV& vLabels)
+hObject renderFrames(const Channel& name, const PoseV& vTwc, const NameV& vLabels, const tOptions& options)
 {
     if(!sCurrentFigure3d)
         nFigure("default", 640, 480);

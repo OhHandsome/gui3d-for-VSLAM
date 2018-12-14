@@ -64,7 +64,6 @@ const hObject internal_plot(const vector<float>& x, const vector<float >& y, con
     win->axis(x0 - 1.2f * width, x0 + 1.2f * width,
               y0 - 1.2f * height, y0 + 1.2f * height);
 
-    win->hold_off();
     return fig;
 }
 
@@ -73,39 +72,37 @@ void internal_plot(hObject fig, const vector<float>& x, const vector<float >& y,
     if(!fig) return;
     Figure2d* win = (Figure2d*)fig;
     win->plot(x, y, format);
-    win->hold_off();
 }
 
-
-void axis_limit(const hObject fig, float x_min, float x_max, float y_min, float y_max)
+void axis_limit(hObject fig, float x_min, float x_max, float y_min, float y_max)
 {
     if(!fig) return;
     Figure2d* win = (Figure2d*)fig;
     win->axis(x_min, x_max, y_min, y_max);
 }
 
-void axis_equal(const hObject fig)
+void axis_equal(hObject fig)
 {
     if(!fig) return;
     Figure2d* win = (Figure2d*)fig;
     win->axis_equal(true);
 }
 
-void axis_fit(const hObject fig)
+void axis_fit(hObject fig)
 {
     if(!fig) return;
     Figure2d* win = (Figure2d*)fig;
     win->axis_fit();
 }
 
-void hold_on(const hObject fig)
+void hold_on(hObject fig)
 {
     if(!fig) return;
     Figure2d* win = (Figure2d*)fig;
     win->hold_on();
 }
 
-void hold_off(const hObject fig)
+void hold_off(hObject fig)
 {
     if(!fig) return;
     Figure2d* win = (Figure2d*)fig;

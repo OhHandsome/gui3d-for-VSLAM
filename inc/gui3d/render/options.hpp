@@ -41,7 +41,8 @@ struct SceneOption
     // Display toggles
     bool bViewKeyframes = true;
 	bool bViewPoseNames = true;
-    bool bViewLocalFrames = false;
+	bool bViewPnPFrames = false;
+    bool bViewLocalFrames = true;
     bool bViewFramesPath = false;
 
     bool bViewGlobalMapPoints = false;

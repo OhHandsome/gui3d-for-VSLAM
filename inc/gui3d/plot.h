@@ -34,7 +34,7 @@ const hObject internal_plot(const vector<float>& x, const vector<float >& y,
 void          internal_plot(hObject fig, const vector<float>& x, const vector<float >& y, const string& format);
 
 template <typename VECTOR1,typename VECTOR2>
-const hObject plot(const VECTOR1 &x,const VECTOR2 &y,const std::string &lineFormat,const std::string &plotName = string())
+hObject plot(const VECTOR1 &x,const VECTOR2 &y,const std::string &lineFormat,const std::string &plotName = string())
 {
     vector<float> x1(x.size()), y1(y.size());
     const size_t N1=size_t(x.size());
@@ -45,7 +45,7 @@ const hObject plot(const VECTOR1 &x,const VECTOR2 &y,const std::string &lineForm
 }
 
 template <typename VECTOR1>
-const hObject plot(const VECTOR1 &y,const std::string  &lineFormat,const std::string  &plotName = string())
+hObject plot(const VECTOR1 &y,const std::string  &lineFormat,const std::string  &plotName = string())
 {
     const size_t N=size_t(y.size());
     vector<float> x1(N),y1(N);
@@ -73,10 +73,10 @@ void plot(hObject fig, const VECTOR1 &y,const std::string &lineFormat,const std:
     internal_plot(fig,x1,y1,lineFormat);
 }
 
-void axis_limit(const hObject fig, float x_min, float x_max, float y_min, float y_max);
-void axis_equal(const hObject fig);
-void axis_fit  (const hObject fig);
-void hold_on   (const hObject fig);
-void hold_off  (const hObject fig);
+void axis_limit(hObject fig, float x_min, float x_max, float y_min, float y_max);
+void axis_equal(hObject fig);
+void axis_fit  (hObject fig);
+void hold_on   (hObject fig);
+void hold_off  (hObject fig);
 
 }
