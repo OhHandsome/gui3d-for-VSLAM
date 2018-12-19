@@ -14,8 +14,8 @@ if(USE_SYSTEM_MRPT)
   find_package(MRPT REQUIRED gui;opengl)
   target_link_libraries(${PROJECT_NAME} PUBLIC ${MRPT_LIBS} ${Eigen3_LIBRARIES} ${OpenCV_LIBRARIES} )
 else()
-  set(ARC_MRPT_SRCS_PATH "/home/oyg5285/pratice/mrpt-1.5.6")
-  set(ARC_MRPT_LIBS      "/home/oyg5285/pratice/mrpt-1.5.6/lib")
+  set(ARC_MRPT_SRCS_PATH "/home/oyg5285/project/mrpt-1.5.6")
+  set(ARC_MRPT_LIBS      "/home/oyg5285/project/mrpt-1.5.6/lib")
   include_directories(
     ${ARC_MRPT_SRCS_PATH}/libs/base/include
     ${ARC_MRPT_SRCS_PATH}/libs/opengl/include

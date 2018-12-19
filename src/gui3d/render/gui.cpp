@@ -287,7 +287,7 @@ hObject renderPath(const Channel& name, const Position3dV& vPoints, const tOptio
     return renderLines(name, vLines, options);
 }
 
-hObject renderPolygon(const Channel& name, const Pose& Twc, const Position3dV& vPoint, const tOptions& options)
+hObject renderPolygon(const Channel& name, const Pose& Twq, const Position3dV& vPoint, const tOptions& options)
 {
     Position3dV vLines;
     const int n_size = (int)vPoint.size();
@@ -300,7 +300,7 @@ hObject renderPolygon(const Channel& name, const Pose& Twc, const Position3dV& v
     }
     hObject h = renderLines(name, vLines, options);
     CSetOfLines* obj = (CSetOfLines*)(h);
-    obj->setPose(castPose(Twc));
+    obj->setPose(castPose(Twq));
     return h;
 }
 
