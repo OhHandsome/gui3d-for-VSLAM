@@ -48,6 +48,7 @@ struct SceneOption
     bool bViewGlobalMapPoints = false;
     bool bViewRefMapPoints = true;
     bool bViewPointCloud = true;
+    bool bViewAprilTags = false;
 
 	bool bViewConnections = false;
 	bool bViewLoopClosed = true;

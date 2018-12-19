@@ -99,6 +99,7 @@ void GuiObserver::DoEvent(mrptEventWindowChar ev)
     auto &bViewRefMapPoints = scene_option.bViewRefMapPoints;
     auto &bViewPointCloud = scene_option.bViewPointCloud;
     auto &bOpenOptimizerPlot = scene_option.bOpenOptimizerPlot;
+    auto &bViewAprilTags = scene_option.bViewAprilTags;
 	auto &KFScale = scene_option.KFScale;
 
 	auto &bWaitKey = fig_option.bWaitKey;
@@ -307,12 +308,20 @@ void GuiObserver::DoEvent(mrptEventWindowChar ev)
         }
             break;
 
-        case 't':
-        case 'T':
+        case 'v':
+        case 'V':
         {
             bViewPort ^= true;
             m_figure->mGLViewImage->setTransparent(bViewPort);
             m_figure->mGLSubView->setTransparent(bViewPort);
+            RequestToRefresh3DView = true;
+        }
+            break;
+
+        case 't':
+        case 'T':
+        {
+            bViewAprilTags ^= true;
             RequestToRefresh3DView = true;
         }
             break;
