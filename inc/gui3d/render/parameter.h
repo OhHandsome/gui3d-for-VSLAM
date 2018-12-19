@@ -4,7 +4,7 @@
 #define M_PI 3.1415926
 #endif
 
-#define White  Color(255,255,255,255)
+#define White  Color(255,255,255,128)
 #define Black  Color(0  ,0  ,0  ,255)
 #define Red    Color(255,0  ,0  ,255)
 #define Green  Color(0  ,255,0  ,255)
@@ -16,6 +16,7 @@
 #define Plum   Color(221,160,221,255)
 #define SeaGreen Color(84,255,159,255)
 #define OrangeRed Color(255,69,0,255)
+#define Snow   Color(255,250,250,255)
 
 enum TextID
 {

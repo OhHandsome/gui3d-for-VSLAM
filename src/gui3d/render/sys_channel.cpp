@@ -1,12 +1,12 @@
 #include <gui3d/gui.h>
 
-#define CurCameraOptions        tOptions(OrangeRed, 1, tOptions::HOLD_OFF)
-#define PrediectCameraOptions   tOptions(OrangeRed, 0.5, tOptions::HOLD_OFF)
+#define CurCameraOptions        tOptions(OrangeRed, 0.5, tOptions::HOLD_OFF)
+#define PrediectCameraOptions   tOptions(Red, 0.5, tOptions::HOLD_OFF)
 #define GTCameraOptions         tOptions(Red, 0.5, tOptions::HOLD_OFF)
 #define RefMapPointsOptions     tOptions(Red, 1, tOptions::HOLD_OFF)
 #define GlobalMapPointsOptions  tOptions(Yellow, 1, tOptions::HOLD_OFF)
-#define LocalFramesOptions      tOptions(Green, 0.25, tOptions::HOLD_OFF)
-#define KeyFramesOptions        tOptions(Cyan,  0.25, tOptions::HOLD_OFF)
+#define LocalFramesOptions      tOptions(Green,  0.25, tOptions::HOLD_OFF)
+#define KeyFramesOptions        tOptions(White,  0.15, tOptions::HOLD_OFF)
 #define DepthPointCloudOptions  tOptions(White,  1.1f, tOptions::HOLD_OFF)
 #define Model3dOptions          tOptions(White,  1.0f, tOptions::HOLD_OFF)
 #define PathOptions             tOptions(Orange, 1.0f, tOptions::HOLD_OFF)
