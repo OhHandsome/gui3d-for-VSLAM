@@ -54,6 +54,7 @@ void waitKey(int delay_ms = 0);
 
 // Render Base Complement
 const string& workRoute();
+const string& dataRoute();
 void setDataRoute(const char* data_path);
 volatile Gui3dOption& Option();
 hObject renderFrame     (const Channel& name, const Pose&  Twc,          const tOptions& options = tOptions());

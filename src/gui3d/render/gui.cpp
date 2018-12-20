@@ -524,6 +524,11 @@ const std::string& workRoute()
 	return mFileRoute;
 }
 
+const std::string& dataRoute()
+{
+    return mDataRoute;
+}
+
 void setDataRoute(const char* data_path)
 {
 	mDataRoute = std::string(data_path);
