@@ -10,6 +10,7 @@ struct FigureOption
     bool bExit        = false;              // Exit GUI Window
     bool bSave3DScene = false;              // Save .3DScene
     bool RequestToRefresh3DView = true;     // Refresh 3D View
+    bool bVideoCapture= false;
 
 
     bool bPlaneXY     = false;              // switch show or hide XY Plane

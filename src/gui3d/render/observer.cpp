@@ -8,15 +8,14 @@ const char* MSG_HELP_WINDOW =
     "These are the supported commands:          \n"
         " - h     : Toogle help view             \n"
         " - x.y/z : Switch view/hide <Ground PlaneXY/Axis3d>\n"
-        " - f     : Switch view/hide <Frames>\n"
-        " - p     : Switch view/hide <MapPoints>\n"
 		" - k/w   : Switch view/hide <KeyFrames/WinKeyFrames>\n"
         " - g/r   : Switch view/hide <GlobalMapPoints/RefMapPoints>\n"
         " - n     : Switch view/hide KeyFrameNames\n"
         " - c     : Switch view/hide Connetions\n"
 		" - d     : Switch view/hide Depth PointCloud\n"
         " - t     : Switch view/hide ViewPorts\n"
-		" - i     : Cache viewImage's Image\n"
+        " - p     : Render/Delete AprilTags\n"
+        " - i     : Cache viewImage's Image\n"
         " - +/-   : Increase/reduce size of Camera\n"
 		" - Space : Stop SLAM Program\n"
 		" - Right : Step SLAM Program\n"
@@ -90,6 +89,7 @@ void GuiObserver::DoEvent(mrptEventWindowChar ev)
     auto &bViewMapPoint = fig_option.bViewMapPoint;
     auto &bViewFrames   = fig_option.bViewFrames;
     auto &bSave3DScene  = fig_option.bSave3DScene;
+    auto &bVideoCapture = fig_option.bVideoCapture;
     auto &RequestToRefresh3DView = fig_option.RequestToRefresh3DView;
 
 	auto &bViewKeyframes = scene_option.bViewKeyframes;
@@ -129,32 +129,6 @@ void GuiObserver::DoEvent(mrptEventWindowChar ev)
         case 'Q':
         case MRPTK_ESCAPE:
             bExit = true;
-            break;
-
-		// Frames
-        case 'f':
-        case 'F':
-		{
-			bViewFrames ^= true;
-            m_figure->lock();
-			for(auto& obj : m_figure->mSysPoseList)
-				VisiableModel(obj.second, bViewFrames);
-			m_figure->unlock();
-            RequestToRefresh3DView = true;
-		}
-            break;
-
-		// MapPoints
-        case 'p':
-        case 'P':
-		{
-		    bViewMapPoint ^= true;
-            m_figure->lock();
-			for(auto& obj : m_figure->mSysMapPoint)
-				VisiableModel(obj.second, bViewMapPoint);
-			m_figure->unlock();
-            RequestToRefresh3DView = true;
-		}
             break;
 
 		// PlanXY
@@ -308,8 +282,8 @@ void GuiObserver::DoEvent(mrptEventWindowChar ev)
         }
             break;
 
-        case 'v':
-        case 'V':
+        case 't':
+        case 'T':
         {
             bViewPort ^= true;
             m_figure->mGLViewImage->setTransparent(bViewPort);
@@ -318,13 +292,25 @@ void GuiObserver::DoEvent(mrptEventWindowChar ev)
         }
             break;
 
-        case 't':
-        case 'T':
+        case 'p':
+        case 'P':
         {
             bViewAprilTags ^= true;
             RequestToRefresh3DView = true;
         }
             break;
+
+        case 'e':
+        case 'E':
+        {
+            if(bVideoCapture)
+                m_figure->mMainWindow->captureImagesStop();
+            else
+                m_figure->mMainWindow->captureImagesStart();
+            bVideoCapture ^= true;
+        }
+            break;
+
 
         case 'i':
         case 'I':
@@ -404,7 +390,11 @@ void GuiObserver::OnEvent(const mrptEvent &e)
     {
         const mrptEventWindowClosed &ee = static_cast<const mrptEventWindowClosed &>(e);
         auto &bExit         = m_figure->mOption.figOpt.bExit;
+        auto &bVideoCapture = m_figure->mOption.figOpt.bVideoCapture;
+
         bExit = true;
+        if(bVideoCapture)
+            m_figure->mMainWindow->captureImagesStop();
     }
 }
 

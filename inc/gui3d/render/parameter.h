@@ -27,7 +27,8 @@ enum TextID
     GLOBALMAP,
     VSLAM_STATUS,
     RENDER_FPS,
-    NEED_KEYFRAME
+    NEED_KEYFRAME,
+    CAPTURE_IMAGES
 
 };
 
@@ -44,8 +45,8 @@ enum EVENT_TYPE {
 #define LINE_WIDTH              30
 
 // Text X
-#define TEXT_X                  50
-#define TEXT_RUN_STATE_X        230
+#define TEXT_X                  (800-50)
+#define TEXT_RUN_STATE_X        (TEXT_X + 180)
 
 // Text Y
 #define TEXT_RUN_STATE_Y        50
@@ -55,6 +56,7 @@ enum EVENT_TYPE {
 #define TEXT_SYSTEM_STATUS_Y    (TEXT_GLOBALMAP_Y + LINE_WIDTH)
 #define TEXT_FREQ_Y             (TEXT_SYSTEM_STATUS_Y + LINE_WIDTH)
 #define TEXT_NEED_KEYFRAME_Y    (TEXT_FREQ_Y + LINE_WIDTH)
+#define TEXT_CAPTURE_IMAGE_Y    (TEXT_NEED_KEYFRAME_Y + LINE_WIDTH)
 
 
 
