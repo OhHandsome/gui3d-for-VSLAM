@@ -56,6 +56,7 @@ void waitKey(int delay_ms = 0);
 const string& workRoute();
 const string& dataRoute();
 void setDataRoute(const char* data_path);
+void setWorkRoute(const char* cache_path = nullptr); // save debug file
 volatile Gui3dOption& Option();
 hObject renderFrame     (const Channel& name, const Pose&  Twc,          const tOptions& options = tOptions());
 hObject renderFrames    (const Channel& name, const PoseV& vTwc,         const NameV& vLabels = NameV(),

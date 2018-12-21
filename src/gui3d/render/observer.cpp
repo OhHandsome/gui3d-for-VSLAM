@@ -163,7 +163,7 @@ void GuiObserver::DoEvent(mrptEventWindowChar ev)
 		{
             bSave3DScene = true;
 		    m_figure->lock();
-            SaveScene(m_figure->mScene);
+            SaveScene(m_figure->mScene, dataRoute());
 			m_figure->unlock();
 		}
             break;

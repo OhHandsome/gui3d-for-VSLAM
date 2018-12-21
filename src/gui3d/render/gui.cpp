@@ -14,6 +14,7 @@
 #include <gui3d/render/model_render.h>
 #include <gui3d/base/timer.h>
 #include <gui3d/base/log.h>
+#include <gui3d/base/io.h>
 
 namespace gui3d {
 
@@ -22,9 +23,9 @@ std::map<string, FigurePtr> sSystemFigure3d;
 Figure* sCurrentFigure3d = nullptr;
 std::string mFileRoute =
 #ifdef _WIN32
-    "E:/gitRespo/practice/ImCache";
+    "D:/gitRespo/pratice/ImCache";
 #else
-    "/media/oyg5285/developer/gitRespo/practice/ImCache";
+    "/media/oyg5285/developer/gitRespo/pratice/ImCache";
 #endif
 std::string mDataRoute = mFileRoute;
 
@@ -388,7 +389,7 @@ hObject viewImage(const cv::Mat &im)
     if(!sCurrentFigure3d)
 		nFigure("default", 640, 480);
 
-	COpenGLViewportPtr obj = sCurrentFigure3d->mGLViewImage;
+	COpenGLViewportPtr &obj = sCurrentFigure3d->mGLViewImage;
 	auto win = sCurrentFigure3d->mMainWindow;
 	auto theScene = win->get3DSceneAndLock();
     viewImage(theScene, obj, im);
@@ -428,7 +429,7 @@ hObject auxViewAt(const Pose &pose)
     if(!sCurrentFigure3d)
 		throw "None Found Figure3d";
 
-	COpenGLViewportPtr obj = sCurrentFigure3d->mGLSubView;
+	COpenGLViewportPtr &obj = sCurrentFigure3d->mGLSubView;
 	auto win = sCurrentFigure3d->mMainWindow;
 	auto theScene = win->get3DSceneAndLock();
     auxViewAt(theScene, obj, pose);
@@ -532,6 +533,16 @@ const std::string& dataRoute()
 void setDataRoute(const char* data_path)
 {
 	mDataRoute = std::string(data_path);
+}
+
+// save debug file
+void setWorkRoute(const char* cache_path)
+{
+    if(cache_path)
+    {
+        mFileRoute = std::string(cache_path);
+    }
+    removeAllFile(mFileRoute);
 }
 
 void addTextMessage(double x, double y, const string &text, size_t unique_index)
