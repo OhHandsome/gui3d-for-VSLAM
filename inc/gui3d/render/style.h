@@ -11,10 +11,10 @@
 //const int AXISLength  = 12;
 
 // Smart Window
-const int MainWidth = 1080 + 108;
-const int MainHeight = 720 + 72;
-const int VideoWidth = 480;
-const int VideoHeight = 360;
+const int MainWidth = 1080 + 108 + 108;
+const int MainHeight = 720 + 72 + 72;
+const int VideoWidth = 640;
+const int VideoHeight = 480 + 10;
 const int VP1_Width = VideoWidth; // cloned viewport
 const int VP1_Height = VideoHeight;
 const int WIN_SPACE = 5;
