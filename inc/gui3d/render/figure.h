@@ -1,6 +1,7 @@
 #include <memory>
 #include <gui3d/render/options.hpp>
 #include <gui3d/utils/dependency.hpp>
+#include <gui3d/window/CDisplayWindow3D.h>
 
 namespace gui3d{
 
@@ -14,7 +15,7 @@ class Figure
 public:
     explicit Figure(const std::string& name, int width = 640, int height = 480);
 
-	// get Figure3d's hObject
+	  // get Figure3d's hObject
     CFrustumPtr            hFrame(const Channel& name);
     CSetOfObjectsPtr       hRobot(const Channel& name);
     CSetOfObjectsPtr       hPoseList(const Channel& name);
@@ -32,14 +33,17 @@ public:
 	static int mNextID;
 
 public:
-    CDisplayWindow3DPtr mMainWindow;
-
+#if HAS_IMGUI
+		gui3d::CDisplayWindow3DPtr mMainWindow;
+#else
+    mrpt::gui::CDisplayWindow3DPtr mMainWindow;
+#endif
     COpenGLScenePtr mScene;
     CAxisPtr mAxis3d;
     CGridPlaneXYPtr mGridXY;
 
-	COpenGLViewportPtr mGLViewImage;
-	COpenGLViewportPtr mGLSubView;
+	  COpenGLViewportPtr mGLViewImage;
+	  COpenGLViewportPtr mGLSubView;
 
     std::map<Channel, CFrustumPtr>            mSysFrame;
     std::map<Channel, CSetOfObjectsPtr>       mSysRobot;

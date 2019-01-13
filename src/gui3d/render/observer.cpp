@@ -303,11 +303,11 @@ void GuiObserver::DoEvent(mrptEventWindowChar ev)
         case 'e':
         case 'E':
         {
-            if(bVideoCapture)
-                m_figure->mMainWindow->captureImagesStop();
-            else
-                m_figure->mMainWindow->captureImagesStart();
-            bVideoCapture ^= true;
+//            if(bVideoCapture)
+//                m_figure->mMainWindow->captureImagesStop();
+//            else
+//                m_figure->mMainWindow->captureImagesStart();
+//            bVideoCapture ^= true;
         }
             break;
 
@@ -320,10 +320,13 @@ void GuiObserver::DoEvent(mrptEventWindowChar ev)
         case MRPTK_SPACE:
         {
             ReadNextFrame ^= true;
-			win->addTextMessage(TEXT_RUN_STATE_X, TEXT_RUN_STATE_Y,
+
+#if HAS_IMGUI == 0
+			      win->addTextMessage(TEXT_RUN_STATE_X, TEXT_RUN_STATE_Y,
 	                    ReadNextFrame ? "VSLAM Run" : "VSLAM Stop",
 						ReadNextFrame ? TColorf(0, 0, 1) : TColorf(1, 0, 0),
                         TextID::RUN_STATE, MRPT_GLUT_BITMAP_HELVETICA_12);
+#endif
             RequestToRefresh3DView = true;
         }
             break;
@@ -331,8 +334,10 @@ void GuiObserver::DoEvent(mrptEventWindowChar ev)
         case MRPTK_RIGHT:
         {
             ReadFrameGap += FRAME_GAP_LENGTH;
+#if HAS_IMGUI == 0
             win->addTextMessage(TEXT_RUN_STATE_X, TEXT_RUN_STATE_Y, "VSLAM Step", TColorf(0,0,1), TextID::RUN_STATE, MRPT_GLUT_BITMAP_HELVETICA_12);
             RequestToRefresh3DView = true;
+#endif
         }
             break;
 
@@ -393,8 +398,10 @@ void GuiObserver::OnEvent(const mrptEvent &e)
         auto &bVideoCapture = m_figure->mOption.figOpt.bVideoCapture;
 
         bExit = true;
+#if HAS_IMGUI == 0
         if(bVideoCapture)
             m_figure->mMainWindow->captureImagesStop();
+#endif
     }
 }
 
