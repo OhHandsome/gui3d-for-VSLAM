@@ -242,7 +242,7 @@ hObject renderFrame(const Channel& name, const Pose& Twc, const tOptions& option
   auto win = sCurrentFigure3d->mMainWindow;
   auto theScene = win->get3DSceneAndLock();
   renderFrame(theScene, obj, Twc, real_options);
-  obj->setName(name);
+  if(obj) obj->setName(name);
   win->unlockAccess3DScene();
   sCurrentFigure3d->mSysFrame[name] = obj;
   return (hObject)(obj.get());
@@ -260,7 +260,7 @@ hObject renderFrames(const Channel& name, const PoseV& vTwc, const NameV& vLabel
     auto win = sCurrentFigure3d->mMainWindow;
     auto theScene = win->get3DSceneAndLock();
     renderFrames(theScene, obj, vTwc, vLabels, real_options);
-    obj->setName(name);
+    if(obj) obj->setName(name);
     win->unlockAccess3DScene();
     sCurrentFigure3d->mSysPoseList[name] = obj;
     return (hObject)(obj.get());
@@ -278,7 +278,7 @@ hObject renderLines(const Channel& name, const Position3dV& vPoint, const tOptio
     auto win = sCurrentFigure3d->mMainWindow;
     auto theScene = win->get3DSceneAndLock();
     renderLines(theScene, obj, vPoint, real_options);
-    obj->setName(name);
+    if(obj) obj->setName(name);
     win->unlockAccess3DScene();
     sCurrentFigure3d->mSysLine[name] = obj;
     return (hObject)(obj.get());
@@ -325,7 +325,7 @@ hObject renderMapPoints(const Channel& name, const LandMark3dV& vPoint,const tOp
 	auto theScene = win->get3DSceneAndLock();
   const Pose Twc = Pose::Identity();
 	renderMapPoints(theScene, obj, Twc, vPoint, real_options);
-  obj->setName(name);
+  if(obj) obj->setName(name);
   win->unlockAccess3DScene();
 	sCurrentFigure3d->mSysMapPoint[name] = obj;
 	return (hObject)(obj.get());
@@ -344,7 +344,7 @@ hObject renderPointCloud(const Channel& name, const PointCloud& cloud,  const tO
 	auto theScene = win->get3DSceneAndLock();
   const Pose Twc = Pose::Identity();
 	renderPointCloud(theScene, obj, Twc, cloud, real_options);
-  obj->setName(name);
+  if(obj) obj->setName(name);
   win->unlockAccess3DScene();
 	sCurrentFigure3d->mSysPointCloud[name] = obj;
 	return (hObject)(obj.get());
@@ -371,7 +371,7 @@ hObject renderModel3d(const Channel& name, const PoseV& vTwc, const PointCloudV&
         o->setName(cv::format("%s/component_%d", name.c_str(), i));
         obj->insert(o);
     }
-    obj->setName(name);
+    if(obj) obj->setName(name);
     win->unlockAccess3DScene();
     sCurrentFigure3d->mSysModel3d[name] = obj;
     return (hObject)(obj.get());
@@ -389,7 +389,7 @@ hObject renderRobot(const Channel& name, const Pose& Twb, const tOptions& option
 	auto win = sCurrentFigure3d->mMainWindow;
 	auto theScene = win->get3DSceneAndLock();
 	renderRobot(theScene, obj, Twb, real_options);
-  obj->setName(name);
+  if(obj) obj->setName(name);
   win->unlockAccess3DScene();
 	sCurrentFigure3d->mSysRobot[name] = obj;
 	return (hObject)(obj.get());
