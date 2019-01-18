@@ -180,7 +180,7 @@ void waitKey(int delay_ms)
 	win->addTextMessage(TEXT_RUN_STATE_X, TEXT_RUN_STATE_Y,
                         "VSLAM Stop", TColorf(1, 0, 0),
                         TextID::RUN_STATE, MRPT_GLUT_BITMAP_HELVETICA_12);
-  win->repaint();
+    win->repaint();
 #endif
     gui3d::Timer timer;
     do {
@@ -323,12 +323,12 @@ hObject renderMapPoints(const Channel& name, const LandMark3dV& vPoint,const tOp
 	CPointCloudPtr obj = sCurrentFigure3d->hMapPoint(name);
 	auto win = sCurrentFigure3d->mMainWindow;
 	auto theScene = win->get3DSceneAndLock();
-  const Pose Twc = Pose::Identity();
-	renderMapPoints(theScene, obj, Twc, vPoint, real_options);
-  if(obj) obj->setName(name);
-  win->unlockAccess3DScene();
-	sCurrentFigure3d->mSysMapPoint[name] = obj;
-	return (hObject)(obj.get());
+    const Pose Twc = Pose::Identity();
+    renderMapPoints(theScene, obj, Twc, vPoint, real_options);
+    if(obj) obj->setName(name);
+    win->unlockAccess3DScene();
+    sCurrentFigure3d->mSysMapPoint[name] = obj;
+    return (hObject)(obj.get());
 }
 
 hObject renderPointCloud(const Channel& name, const PointCloud& cloud,  const tOptions& options)
@@ -342,12 +342,12 @@ hObject renderPointCloud(const Channel& name, const PointCloud& cloud,  const tO
     CPointCloudColouredPtr obj = sCurrentFigure3d->hPointCloud(name);
 	auto win = sCurrentFigure3d->mMainWindow;
 	auto theScene = win->get3DSceneAndLock();
-  const Pose Twc = Pose::Identity();
-	renderPointCloud(theScene, obj, Twc, cloud, real_options);
-  if(obj) obj->setName(name);
-  win->unlockAccess3DScene();
-	sCurrentFigure3d->mSysPointCloud[name] = obj;
-	return (hObject)(obj.get());
+    const Pose Twc = Pose::Identity();
+    renderPointCloud(theScene, obj, Twc, cloud, real_options);
+    if(obj) obj->setName(name);
+    win->unlockAccess3DScene();
+    sCurrentFigure3d->mSysPointCloud[name] = obj;
+    return (hObject)(obj.get());
 }
 
 hObject renderModel3d(const Channel& name, const PoseV& vTwc, const PointCloudV& cloud, const tOptions& options)
@@ -389,29 +389,29 @@ hObject renderRobot(const Channel& name, const Pose& Twb, const tOptions& option
 	auto win = sCurrentFigure3d->mMainWindow;
 	auto theScene = win->get3DSceneAndLock();
 	renderRobot(theScene, obj, Twb, real_options);
-  if(obj) obj->setName(name);
-  win->unlockAccess3DScene();
+    if(obj) obj->setName(name);
+    win->unlockAccess3DScene();
 	sCurrentFigure3d->mSysRobot[name] = obj;
 	return (hObject)(obj.get());
 }
 
 hObject viewImage(const cv::Mat &im)
 {
-  if(!sCurrentFigure3d)
-  nFigure("default", 640, 480);
+    if(!sCurrentFigure3d)
+        nFigure("default", 640, 480);
 
-  COpenGLViewportPtr &obj = sCurrentFigure3d->mGLViewImage;
-  auto win = sCurrentFigure3d->mMainWindow;
-  auto theScene = win->get3DSceneAndLock();
-  viewImage(theScene, obj, im);
-  win->unlockAccess3DScene();
+    COpenGLViewportPtr &obj = sCurrentFigure3d->mGLViewImage;
+    auto win = sCurrentFigure3d->mMainWindow;
+    auto theScene = win->get3DSceneAndLock();
+    viewImage(theScene, obj, im);
+    win->unlockAccess3DScene();
 
-  static size_t num = 0;
-  num++;
-  auto &bCacheIm = sCurrentFigure3d->mOption.conOpt.bCacheIm;
-  if (bCacheIm)
-      cv::imwrite(mFileRoute + cv::format("/%d.jpg", num), im);
-  return (hObject)(obj.get());
+    static size_t num = 0;
+    num++;
+    auto &bCacheIm = sCurrentFigure3d->mOption.conOpt.bCacheIm;
+    if (bCacheIm)
+        cv::imwrite(mFileRoute + cv::format("/%d.jpg", num), im);
+    return (hObject)(obj.get());
 }
 
 hObject viewDepth(const cv::Mat& im, const cv::Mat& depth_pts)
