@@ -1,13 +1,18 @@
 #include <memory>
 #include <gui3d/render/options.hpp>
 #include <gui3d/utils/dependency.hpp>
+#if HAS_IMGUI
 #include <gui3d/window/CDisplayWindow3D.h>
+#endif
 
 namespace gui3d{
 
+#if HAS_IMGUI == 0
 class GuiObserver;
-class Figure;
 using GuiObserverPtr = std::shared_ptr<GuiObserver>;
+#endif
+
+class Figure;
 using FigurePtr = std::shared_ptr<Figure>;
 
 class Figure
@@ -15,7 +20,7 @@ class Figure
 public:
     explicit Figure(const std::string& name, int width = 640, int height = 480);
 
-	  // get Figure3d's hObject
+	// get Figure3d's hObject
     CFrustumPtr            hFrame(const Channel& name);
     CSetOfObjectsPtr       hRobot(const Channel& name);
     CSetOfObjectsPtr       hPoseList(const Channel& name);
@@ -34,16 +39,19 @@ public:
 
 public:
 #if HAS_IMGUI
-		gui3d::CDisplayWindow3DPtr mMainWindow;
+	gui3d::CDisplayWindow3DPtr mMainWindow;
 #else
     mrpt::gui::CDisplayWindow3DPtr mMainWindow;
+
+	GuiObserverPtr mObserver;
+	volatile Gui3dOption mOption;
 #endif
     COpenGLScenePtr mScene;
     CAxisPtr mAxis3d;
     CGridPlaneXYPtr mGridXY;
 
-	  COpenGLViewportPtr mGLViewImage;
-	  COpenGLViewportPtr mGLSubView;
+	COpenGLViewportPtr mGLViewImage;
+	COpenGLViewportPtr mGLSubView;
 
     std::map<Channel, CFrustumPtr>            mSysFrame;
     std::map<Channel, CSetOfObjectsPtr>       mSysRobot;
@@ -52,9 +60,6 @@ public:
     std::map<Channel, CPointCloudColouredPtr> mSysPointCloud;
     std::map<Channel, CSetOfLinesPtr>         mSysLine;
     std::map<Channel, CSetOfObjectsPtr>       mSysModel3d;
-
-    GuiObserverPtr mObserver;
-    volatile Gui3dOption mOption;
 };
 
 

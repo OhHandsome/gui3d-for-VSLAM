@@ -473,24 +473,26 @@ void repaint()
 hObject im_show(const string& name, const cv::Mat& im)
 {
 #if HAS_IMGUI == 0
-  FigurePtr fig;
-	auto it = sSystemFigure3d.find(name);
+    FigurePtr fig;
+    auto it = sSystemFigure3d.find(name);
     if(it == sSystemFigure3d.end())
     {
-	    fig = std::make_shared<Figure>(name, im.cols, im.rows);
-		sSystemFigure3d[name] = fig;
-	}
-	else
-  {
+        fig = std::make_shared<Figure>(name, im.cols, im.rows);
+        sSystemFigure3d[name] = fig;
+    }
+    else
+    {
         fig = it->second;
-  }
-
-	auto win = fig->mMainWindow;
-	CImage cim = castImage_clone(im);
-  win->setImageView_fast(cim);
-  win->resize((unsigned int)im.cols, (unsigned int)im.rows);
-  win->repaint();
-  return (hObject)fig.get();
+    }
+    auto win = fig->mMainWindow;
+    CImage cim = castImage_clone(im);
+    win->setImageView_fast(cim);
+    win->resize((unsigned int)im.cols, (unsigned int)im.rows);
+    win->repaint();
+    return (hObject)fig.get();
+#else
+    cv::imshow(name, im);
+    cv::waitKey(10);
 #endif
 }
 
