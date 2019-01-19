@@ -1,5 +1,5 @@
 project(gui3d)
-
+cmake_minimum_required(VERSION 2.9)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 # Set search directory for looking for our custom CMake scripts to
 list(APPEND CMAKE_MODULE_PATH ${gui3d_SOURCE_DIR}/cmake_modules)

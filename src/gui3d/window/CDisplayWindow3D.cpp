@@ -17,8 +17,7 @@ static void glfw_error_callback(int error, const char* description) {
 
 static void ShowHelpMarker(const char* desc) {
   ImGui::TextDisabled("(?)");
-  if (ImGui::IsItemHovered())
-  {
+  if (ImGui::IsItemHovered()){
     ImGui::BeginTooltip();
     ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
     ImGui::TextUnformatted(desc);
@@ -26,6 +25,31 @@ static void ShowHelpMarker(const char* desc) {
     ImGui::EndTooltip();
   }
 }
+
+struct GlfwContextScopeGuard {
+  explicit GlfwContextScopeGuard(GLFWwindow* win){
+    prev_win = glfwGetCurrentContext();
+    glfwMakeContextCurrent(win);
+  }
+
+  ~GlfwContextScopeGuard(){
+    glfwMakeContextCurrent(prev_win);
+  }
+  GLFWwindow* prev_win;
+};
+
+struct ImGuiContextScopeGuard {
+  explicit ImGuiContextScopeGuard(ImGuiContext* ctx) {
+    prev_ctx = ImGui::GetCurrentContext();
+    ImGui::SetCurrentContext(ctx);
+  }
+
+  ~ImGuiContextScopeGuard() {
+    ImGui::SetCurrentContext(prev_ctx);
+  }
+
+  ImGuiContext* prev_ctx;
+};
 
 CDisplayWindow3DPtr
 CDisplayWindow3D::Create(const std::string &windowCaption,
@@ -44,19 +68,20 @@ CDisplayWindow3D::CDisplayWindow3D(const std::string &windowCaption,
 
   // glfw window creation
   m_Window = glfwCreateWindow(initialWindowWidth, initialWindowHeight, windowCaption.c_str(), nullptr, nullptr);
-  auto& window = m_Window;
-  if (window == nullptr) {
+  GlfwContextScopeGuard gl_ctx_guard(m_Window);
+  if (m_Window == nullptr) {
     std::cerr << "Failed to create GLFW window" << std::endl;
     glfwTerminate();
     exit(1);
   }
-  glfwMakeContextCurrent(window);
-  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+  glfwMakeContextCurrent(m_Window);
+  glfwSetFramebufferSizeCallback(m_Window, framebuffer_size_callback);
 
   // Setup Dear ImGui binding
   IMGUI_CHECKVERSION();
   m_ImGuiContext = ImGui::CreateContext();
-  ImGui_ImplGlfwGL2_Init(window, true);
+  ImGuiContextScopeGuard imgui_ctx_guard(m_ImGuiContext);
+  ImGui_ImplGlfwGL2_Init(m_Window, true);
 
   // Setup style
   ImGui::StyleColorsClassic();
@@ -135,8 +160,8 @@ void CDisplayWindow3D::OnPreRender() {
   // Display panel
   static bool show_axis3d = true;
   if(ImGui::Begin("System", &show_axis3d,
-                  ImGuiWindowFlags_NoTitleBar |
-                  ImGuiWindowFlags_NoResize)) {
+                  ImGuiWindowFlags_NoScrollbar |
+                  ImGuiWindowFlags_AlwaysAutoResize)) {
     get3DSceneAndLock();
     bool visible = m_Axis3d->isVisible();
     if (ImGui::Checkbox("Axis3d", &visible))
@@ -217,8 +242,10 @@ void CDisplayWindow3D::OnPostRender()
 }
 
 void CDisplayWindow3D::backThreadRun() {
-  glfwMakeContextCurrent(m_Window);
-  ImGui::SetCurrentContext(m_ImGuiContext);
+
+  GlfwContextScopeGuard gl_ctx_guard(m_Window);
+  ImGuiContextScopeGuard imgui_ctx_guard(m_ImGuiContext);
+
   ImVec4 clear_color = ImVec4(0.6f, 0.6f, 0.60f, 0.00f);
   glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

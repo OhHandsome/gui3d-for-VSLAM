@@ -44,7 +44,6 @@ public:
     mrpt::gui::CDisplayWindow3DPtr mMainWindow;
 
 	GuiObserverPtr mObserver;
-	volatile Gui3dOption mOption;
 #endif
     COpenGLScenePtr mScene;
     CAxisPtr mAxis3d;
@@ -60,6 +59,8 @@ public:
     std::map<Channel, CPointCloudColouredPtr> mSysPointCloud;
     std::map<Channel, CSetOfLinesPtr>         mSysLine;
     std::map<Channel, CSetOfObjectsPtr>       mSysModel3d;
+
+    volatile Gui3dOption mOption;
 };
 
 
