@@ -72,6 +72,16 @@ Figure::Figure(const string &name, int width, int height)
 #endif
 }
 
+volatile Gui3dOption& Figure::Options()
+{
+#if HAS_IMGUI
+  return mMainWindow->Options();
+#else
+  return mOption;
+#endif
+}
+
+
 // Find Channel's hObject
 CFrustumPtr Figure::hFrame(const Channel& name)
 {

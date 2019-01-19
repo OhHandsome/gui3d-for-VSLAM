@@ -529,10 +529,10 @@ hObject im_show(const string& name, const cv::Mat& im, const cv::Mat& depth)
 // ---------------------------- Engine Utils -----------------------------//
 volatile Gui3dOption& Option()
 {
-	if(!sCurrentFigure3d)
-		throw "None Found Figure3d";
+  if (!sCurrentFigure3d)
+      throw "None Found Figure3d";
 
-	return sCurrentFigure3d->mOption;
+	return sCurrentFigure3d->Options();
 }
 
 const std::string& workRoute()

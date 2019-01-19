@@ -4,6 +4,7 @@
 #include <mrpt/opengl/CAxis.h>
 #include <mrpt/opengl/CGridPlaneXY.h>
 
+#include <gui3d/render/options.hpp>
 #include <gui3d/window/CGlCanvas.h>
 #include <string>
 #include <mutex>
@@ -11,6 +12,7 @@
 
 class GLFWwindow;
 class ImGuiContext;
+
 namespace gui3d{
 
 class CDisplayWindow3D;
@@ -45,6 +47,8 @@ class CDisplayWindow3D{
   void setPos(int x, int y) {}
   void repaint() { RequestToRefresh3DView = true; }
   void addTextMessage(int , int , int, int , int ) {}
+  volatile Gui3dOption& Options() { return m_Observer; }
+
  private:
   void InitScene();
   void forceRepaint(); //!< Repaints the window. forceRepaint, repaint and updateWindow are all aliases of the same method
@@ -54,7 +58,8 @@ class CDisplayWindow3D{
 
   mrpt::opengl::CAxisPtr                m_Axis3d;
   mrpt::opengl::CGridPlaneXYPtr         m_ZeroPlane;
-  mrpt::opengl::COpenGLViewportPtr      mGLViewImage;
+
+  volatile Gui3dOption                   m_Observer;
 
   bool                                   RequestToRefresh3DView;
   float                                  m_lastWheelRotation;

@@ -6,19 +6,19 @@ namespace gui3d {
 
 struct FigureOption
 {
-    bool bWaitKey     = false;              // For waitKey
-    bool bExit        = false;              // Exit GUI Window
-    bool bSave3DScene = false;              // Save .3DScene
-    bool RequestToRefresh3DView = true;     // Refresh 3D View
-    bool bVideoCapture= false;
+	bool bWaitKey     = false;              // For waitKey
+	bool bExit        = false;              // Exit GUI Window
+	bool bSave3DScene = false;              // Save .3DScene
+	bool RequestToRefresh3DView = true;     // Refresh 3D View
+	bool bVideoCapture= false;
 
 
-    bool bPlaneXY     = false;              // switch show or hide XY Plane
-    bool bAxis3d      = true;               // switch show or hide Axis3d
-    float AxisFrq     = 0.25f;
-    bool bViewPort    = true;               // switch show or hide viewport
-    bool bViewFrames  = true;               // switch show or hide Frames
-    bool bViewMapPoint= true;               // switch show or hide MapPoint
+	bool bPlaneXY     = false;              // switch show or hide XY Plane
+	bool bAxis3d      = true;               // switch show or hide Axis3d
+	float AxisFrq     = 0.25f;
+	bool bViewPort    = true;               // switch show or hide viewport
+	bool bViewFrames  = true;               // switch show or hide Frames
+	bool bViewMapPoint= true;               // switch show or hide MapPoint
 };
 
 // Engine provide status for ui-interface, for example
@@ -27,44 +27,44 @@ struct FigureOption
 // Option in Program Control Stream
 struct ControlOption
 {
-    // Other toggles
-    int ReadFrameGap = FRAME_GAP_LENGTH;   // Read n Frame and Stop when ReadNextFrame = false
-    bool ReadNextFrame = true;             // Read Next Frame
+	// Other toggles
+	int ReadFrameGap = FRAME_GAP_LENGTH;   // Read n Frame and Stop when ReadNextFrame = false
+	bool ReadNextFrame = true;             // Read Next Frame
 
-    bool StopWhenLost = false;             // For vSLAM's tracking status
-    bool StopWhenInitOK = true;
-    bool bCacheIm = false;                 // Save viewImage()'s image
+	bool StopWhenLost = true;             // For vSLAM's tracking status
+	bool StopWhenInitOK = true;
+	bool bCacheIm = false;                 // Save viewImage()'s image
 };
 
 // Option in 3d SLAM's Scene
 struct SceneOption
 {
-    // Display toggles
-    bool bViewKeyframes = true;
+	// Display toggles
+	bool bViewKeyframes = true;
 	bool bViewPoseNames = true;
 	bool bViewPnPFrames = false;
-    bool bViewLocalFrames = true;
-    bool bViewFramesPath = false;
+	bool bViewLocalFrames = true;
+	bool bViewFramesPath = false;
 
-    bool bViewGlobalMapPoints = false;
-    bool bViewRefMapPoints = true;
-    bool bViewPointCloud = true;
-    bool bViewAprilTags = true;
+	bool bViewGlobalMapPoints = false;
+	bool bViewRefMapPoints = true;
+	bool bViewPointCloud = true;
+	bool bViewAprilTags = true;
 
 	bool bViewConnections = false;
 	bool bViewLoopClosed = true;
-    bool bOpenOptimizerPlot = false;
+	bool bOpenOptimizerPlot = false;
 
-    // parameter of model
-    float KFScale = 0.25;
-    float CurKFScale = 1;
+	// parameter of model
+	float KFScale = 0.25;
+	float CurKFScale = 1;
 };
 
 struct Gui3dOption
 {
-    FigureOption  figOpt;
-    ControlOption conOpt;
-    SceneOption   sceneOpt;
+	FigureOption  figOpt;
+	ControlOption conOpt;
+	SceneOption   sceneOpt;
 };
 
 } // namespace gui3d

@@ -3,6 +3,8 @@
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw_gl2.h>
+#include <gui3d/render/options.hpp>
+
 using namespace mrpt;
 using namespace mrpt::opengl;
 
@@ -179,6 +181,21 @@ void CDisplayWindow3D::OnPreRender() {
     m_Axis3d->setFrequency(freq);
     m_ZeroPlane->setGridFrequency(freq);
     unlockAccess3DScene();
+
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    if(!io.WantCaptureKeyboard){
+
+      auto &bReadNextFrame = m_Observer.conOpt.ReadNextFrame;
+      auto &ReadFrameGap = m_Observer.conOpt.ReadFrameGap;
+      auto &bViewAprilTags = m_Observer.sceneOpt.bViewAprilTags;
+
+      if (io.KeysDown[GLFW_KEY_SPACE]){
+        printf("KeyDown SPACE\n");
+        bReadNextFrame ^= true;
+      }
+      else if(io.KeysDown[GLFW_KEY_RIGHT] || io.KeysDownDuration[GLFW_KEY_RIGHT] < 0.002)
+        ReadFrameGap = 1;
+    }
   }
   ImGui::End();
 
