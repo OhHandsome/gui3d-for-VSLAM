@@ -4,7 +4,8 @@
   [exec] [scene.txt]  
   example:  
   ` gui3d_demo ./data/scene.txt`
-    
+ - **Figure**   
+  ![image](./demo.png)
  - **Dependency**  
   [wxWidgets 2.9+][1]  
   [mrpt1.5+][2]
