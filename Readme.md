@@ -5,7 +5,7 @@
   example:  
   ` gui3d_demo ./data/scene.txt`
  - **Figure**   
-  ![image](./demo.png)
+  ![image](./demo.bmp)
  - **Dependency**  
   [wxWidgets 2.9+][1]  
   [mrpt1.5+][2]
