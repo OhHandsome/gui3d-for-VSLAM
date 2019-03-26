@@ -174,6 +174,7 @@ void waitKey(int delay_ms)
     auto &bExit    = guiOpt.figOpt.bExit;
     auto &RequestToRefresh3DView = guiOpt.figOpt.RequestToRefresh3DView;
     bWaitKey = false;
+    bExit = false;
 
 #if HAS_IMGUI == 0
 	auto& win = sCurrentFigure3d->mMainWindow;
