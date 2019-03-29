@@ -1,7 +1,7 @@
 #include <gui3d/gui.h>
 
 #define CurCameraOptions        tOptions(OrangeRed, 0.5, tOptions::HOLD_OFF)
-#define PrediectCameraOptions   tOptions(Red, 0.5, tOptions::HOLD_OFF)
+#define PrediectCameraOptions   tOptions(Red, 0.6, tOptions::HOLD_OFF)
 #define GTCameraOptions         tOptions(Red, 0.5, tOptions::HOLD_OFF)
 #define RefMapPointsOptions     tOptions(Red, 1, tOptions::HOLD_OFF)
 #define GlobalMapPointsOptions  tOptions(Yellow, 1, tOptions::HOLD_OFF)
