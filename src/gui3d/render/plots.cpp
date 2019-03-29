@@ -6,7 +6,7 @@ namespace matlab{
 
 typedef CDisplayWindowPlots Figure2d;
 typedef CDisplayWindowPlotsPtr Figure2dPtr;
-std::vector<CDisplayWindowPlotsPtr> sSystemFigure2d;
+std::map<std::string, CDisplayWindowPlotsPtr> sSystemFigure2d;
 char color[] = "krgbmc";
 
 void MenuCallback(int menuID, float x, float y, void *userParam)
@@ -29,11 +29,12 @@ void MenuCallback(int menuID, float x, float y, void *userParam)
 
 const hObject figure(const string& plot_name)
 {
-    std::string name;
-    if(plot_name.empty())
+    if (sSystemFigure2d.count(plot_name))
+        return (hObject) sSystemFigure2d.at(plot_name).get();
+
+    string name = plot_name;
+    if(name.empty())
         name = format("%ld", sSystemFigure2d.size() + 1);
-    else
-        name = plot_name;
 
     Figure2dPtr win = CDisplayWindowPlotsPtr(new CDisplayWindowPlots(name, 640, 480));
     win->enableMousePanZoom(true);
@@ -41,7 +42,7 @@ const hObject figure(const string& plot_name)
     win->addPopupMenuEntry("clear lines", 2);
     win->setMenuCallback(MenuCallback, (void *) win.get());
 
-    sSystemFigure2d.push_back(win);
+    sSystemFigure2d[name] = win;
     return (hObject)(win.get());
 }
 
