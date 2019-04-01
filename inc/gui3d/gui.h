@@ -25,9 +25,9 @@ namespace gui3d{
 struct tOptions{
     enum { HOLD_ON, HOLD_OFF };
 
-    tOptions& setColor(const Color& color) { _color = color; }
-    tOptions& setScale(const float scale)  { _scale = scale; }
-    tOptions& setMethod(bool method)       { _method = method; }
+    tOptions& setColor(const Color& color) { _color = color; return *this;}
+    tOptions& setScale(const float scale)  { _scale = scale; return *this;}
+    tOptions& setMethod(bool method)       { _method = method; return *this;}
 
     tOptions() : _color(Blue), _scale(0.250f), _method(HOLD_OFF){}
     tOptions(const Color& color, float scale, bool flag) :
