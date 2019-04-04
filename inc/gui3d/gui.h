@@ -72,6 +72,7 @@ hObject renderModel3d   (const Channel& name,
                          const PoseV&   Twc , const PointCloudV& cloud,  const tOptions& options = tOptions());
 hObject renderRobot     (const Channel& name, const Pose& Twb,           const tOptions& options = tOptions());
 hObject viewImage       (const cv::Mat& im);  // Render ViewPort, for example, imshow(), Aux Viewport
+hObject viewAuxImage    (const cv::Mat& im);  // Render ViewPort, for example, imshow(), Aux Viewport
 hObject viewDepth       (const cv::Mat& im, const cv::Mat& array2d_pt3d);
 hObject auxViewAt       (const Pose& pose);    // GL Camera Pose in Aux ViewPort for Multi-View
 void    update          (hObject obj, const Pose& Twc);

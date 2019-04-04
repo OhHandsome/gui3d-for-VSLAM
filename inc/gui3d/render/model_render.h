@@ -29,7 +29,7 @@ bool renderPointCloud(GLScenePtr theScene, CPointCloudColouredPtr& obj, const Po
 
 // Render ViewPort
 bool auxViewAt(GLScenePtr theScene, COpenGLViewportPtr& gl_view_Camera, const Pose& pose);
-bool viewImage(GLScenePtr theScene, COpenGLViewportPtr& gl_view_Image,  const cv::Mat& im);
+bool viewImage(GLScenePtr theScene, COpenGLViewportPtr& gl_view_Image,  const cv::Mat& im, const std::string& name = "Image");
 
 
 template <class T>

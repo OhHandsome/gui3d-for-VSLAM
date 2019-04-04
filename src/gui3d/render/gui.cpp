@@ -127,7 +127,7 @@ hObject nFigure(const string& name, int width, int height)
     LOGD("New     Figure: %s", name.c_str());
     FigurePtr fig = std::make_shared<Figure>(name, width, height);
     sSystemFigure3d[name] = fig;
-	  sCurrentFigure3d = fig.get();
+    sCurrentFigure3d = fig.get();
     return (hObject)fig.get();
 }
 
@@ -404,7 +404,26 @@ hObject viewImage(const cv::Mat &im)
     COpenGLViewportPtr &obj = sCurrentFigure3d->mGLViewImage;
     auto win = sCurrentFigure3d->mMainWindow;
     auto theScene = win->get3DSceneAndLock();
-    viewImage(theScene, obj, im);
+    viewImage(theScene, obj, im, "Image");
+    win->unlockAccess3DScene();
+
+    static size_t num = 0;
+    num++;
+    auto &bCacheIm = sCurrentFigure3d->mOption.conOpt.bCacheIm;
+    if (bCacheIm)
+        cv::imwrite(mFileRoute + cv::format("/%d.jpg", num), im);
+    return (hObject)(obj.get());
+}
+
+hObject viewAuxImage(const cv::Mat &im)
+{
+    if(!sCurrentFigure3d)
+        nFigure("default", 640, 480);
+
+    COpenGLViewportPtr &obj = sCurrentFigure3d->mGLSubView;
+    auto win = sCurrentFigure3d->mMainWindow;
+    auto theScene = win->get3DSceneAndLock();
+    viewImage(theScene, obj, im, "AuxImage");
     win->unlockAccess3DScene();
 
     static size_t num = 0;

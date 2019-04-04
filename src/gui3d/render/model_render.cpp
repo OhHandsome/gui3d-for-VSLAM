@@ -244,14 +244,20 @@ bool renderPointCloud(GLScenePtr theScene, CPointCloudColouredPtr& obj, const Po
 	return true;
 }
 
-bool viewImage(GLScenePtr theScene, COpenGLViewportPtr& gl_view_Image,  const cv::Mat& im)
+bool viewImage(GLScenePtr theScene, COpenGLViewportPtr& gl_view_Image,  const cv::Mat& im, const std::string& name)
 {
     CImage cim = castImage_clone(im);
     if(!gl_view_Image)
     {
         // Create small auxiliary viewport
-        gl_view_Image  = theScene->createViewport("Image");
-        gl_view_Image->setViewportPosition(MainWidth - VideoWidth, MainHeight - VideoHeight, VideoWidth, VideoHeight);
+        gl_view_Image  = theScene->createViewport(name);
+        if (name == "Image")
+            gl_view_Image->setViewportPosition(MainWidth - VideoWidth, MainHeight - VideoHeight, VideoWidth, VideoHeight);
+        else
+            gl_view_Image->setViewportPosition(MainWidth - VP1_Width,
+                                               MainHeight - VP1_Height - VideoHeight - WIN_SPACE,
+                                               VP1_Width,
+                                               VP1_Height);
         gl_view_Image->setTransparent(true);
     }
     gl_view_Image->setImageView_fast(cim);

@@ -99,7 +99,8 @@ void GuiObserver::DoEvent(mrptEventWindowChar ev)
     auto &bViewRefMapPoints = scene_option.bViewRefMapPoints;
     auto &bViewPointCloud = scene_option.bViewPointCloud;
     auto &bOpenOptimizerPlot = scene_option.bOpenOptimizerPlot;
-    auto &bViewAprilTags = scene_option.bViewAprilTags;
+    auto &bViewAprilTagsForVINS = scene_option.bViewAprilTagsForVINS;
+    auto &bViewAprilTagsForLocalMap = scene_option.bViewAprilTagsForLocalMap;
 	auto &KFScale = scene_option.KFScale;
 
 	auto &bWaitKey = fig_option.bWaitKey;
@@ -295,7 +296,8 @@ void GuiObserver::DoEvent(mrptEventWindowChar ev)
         case 'p':
         case 'P':
         {
-            bViewAprilTags ^= true;
+            bViewAprilTagsForVINS ^= true;
+            bViewAprilTagsForLocalMap ^= true;
             RequestToRefresh3DView = true;
         }
             break;
