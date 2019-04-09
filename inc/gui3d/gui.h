@@ -43,7 +43,7 @@ struct tOptions{
 inline string Engine() {return "vSLAM for ArcSoft";}
 
 // Figure for 3d
-hObject nFigure(const string& name, int width = 1080, int height = 720);
+hObject nFigure(const string& name, int width = -1, int height = -1);
 void setAsCurrentFigure(hObject fig); // same with gcf in matlab
 void addTextMessage(double x, double y, const string &text, size_t unique_index);
 void moveFigure(int x, int y);
