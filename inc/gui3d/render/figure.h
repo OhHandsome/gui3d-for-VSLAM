@@ -35,7 +35,7 @@ public:
 	volatile Gui3dOption& Options();
 
 public:
-  int mFigureID;
+    int mFigureID;
 	string name;
 	static int mNextID;
 
@@ -43,7 +43,7 @@ public:
 #if HAS_IMGUI
 	gui3d::CDisplayWindow3DPtr mMainWindow;
 #else
-  mrpt::gui::CDisplayWindow3DPtr mMainWindow;
+	mrpt::gui::CDisplayWindow3DPtr mMainWindow;
 
 	GuiObserverPtr mObserver;
 #endif

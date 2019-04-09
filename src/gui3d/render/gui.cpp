@@ -173,11 +173,9 @@ void waitKey(int delay_ms)
 		throw "None Found Figure3d";
 
     volatile Gui3dOption& guiOpt = sCurrentFigure3d->mOption;
-    auto &bWaitKey = guiOpt.figOpt.bWaitKey;
-    auto &bExit    = guiOpt.figOpt.bExit;
-    auto &RequestToRefresh3DView = guiOpt.figOpt.RequestToRefresh3DView;
-    bWaitKey = false;
-    bExit = false;
+    volatile bool &bWaitKey = guiOpt.figOpt.bWaitKey;
+    volatile bool &bExit    = guiOpt.figOpt.bExit;
+    volatile bool &RequestToRefresh3DView = guiOpt.figOpt.RequestToRefresh3DView;
 
 #if HAS_IMGUI == 0
 	auto& win = sCurrentFigure3d->mMainWindow;
@@ -201,6 +199,8 @@ void waitKey(int delay_ms)
         }
     }
 	while (1);
+    bWaitKey = false;
+    bExit = false;
 }
 
 void waitExit(hObject hfig, int delay_ms)
@@ -236,20 +236,20 @@ void waitExit(hObject hfig, int delay_ms)
 // ----------------------- Render Handle ----------------------------//
 hObject renderFrame(const Channel& name, const Pose& Twc, const tOptions& options)
 {
-  if(!sCurrentFigure3d)
-      nFigure("default", 640, 480);
+    if(!sCurrentFigure3d)
+        nFigure("default", 640, 480);
 
-  tOptions real_options = options;
-  systemChannelOptions(name, real_options);
+    tOptions real_options = options;
+    systemChannelOptions(name, real_options);
 
-  CFrustumPtr obj = sCurrentFigure3d->hFrame(name);
-  auto win = sCurrentFigure3d->mMainWindow;
-  auto theScene = win->get3DSceneAndLock();
-  renderFrame(theScene, obj, Twc, real_options);
-  if(obj) obj->setName(name);
-  win->unlockAccess3DScene();
-  sCurrentFigure3d->mSysFrame[name] = obj;
-  return (hObject)(obj.get());
+    CFrustumPtr obj = sCurrentFigure3d->hFrame(name);
+    auto win = sCurrentFigure3d->mMainWindow;
+    auto theScene = win->get3DSceneAndLock();
+    renderFrame(theScene, obj, Twc, real_options);
+    if(obj) obj->setName(name);
+    win->unlockAccess3DScene();
+    sCurrentFigure3d->mSysFrame[name] = obj;
+    return (hObject)(obj.get());
 }
 
 hObject renderFrames(const Channel& name, const PoseV& vTwc, const NameV& vLabels, const tOptions& options)
@@ -567,7 +567,7 @@ void setWorkRoute(const char* cache_path)
 void addTextMessage(double x, double y, const string &text, size_t unique_index)
 {
 #if HAS_IMGUI == 0
-  if(!sCurrentFigure3d)
+    if(!sCurrentFigure3d)
         throw "None Found Figure3d";
     auto& win = sCurrentFigure3d->mMainWindow;
     win->addTextMessage(x, y, text, TColorf(0, 1, 1), unique_index, MRPT_GLUT_BITMAP_HELVETICA_12);
