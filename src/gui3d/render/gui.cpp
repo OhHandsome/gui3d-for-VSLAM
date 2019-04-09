@@ -12,6 +12,7 @@
 #include <gui3d/utils/cast_utils.h>
 #include <gui3d/render/figure.h>
 #include <gui3d/render/model_render.h>
+#include <gui3d/render/style.h>
 #include <gui3d/base/timer.h>
 #include <gui3d/base/log.h>
 #include <gui3d/base/io.h>
@@ -116,6 +117,8 @@ void destoryFigure(hObject hfig)
 // ----------------------- Figure Handle ----------------------------//
 hObject nFigure(const string& name, int width, int height)
 {
+    if (width < 0) width = MainWidth;
+    if (height < 0) height = MainHeight;
     auto it = sSystemFigure3d.find(name);
     if(it != sSystemFigure3d.end())
     {
