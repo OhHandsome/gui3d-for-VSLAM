@@ -85,7 +85,7 @@ void GuiObserver::DoEvent(mrptEventWindowChar ev)
     auto &bAxis3d       = fig_option.bAxis3d;
     auto &AxisFrq       = fig_option.AxisFrq;
     auto &bPlaneXY      = fig_option.bPlaneXY;
-    auto &bViewPort = fig_option.bViewPort;
+    auto &bViewPort     = fig_option.bViewPort;
     auto &bViewMapPoint = fig_option.bViewMapPoint;
     auto &bViewFrames   = fig_option.bViewFrames;
     auto &bSave3DScene  = fig_option.bSave3DScene;
