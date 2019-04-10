@@ -493,7 +493,7 @@ void repaint()
 
 // ---------------------------- image display ----------------------------//
 // Same as OpenCV::im_show()
-hObject im_show(const string& name, const cv::Mat& im)
+hObject imshow(const string& name, const cv::Mat& im)
 {
 #if HAS_IMGUI == 0
     FigurePtr fig;
@@ -502,6 +502,7 @@ hObject im_show(const string& name, const cv::Mat& im)
     {
         fig = std::make_shared<Figure>(name, im.cols, im.rows);
         sSystemFigure3d[name] = fig;
+        sCurrentFigure3d = fig.get();
     }
     else
     {
@@ -519,7 +520,7 @@ hObject im_show(const string& name, const cv::Mat& im)
 #endif
 }
 
-hObject im_show(const string& name, const cv::Mat& im, const cv::Mat& depth)
+hObject imshow(const string& name, const cv::Mat& im, const cv::Mat& depth)
 {
     FigurePtr fig;
     auto it = sSystemFigure3d.find(name);
@@ -527,6 +528,7 @@ hObject im_show(const string& name, const cv::Mat& im, const cv::Mat& depth)
     {
         fig = std::make_shared<Figure>(name, im.cols, im.rows);
         sSystemFigure3d[name] = fig;
+        sCurrentFigure3d = fig.get();
     }
     else
     {
