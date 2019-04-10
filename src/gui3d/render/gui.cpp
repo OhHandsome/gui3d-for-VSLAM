@@ -507,6 +507,7 @@ hObject imshow(const string& name, const cv::Mat& im)
     else
     {
         fig = it->second;
+        sCurrentFigure3d = fig.get();
     }
     auto win = fig->mMainWindow;
     CImage cim = castImage_clone(im);
@@ -533,6 +534,7 @@ hObject imshow(const string& name, const cv::Mat& im, const cv::Mat& depth)
     else
     {
         fig = it->second;
+        sCurrentFigure3d = fig.get();
     }
 
     PointCloud cloud;
