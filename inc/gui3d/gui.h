@@ -52,6 +52,11 @@ void destoryFigure(hObject fig);
 void play_control();
 void waitKey(int delay_ms = 0);
 
+// Image Display
+hObject imshow(const string& name, const cv::Mat& im);
+hObject imshow(const string& name, const cv::Mat& im, const cv::Mat& array2d_pt3d);
+void waitExit(hObject hfig, int delay_ms = 0);
+
 // Render Base Complement
 const string& workRoute();
 const string& dataRoute();
@@ -76,11 +81,6 @@ hObject viewDepth       (const cv::Mat& im, const cv::Mat& array2d_pt3d);
 hObject auxViewAt       (const Pose& pose);    // GL Camera Pose in Aux ViewPort for Multi-View
 void    update          (hObject obj, const Pose& Twc);
 void    repaint();
-
-// Image Display
-hObject im_show(const string& name, const cv::Mat& im);
-hObject im_show(const string& name, const cv::Mat& im, const cv::Mat& array2d_pt3d);
-void waitExit(hObject hfig, int delay_ms = 0);
 
 void collectCloudFromRGBD(const cv::Mat& im, const cv::Mat& depth, PointCloud& cloud);
 void saveAsPLY(const std::string& name, const Pose& Twc, const PointCloud& cloud);

@@ -17,8 +17,8 @@ void test_gui3d();
 int main()
 {
 //    test_plots();
-//    test_gui3d();
-    test_mrpt_opengl();
+    test_gui3d();
+//    test_mrpt_opengl();
     return 0;
 }
 
@@ -55,19 +55,25 @@ void test_plots()
 
 void test_gui3d()
 {
-    Pose Twc = Pose::Identity();
-    string name = Engine();
-    hObject fig1 = nFigure(name, 1080, 720);
-    renderFrame(sysChannel[CurCamera], Twc);
-    waitExit(fig1);
-    destoryFigure(fig1);
+//    Pose Twc = Pose::Identity();
+//    string name = Engine();
+//    hObject fig1 = nFigure(name, 1080, 720);
+//    renderFrame(sysChannel[CurCamera], Twc);
+//    waitKey();
+//    destoryFigure(fig1);
+//
+//    {
+//        hObject fig2 = nFigure("Test For Gui3d", 1080, 720);
+//        renderFrame(sysChannel[CurCamera], Twc);
+//        waitKey();
+//        destoryFigure(fig2);
+//    }
 
-    {
-        hObject fig2 = nFigure("Test For Gui3d", 1080, 720);
-        renderFrame(sysChannel[CurCamera], Twc);
-        waitExit(fig2);
-        destoryFigure(fig2);
-    }
+    const char* file =
+        "/media/oyg5285/developer/gitRespo/data/pixel_XL/group/slow_move/20180831_135827/image/000001.bmp";
+    cv::Mat im = cv::imread(file);
+    gui3d::imshow("im", im);
+    gui3d::waitKey();
 
 //    setOutputFigure(fig1);
 //    LOGI("Move ");
