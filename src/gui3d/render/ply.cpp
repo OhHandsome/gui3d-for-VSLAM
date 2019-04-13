@@ -1,16 +1,21 @@
 #include <gui3d/base/type_def.h>
 #include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 #include <iostream>
 namespace gui3d{
 extern std::string mDataRoute;
 
 void collectCloudFromRGBD(const cv::Mat& im, const cv::Mat& depth, PointCloud& cloud)
 {
+    cv::Mat color;
+    if (im.channels() == 1)
+        cv::cvtColor(im, color, cv::COLOR_GRAY2BGR);
+
     cloud.clear();
     for(int y = 0; y < depth.rows; y++)
     {
         auto pdepth = depth.ptr<cv::Vec3f>(y);
-        auto pimage = im.ptr<cv::Vec3b>(y);
+        auto pimage = color.ptr<cv::Vec3b>(y);
         for(int x = 0; x < depth.cols; x++)
         {
             cv::Vec3f pt = pdepth[x];
