@@ -80,6 +80,7 @@ hObject viewImage       (const cv::Mat& im);  // Render ViewPort, for example, i
 hObject viewDepth       (const cv::Mat& im, const cv::Mat& array2d_pt3d);
 hObject auxViewAt       (const Pose& pose);    // GL Camera Pose in Aux ViewPort for Multi-View
 void    update          (hObject obj, const Pose& Twc);
+void    clear();
 void    repaint();
 
 void collectCloudFromRGBD(const cv::Mat& im, const cv::Mat& depth, PointCloud& cloud);

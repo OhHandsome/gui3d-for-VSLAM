@@ -91,6 +91,9 @@ void setAsCurrentFigure(hObject fig)
 
 void destoryFigure(const string& name)
 {
+    if (sSystemFigure3d.empty())
+        return;
+
     auto it = sSystemFigure3d.find(name);
     if(it == sSystemFigure3d.end())
     {
@@ -130,7 +133,7 @@ hObject nFigure(const string& name, int width, int height)
     LOGD("New     Figure: %s", name.c_str());
     FigurePtr fig = std::make_shared<Figure>(name, width, height);
     sSystemFigure3d[name] = fig;
-	  sCurrentFigure3d = fig.get();
+	sCurrentFigure3d = fig.get();
     return (hObject)fig.get();
 }
 
@@ -471,6 +474,17 @@ void repaint()
 
 	sCurrentFigure3d->mMainWindow->repaint();
 }
+
+void clear()
+{
+    if(!sCurrentFigure3d)
+        return;
+
+    auto& theScene = sCurrentFigure3d->mMainWindow->get3DSceneAndLock();
+    theScene->clear();
+    sCurrentFigure3d->mMainWindow->unlockAccess3DScene();
+}
+
 
 // ---------------------------- image display ----------------------------//
 // Same as OpenCV::im_show()

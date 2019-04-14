@@ -188,18 +188,18 @@ bool renderLines(GLScenePtr theScene, CSetOfLinesPtr& obj, const Position3dV& vv
 
 bool renderMapPoints(GLScenePtr theScene, CPointCloudPtr& obj, const Pose& Twc, const LandMark3dV& vPoints, const tOptions& options)
 {
-    if (vPoints.empty())
-		return false;
-
 	if(!obj)
 	{
-		obj = CPointCloud::Create();
+	    if (vPoints.empty())
+            return false;
+
+        obj = CPointCloud::Create();
 		obj->setPointSize(1.0);
 		obj->enablePointSmooth();
 		theScene->insert(obj);
 	}
-	if(options._method == tOptions::HOLD_OFF)  obj->clear();
-
+	if (options._method == tOptions::HOLD_OFF)  obj->clear();
+    if (vPoints.empty()) obj->clear();
 	obj->setColor(castColor(options._color));
 	obj->setPointSize(options._scale);
 	obj->setPose(castPose(Twc));
@@ -255,6 +255,7 @@ bool viewImage(GLScenePtr theScene, COpenGLViewportPtr& gl_view_Image,  const cv
         gl_view_Image->setTransparent(true);
     }
     gl_view_Image->setImageView_fast(cim);
+    gl_view_Image->setViewportPosition(MainWidth - im.cols, MainHeight - im.rows, im.cols, im.rows);
     return true;
 }
 
