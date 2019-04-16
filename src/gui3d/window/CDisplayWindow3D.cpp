@@ -66,7 +66,7 @@ CDisplayWindow3D::CDisplayWindow3D(const std::string &windowCaption,
   glfwSetErrorCallback(glfw_error_callback);
 
   // glfw: initialize and configure
-  glfwInit();
+  //glfwInit();
 
   // glfw window creation
   m_Window = glfwCreateWindow(initialWindowWidth, initialWindowHeight, windowCaption.c_str(), nullptr, nullptr);
@@ -320,7 +320,7 @@ void CDisplayWindow3D::backThreadRun() {
   }
   ImGui::DestroyContext();
   glfwDestroyWindow(m_Window);
-  glfwTerminate();
+  //glfwTerminate();
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

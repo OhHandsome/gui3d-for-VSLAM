@@ -17,11 +17,142 @@
 #include <gui3d/base/log.h>
 #include <gui3d/base/io.h>
 
+#if HAS_IMGUI
+#include <GLFW/glfw3.h>
+#endif
+
 namespace gui3d {
 
-// Engine
-std::map<string, FigurePtr> sSystemFigure3d;
 Figure* sCurrentFigure3d = nullptr;
+// Engine
+class Viz
+{
+    std::map<string, FigurePtr> sSystemFigure3d;
+
+public:
+    static Viz& instance()
+    {
+        static Viz ins;
+        return ins;
+    }
+
+    Viz()
+    {
+#if HAS_IMGUI
+        glfwInit();
+#endif
+    }
+
+    ~Viz()
+    {
+        sSystemFigure3d.clear();
+#if HAS_IMGUI
+        glfwTerminate();
+#endif
+    }
+
+    void add(const std::string& name, FigurePtr fig)
+    {
+        sSystemFigure3d[name] = fig;
+        sCurrentFigure3d = fig.get();
+    }
+
+    FigurePtr findFigure(const std::string& name)
+    {
+        auto it = sSystemFigure3d.find(name);
+        if(it != sSystemFigure3d.end())
+        {
+            return it->second;
+        }
+        return nullptr;
+    }
+
+    void setAsCurrentFigure(hObject fig)
+    {
+        if(!bValidFigure(fig))
+        {
+            LOGE("None Valid Figure!!");
+            return;
+        }
+        sCurrentFigure3d = (Figure *)fig;
+    }
+
+    void destory(const std::string& name)
+    {
+        if (sSystemFigure3d.empty())
+            return;
+
+        auto it = sSystemFigure3d.find(name);
+        if(it != sSystemFigure3d.end())
+        {
+            LOGD("Destory Figure: %s", name.c_str());
+            FigurePtr fig = it->second;
+            if (fig.get() == sCurrentFigure3d)
+                sCurrentFigure3d = nullptr;
+
+            sSystemFigure3d.erase(it);
+            csCurFigureFromExistWindows();
+            return;
+        }
+        LOGI("None Figure: %s", name.c_str());
+    }
+
+    void destory(hObject hfig)
+    {
+        if(!bValidFigure(hfig))
+            return;
+
+        Figure* fig = (Figure*)hfig;
+        destory(fig->name);
+    }
+
+private:
+    // when delete figure, need choose and set sCurrentFigure3d
+    void csCurFigureFromExistWindows()
+    {
+        if(sSystemFigure3d.empty())
+        {
+            sCurrentFigure3d = nullptr;
+            LOGI("None sCurrentFigure3d!");
+            return;
+        }
+
+        // Engine Main Figure as sCurrentFigure3d
+        string AppName = Engine();
+        FigurePtr win = Viz::instance().findFigure(AppName);
+        if(win)
+        {
+            sCurrentFigure3d = win.get();
+            //LOGI("set sCurrentFigure3d: %s", win.c_str());
+            return;
+        }
+
+        // Latest Figure3d as sCurrentFigure3d
+        int max_id = -1;
+        for(auto& item : sSystemFigure3d)
+        {
+            if(item.second->mFigureID > max_id)
+            {
+                max_id = item.second->mFigureID;
+                sCurrentFigure3d = item.second.get();
+                LOGI("set sCurrentFigure3d: %s", item.first.c_str());
+            }
+        }
+    }
+
+    bool bValidFigure(hObject fig)
+    {
+        if(fig == nullptr) return false;
+        for(auto& item : sSystemFigure3d)
+        {
+            if(fig == item.second.get())
+                return true;
+        }
+        return false;
+    }
+
+};
+
 std::string mFileRoute =
 #ifdef _WIN32
     "D:/gitRespo/pratice/ImCache";
@@ -34,87 +165,20 @@ void registerSystemChannelOptions();
 bool systemChannelOptions(const Channel& name, tOptions& options);
 
 // ----------------------- Engine Handle ----------------------------//
-// when delete figure, need choose and set sCurrentFigure3d
-void csCurFigureFromExistWindows()
-{
-	if(sSystemFigure3d.empty())
-    {
-        sCurrentFigure3d = nullptr;
-        LOGI("None sCurrentFigure3d!");
-        return;
-    }
-
-    // Engine Main Figure as sCurrentFigure3d
-	string AppName = Engine();
-	auto it = sSystemFigure3d.find(AppName);
-	if(it != sSystemFigure3d.end())
-	{
-		sCurrentFigure3d = it->second.get();
-        LOGI("set sCurrentFigure3d: %s", it->first.c_str());
-        return;
-	}
-
-	// Latest Figure3d as sCurrentFigure3d
-    int max_id = -1;
-	for(auto& item : sSystemFigure3d)
-	{
-		if(item.second->mFigureID > max_id)
-		{
-			max_id = item.second->mFigureID;
-			sCurrentFigure3d = item.second.get();
-            LOGI("set sCurrentFigure3d: %s", item.first.c_str());
-        }
-	}
-}
-
-bool bValidFigure(hObject fig)
-{
-    if(fig == nullptr) return false;
-    for(auto& item : sSystemFigure3d)
-    {
-        if(fig == item.second.get())
-            return true;
-    }
-    return false;
-}
-
 // set fig as sCurrentFigure3d
 void setAsCurrentFigure(hObject fig)
 {
-    if(!bValidFigure(fig))
-    {
-        LOGE("None Valid Figure!!");
-        return;
-    }
-    sCurrentFigure3d = (Figure *)fig;
+    Viz::instance().setAsCurrentFigure(fig);
 }
 
 void destoryFigure(const string& name)
 {
-    if (sSystemFigure3d.empty())
-        return;
-
-    auto it = sSystemFigure3d.find(name);
-    if(it == sSystemFigure3d.end())
-    {
-        LOGI("None Figure: %s", name.c_str());
-        return;
-    }
-
-    LOGD("Destory Figure: %s", name.c_str());
-    FigurePtr fig = it->second;
-    sSystemFigure3d.erase(it);
-    if(fig.get() != sCurrentFigure3d) return;
-    csCurFigureFromExistWindows();
+    Viz::instance().destory(name);
 }
 
 void destoryFigure(hObject hfig)
 {
-    if(!bValidFigure(hfig))
-        return;
-
-    Figure* fig = (Figure*)hfig;
-    destoryFigure(fig->name);
+    Viz::instance().destory(hfig);
 }
 
 // ----------------------- Figure Handle ----------------------------//
@@ -122,18 +186,17 @@ hObject nFigure(const string& name, int width, int height)
 {
     if (width < 0) width = MainWidth;
     if (height < 0) height = MainHeight;
-    auto it = sSystemFigure3d.find(name);
-    if(it != sSystemFigure3d.end())
+    FigurePtr win = Viz::instance().findFigure(name);
+    if(win)
     {
-        it->second->mMainWindow->resize(width, height);
-        return (hObject)it->second.get();
+        win->mMainWindow->resize(width, height);
+        return (hObject)win.get();
     }
 
     registerSystemChannelOptions();
     LOGD("New     Figure: %s", name.c_str());
     FigurePtr fig = std::make_shared<Figure>(name, width, height);
-    sSystemFigure3d[name] = fig;
-	sCurrentFigure3d = fig.get();
+    Viz::instance().add(name, fig);
     return (hObject)fig.get();
 }
 
@@ -518,19 +581,13 @@ hObject imshow(const string& name, const cv::Mat& im)
 
 hObject imshow(const string& name, const cv::Mat& im, const cv::Mat& depth)
 {
-    FigurePtr fig;
-    auto it = sSystemFigure3d.find(name);
-    if(it == sSystemFigure3d.end())
+    FigurePtr fig = Viz::instance().findFigure(name);
+    if (!fig)
     {
         fig = std::make_shared<Figure>(name, im.cols, im.rows);
-        sSystemFigure3d[name] = fig;
-        sCurrentFigure3d = fig.get();
+        Viz::instance().add(name, fig);
     }
-    else
-    {
-        fig = it->second;
-        sCurrentFigure3d = fig.get();
-    }
+    sCurrentFigure3d = fig.get();
 
     PointCloud cloud;
     collectCloudFromRGBD(im, depth, cloud);
