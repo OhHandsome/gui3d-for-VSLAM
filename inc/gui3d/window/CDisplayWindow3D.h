@@ -49,6 +49,7 @@ class CDisplayWindow3D{
   void addTextMessage(int , int , int, int , int ) {}
   volatile Gui3dOption& Options() { return m_Observer; }
   bool WindowClosed() const;
+  void RunOnce();
 
  private:
   void InitScene();

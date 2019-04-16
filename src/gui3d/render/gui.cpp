@@ -535,7 +535,8 @@ void repaint()
 	if(!sCurrentFigure3d)
 		return;
 
-	sCurrentFigure3d->mMainWindow->repaint();
+  sCurrentFigure3d->mMainWindow->repaint();
+	//sCurrentFigure3d->mMainWindow->RunOnce();
 }
 
 void clear()
