@@ -554,19 +554,14 @@ void clear()
 hObject imshow(const string& name, const cv::Mat& im)
 {
 #if HAS_IMGUI == 0
-    FigurePtr fig;
-    auto it = sSystemFigure3d.find(name);
-    if(it == sSystemFigure3d.end())
+    FigurePtr fig = Viz::instance().findFigure(name);
+    if (!fig)
     {
         fig = std::make_shared<Figure>(name, im.cols, im.rows);
-        sSystemFigure3d[name] = fig;
-        sCurrentFigure3d = fig.get();
+        Viz::instance().add(name, fig);
     }
-    else
-    {
-        fig = it->second;
-        sCurrentFigure3d = fig.get();
-    }
+
+    sCurrentFigure3d = fig.get();
     auto win = fig->mMainWindow;
     CImage cim = castImage_clone(im);
     win->setImageView_fast(cim);
