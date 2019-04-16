@@ -10,6 +10,7 @@
 #include <chrono>
 #include <thread>
 #include <gui3d/window/CGlCanvas.h>
+#include <gui3d/window/CDisplayWindow3D.h>
 
 const int AXISLength  = 6;
 
@@ -22,7 +23,7 @@ void processInput(GLFWwindow *window);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-int main()
+int single_thread_test()
 {
   // glfw: initialize and configure
   // ------------------------------
@@ -192,4 +193,16 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
   // make sure the viewport matches the new window dimensions; note that width and
   // height will be significantly larger than specified on retina displays.
   glViewport(0, 0, width, height);
+}
+
+int multi_thread_test()
+{
+  gui3d::CDisplayWindow3DPtr win(new gui3d::CDisplayWindow3D("1", 1080, 720));
+  win->backThreadRun();
+}
+
+int main()
+{
+  single_thread_test();
+  multi_thread_test();
 }

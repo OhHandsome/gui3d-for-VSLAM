@@ -100,7 +100,8 @@ CDisplayWindow3D::CDisplayWindow3D(const std::string &windowCaption,
   m_3Dscene = mrpt::opengl::COpenGLScene::Create();
   m_GlCanvas = new CGlCanvas(m_3Dscene);
   InitScene();
-  m_renderLoopThread = std::thread(&CDisplayWindow3D::backThreadRun, this);
+  RequestToRefresh3DView = true;
+  //m_renderLoopThread = std::thread(&CDisplayWindow3D::backThreadRun, this);
 }
 
 CDisplayWindow3D::~CDisplayWindow3D() {
@@ -110,12 +111,18 @@ CDisplayWindow3D::~CDisplayWindow3D() {
   delete m_GlCanvas;
   m_3Dscene.clear_unique();
 
-  // Cleanup
-  // glfw: terminate, clearing all previously allocated GLFW resources.
-  ImGui_ImplGlfwGL2_Shutdown();
+  {
+    GlfwContextScopeGuard gl_ctx_guard(m_Window);
+    ImGuiContextScopeGuard imgui_ctx_guard(m_ImGuiContext);
+    // Cleanup
+    // glfw: terminate, clearing all previously allocated GLFW resources.
+    ImGui_ImplGlfwGL2_Shutdown();
+  }
+
   ImGui::DestroyContext();
   glfwDestroyWindow(m_Window);
   glfwTerminate();
+  printf("Exit BackEnd\n");
 }
 
 mrpt::opengl::COpenGLScenePtr& CDisplayWindow3D::get3DSceneAndLock() {
@@ -164,37 +171,40 @@ void CDisplayWindow3D::OnPreRender() {
   if(ImGui::Begin("System", &show_axis3d,
                   ImGuiWindowFlags_NoScrollbar |
                   ImGuiWindowFlags_AlwaysAutoResize)) {
+
+    // Visible about Axis3d and ZeroPlane
     get3DSceneAndLock();
     bool visible = m_Axis3d->isVisible();
     if (ImGui::Checkbox("Axis3d", &visible))
       m_Axis3d->setVisibility(visible);
-    visible = m_ZeroPlane->isVisible();
     ImGui::SameLine();
+    visible = m_ZeroPlane->isVisible();
     if (ImGui::Checkbox("ZeroPlane", &visible))
       m_ZeroPlane->setVisibility(visible);
 
     ImGui::Text("Label:");
     ImGui::SameLine();
-
     int freq = m_Axis3d->getFrequency();
-    ImGui::SliderInt("FREQ", &freq, 1, 8);            // Edit 1 float using a slider from 0.0f to 1.0f
+    ImGui::SliderInt("FREQ", &freq, 1, 8); // Edit 1 Int using a slider from 1 to 8
     m_Axis3d->setFrequency(freq);
     m_ZeroPlane->setGridFrequency(freq);
     unlockAccess3DScene();
 
+    // IO
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     if(!io.WantCaptureKeyboard){
 
       auto &bReadNextFrame = m_Observer.conOpt.ReadNextFrame;
       auto &ReadFrameGap = m_Observer.conOpt.ReadFrameGap;
-      auto &bViewAprilTags = m_Observer.sceneOpt.bViewAprilTags;
-
+      auto &bExit = m_Observer.figOpt.bExit;
       if (io.KeysDown[GLFW_KEY_SPACE]){
         printf("KeyDown SPACE\n");
         bReadNextFrame ^= true;
       }
       else if(io.KeysDown[GLFW_KEY_RIGHT] || io.KeysDownDuration[GLFW_KEY_RIGHT] < 0.002)
         ReadFrameGap = 1;
+      else if(io.KeysDown[GLFW_KEY_ESCAPE])
+        bExit = true;
     }
   }
   ImGui::End();
@@ -302,7 +312,7 @@ void CDisplayWindow3D::backThreadRun() {
     }
 
     // 2. Render
-    //if(RequestToRefresh3DView)
+    if(RequestToRefresh3DView)
     {
       get3DSceneAndLock();
       m_GlCanvas->OnPaint();

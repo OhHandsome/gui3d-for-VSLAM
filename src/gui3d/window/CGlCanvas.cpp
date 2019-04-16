@@ -73,8 +73,8 @@ void CGlCanvas::OnMouseMove(MouseEvent& event)
     else
     {
       // Orbit camera:
-      cameraAzimuthDeg -= 0.15*(X - mouseClickX);
-      cameraElevationDeg += 0.15*(Y - mouseClickY);
+      cameraAzimuthDeg -= 0.2*(X - mouseClickX);
+      cameraElevationDeg += 0.2*(Y - mouseClickY);
       if (cameraElevationDeg<-90) cameraElevationDeg = -90;
       if (cameraElevationDeg>90) cameraElevationDeg = 90;
     }
