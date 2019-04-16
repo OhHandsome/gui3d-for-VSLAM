@@ -63,20 +63,27 @@ CDisplayWindow3D::Create(const std::string &windowCaption,
 CDisplayWindow3D::CDisplayWindow3D(const std::string &windowCaption,
                                    unsigned int initialWindowWidth,
                                    unsigned int initialWindowHeight) {
-  glfwSetErrorCallback(glfw_error_callback);
+  //glfwSetErrorCallback(glfw_error_callback);
 
   // glfw: initialize and configure
   //glfwInit();
 
   // glfw window creation
   m_Window = glfwCreateWindow(initialWindowWidth, initialWindowHeight, windowCaption.c_str(), nullptr, nullptr);
-  GlfwContextScopeGuard gl_ctx_guard(m_Window);
   if (m_Window == nullptr) {
-    std::cerr << "Failed to create GLFW window" << std::endl;
-    glfwTerminate();
-    exit(1);
+      std::cerr << "Failed to create GLFW window" << std::endl;
+      glfwTerminate();
+      exit(1);
   }
-  glfwMakeContextCurrent(m_Window);
+
+  // Make the window's context current
+  GlfwContextScopeGuard gl_ctx_guard(m_Window);
+  // glad: load all OpenGL function pointers
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+      std::cerr << "Failed to initialize GLAD" << std::endl;
+      exit(1);
+  }
+  //glfwMakeContextCurrent(m_Window);
   glfwSetFramebufferSizeCallback(m_Window, framebuffer_size_callback);
 
   // Setup Dear ImGui binding
@@ -88,12 +95,6 @@ CDisplayWindow3D::CDisplayWindow3D(const std::string &windowCaption,
   // Setup style
   ImGui::StyleColorsClassic();
 
-  // glad: load all OpenGL function pointers
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    std::cerr << "Failed to initialize GLAD" << std::endl;
-    exit(1);
-  }
-
   ImGuiIO& io = ImGui::GetIO(); (void)io;
   m_lastWheelRotation = io.MouseWheel;
 
@@ -103,6 +104,9 @@ CDisplayWindow3D::CDisplayWindow3D(const std::string &windowCaption,
   RequestToRefresh3DView = true;
   glfwSetKeyCallback(m_Window, key_callback);
   glfwSetWindowUserPointer(m_Window, this);
+
+  // must be add, sometimes crash
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
   m_renderLoopThread = std::thread(&CDisplayWindow3D::backThreadRun, this);
 }
 
@@ -179,9 +183,12 @@ void CDisplayWindow3D::OnPreRender() {
     ImGui::Text("Label:");
     ImGui::SameLine();
     int freq = m_Axis3d->getFrequency();
-    ImGui::SliderInt("FREQ", &freq, 1, 8); // Edit 1 Int using a slider from 1 to 8
-    m_Axis3d->setFrequency(freq);
-    m_ZeroPlane->setGridFrequency(freq);
+    int v[2];
+    v[0] = m_Axis3d->getFrequency();
+    v[1] = m_ZeroPlane->getGridFrequency();
+    ImGui::SliderInt2("FREQ", v, 1, 8); // Edit 1 Int using a slider from 1 to 8
+    m_Axis3d->setFrequency(v[0]);
+    m_ZeroPlane->setGridFrequency(v[1]);
     unlockAccess3DScene();
   }
   ImGui::End();
