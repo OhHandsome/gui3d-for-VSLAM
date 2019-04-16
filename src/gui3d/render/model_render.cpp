@@ -247,7 +247,7 @@ bool renderPointCloud(GLScenePtr theScene, CPointCloudColouredPtr& obj, const Po
 bool viewImage(GLScenePtr theScene, COpenGLViewportPtr& gl_view_Image,  const cv::Mat& im)
 {
     CImage cim = castImage_clone(im);
-    if(!gl_view_Image)
+    if (!gl_view_Image)
     {
         // Create small auxiliary viewport
         gl_view_Image  = theScene->createViewport("Image");
@@ -255,7 +255,10 @@ bool viewImage(GLScenePtr theScene, COpenGLViewportPtr& gl_view_Image,  const cv
         gl_view_Image->setTransparent(true);
     }
     gl_view_Image->setImageView_fast(cim);
-    gl_view_Image->setViewportPosition(MainWidth - im.cols, MainHeight - im.rows, im.cols, im.rows);
+    gl_view_Image->setViewportPosition(MainWidth  - im.cols * ZoomOfImage,
+                                       MainHeight - im.rows * ZoomOfImage,
+                                       im.cols * ZoomOfImage,
+                                       im.rows * ZoomOfImage);
     return true;
 }
 

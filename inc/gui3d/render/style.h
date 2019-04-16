@@ -11,14 +11,15 @@
 //const int AXISLength  = 12;
 
 // Smart Window
-//const int MainWidth = 1080;
-//const int MainHeight = 720;
-//const int VideoWidth = int(160*4*0.8);
-//const int VideoHeight = int(160*3*0.8);
-//const int VP1_Width = VideoWidth; // cloned viewport
-//const int VP1_Height = VideoHeight;
-//const int WIN_SPACE = 5;
-//const int AXISLength  = 6;
+const int MainWidth = 1080;
+const int MainHeight = 720;
+const double ZoomOfImage = 0.6;
+const int VideoWidth = int(160*4*0.8);
+const int VideoHeight = int(160*3*0.8);
+const int VP1_Width = VideoWidth; // cloned viewport
+const int VP1_Height = VideoHeight;
+const int WIN_SPACE = 5;
+const int AXISLength  = 6;
 
 // RGBD Window
 //const int MainWidth = 1080;
@@ -42,11 +43,11 @@
 
 
 // Test For LocalMapp
-const int MainWidth = 1080*1.1;
-const int MainHeight = 720*1.1;
-const int VideoWidth = int(160*4*0.7);
-const int VideoHeight = int(160*3*0.7);
-const int VP1_Width = VideoWidth; // cloned viewport
-const int VP1_Height = VideoHeight;
-const int WIN_SPACE = 5;
-const int AXISLength  = 6;
+//const int MainWidth = 1080*1.1;
+//const int MainHeight = 720*1.1;
+//const int VideoWidth = int(160*4*0.7);
+//const int VideoHeight = int(160*3*0.7);
+//const int VP1_Width = VideoWidth; // cloned viewport
+//const int VP1_Height = VideoHeight;
+//const int WIN_SPACE = 5;
+//const int AXISLength  = 6;
