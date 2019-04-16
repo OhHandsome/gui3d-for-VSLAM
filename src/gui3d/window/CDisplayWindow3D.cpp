@@ -279,8 +279,8 @@ void CDisplayWindow3D::backThreadRun() {
         m_GlCanvas->OnMouseUp(event);
       }
 
-      if(event.GetWheelRotation() - m_lastWheelRotation > 1.0 ||
-         event.GetWheelRotation() - m_lastWheelRotation < -1.0) {
+      if(event.GetWheelRotation() - m_lastWheelRotation > 0.5 ||
+         event.GetWheelRotation() - m_lastWheelRotation < -0.5) {
         m_GlCanvas->OnMouseWheel(event);
         RequestToRefresh3DView = true;
       }
