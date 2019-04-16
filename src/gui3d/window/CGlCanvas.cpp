@@ -1,6 +1,10 @@
 #include <gui3d/window/CGlCanvas.h>
 #include <glad/glad.h>
 
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
+
 using namespace mrpt;
 using namespace mrpt::utils;
 using namespace mrpt::opengl;
@@ -144,6 +148,16 @@ CGlCanvas::~CGlCanvas()
 
 void CGlCanvas::Render()
 {
+  static bool GLUT_INIT_DONE = false;
+  if (!GLUT_INIT_DONE)
+  {
+    GLUT_INIT_DONE = true;
+
+    int argc=1;
+    char *argv[1] = { NULL };
+    glutInit( &argc, argv );
+  }
+
   try
   {
     // Call PreRender user code:

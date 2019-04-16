@@ -55,6 +55,7 @@ class CDisplayWindow3D{
   void forceRepaint(); //!< Repaints the window. forceRepaint, repaint and updateWindow are all aliases of the same method
   void OnPreRender();
   void OnPostRender();
+  void OnEyeShotRender();    // handle eye shot from mouse wheel
   void backThreadRun();
 
   mrpt::opengl::CAxisPtr                m_Axis3d;

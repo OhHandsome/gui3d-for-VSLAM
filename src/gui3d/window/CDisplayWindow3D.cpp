@@ -236,6 +236,36 @@ void CDisplayWindow3D::OnPreRender() {
   ImGui::End();
 }
 
+void CDisplayWindow3D::OnEyeShotRender()
+{
+  GlfwContextScopeGuard gl_ctx_guard(m_Window);
+  ImGuiContextScopeGuard imgui_ctx_guard(m_ImGuiContext);
+
+  ImGuiIO& io = ImGui::GetIO(); (void)io;
+  if(!io.WantCaptureMouse || !io.WantCaptureKeyboard){
+    MouseEvent event;
+    event.setFromIO(io);
+
+    if(io.MouseDown[0] || io.MouseDown[1]) {
+      double distance = std::sqrt(io.MouseDelta[0] * io.MouseDelta[0] + io.MouseDelta[1] * io.MouseDelta[1]);
+      if(distance > 1.0 && distance < 200.0) {
+        m_GlCanvas->OnMouseMove(event);
+        RequestToRefresh3DView = true;
+      }
+      m_GlCanvas->OnMouseDown(event);
+    }
+    else if(io.MouseReleased[0] || io.MouseReleased[1]) {
+      m_GlCanvas->OnMouseUp(event);
+    }
+
+    if(event.GetWheelRotation() - m_lastWheelRotation > 0.5 ||
+       event.GetWheelRotation() - m_lastWheelRotation < -0.5) {
+      m_GlCanvas->OnMouseWheel(event);
+      RequestToRefresh3DView = true;
+    }
+  }
+}
+
 void CDisplayWindow3D::OnPostRender()
 {
 //  ImGui::Spacing();
@@ -249,8 +279,8 @@ void CDisplayWindow3D::backThreadRun() {
 
   GlfwContextScopeGuard gl_ctx_guard(m_Window);
   ImGuiContextScopeGuard imgui_ctx_guard(m_ImGuiContext);
-
   ImVec4 clear_color = ImVec4(0.6f, 0.6f, 0.60f, 0.00f);
+
   // loop
   while (!glfwWindowShouldClose(m_Window)) {
     glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
@@ -262,29 +292,7 @@ void CDisplayWindow3D::backThreadRun() {
     OnPreRender();
 
     // 1. Zoom-pan-rotate mouse manipulation
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    if(!io.WantCaptureMouse || !io.WantCaptureKeyboard){
-      MouseEvent event;
-      event.setFromIO(io);
-
-      if(io.MouseDown[0] || io.MouseDown[1]) {
-        double distance = std::sqrt(io.MouseDelta[0] * io.MouseDelta[0] + io.MouseDelta[1] * io.MouseDelta[1]);
-        if(distance > 1.0 && distance < 200.0) {
-          m_GlCanvas->OnMouseMove(event);
-          RequestToRefresh3DView = true;
-        }
-        m_GlCanvas->OnMouseDown(event);
-      }
-      else if(io.MouseReleased[0] || io.MouseReleased[1]) {
-        m_GlCanvas->OnMouseUp(event);
-      }
-
-      if(event.GetWheelRotation() - m_lastWheelRotation > 0.5 ||
-         event.GetWheelRotation() - m_lastWheelRotation < -0.5) {
-        m_GlCanvas->OnMouseWheel(event);
-        RequestToRefresh3DView = true;
-      }
-    }
+    OnEyeShotRender();
 
     // 2. Render
     //if(RequestToRefresh3DView)
@@ -294,8 +302,8 @@ void CDisplayWindow3D::backThreadRun() {
       unlockAccess3DScene();
       RequestToRefresh3DView = false;
     }
-
     OnPostRender();
+
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
     // -------------------------------------------------------------------------------
     ImGui::Render();
@@ -319,10 +327,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 {
   void* userPointer = glfwGetWindowUserPointer(window);
   CDisplayWindow3D* window3d = (CDisplayWindow3D*) userPointer;
+
   volatile FigureOption& fig_option = window3d->Options().figOpt;
   volatile ControlOption& con_option = window3d->Options().conOpt;
   volatile SceneOption& scene_option = window3d->Options().sceneOpt;
-
   auto& ReadNextFrame = con_option.ReadNextFrame;
   auto& ReadFrameGap = con_option.ReadFrameGap;
   auto& bCacheIm = con_option.bCacheIm;
@@ -381,9 +389,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    // make sure the viewport matches the new window dimensions; note that width and
-    // height will be significantly larger than specified on retina displays.
-    glViewport(0, 0, width, height);
+  // make sure the viewport matches the new window dimensions; note that width and
+  // height will be significantly larger than specified on retina displays.
+  glViewport(0, 0, width, height);
 }
 
 /**
