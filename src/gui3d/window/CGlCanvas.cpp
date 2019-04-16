@@ -6,7 +6,7 @@ using namespace mrpt::utils;
 using namespace mrpt::opengl;
 using namespace std;
 
-namespace gui3d{
+namespace gui3d {
 float  CGlCanvas::SENSIBILITY_DEG_PER_PIXEL = 0.1f;
 
 void CGlCanvas::OnMouseDown(MouseEvent& event)
