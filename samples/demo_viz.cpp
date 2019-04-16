@@ -7,8 +7,6 @@
 #include <gui3d/base/io.h>
 #include <Eigen/Dense>
 #include <thread>
-#include <ml.h>
-
 
 using namespace xgl;
 #define READ_SCENE
@@ -60,7 +58,7 @@ int main(int argc, char **argv)
             auto obj = new viz::Frustum(T);
             obj->setColor(xgl::Color::red());
             obj->setShowName(true);
-            obj->setName(cv::format("KF%d", i));
+            obj->setName(tv::format("KF%d", i));
             obj->setScale(xgl::Vector3f(2, 2, 2));
             kf_container->addObject(obj);
         }
