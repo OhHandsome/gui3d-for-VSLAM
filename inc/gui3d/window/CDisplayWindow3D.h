@@ -42,19 +42,20 @@ class CDisplayWindow3D{
 
   /** Unlocks the access to the internal 3D scene. It is safer to use mrpt::gui::CDisplayWindow3DLocker instead.
     *  Typically user will want to call forceRepaint after updating the scene. */
-  void  unlockAccess3DScene();
+  void unlockAccess3DScene();
   void resize(int width, int height) {}
   void setPos(int x, int y) {}
   void repaint() { RequestToRefresh3DView = true; }
   void addTextMessage(int , int , int, int , int ) {}
   volatile Gui3dOption& Options() { return m_Observer; }
-  void backThreadRun();
+  bool WindowClosed() const;
 
  private:
   void InitScene();
   void forceRepaint(); //!< Repaints the window. forceRepaint, repaint and updateWindow are all aliases of the same method
   void OnPreRender();
   void OnPostRender();
+  void backThreadRun();
 
   mrpt::opengl::CAxisPtr                m_Axis3d;
   mrpt::opengl::CGridPlaneXYPtr         m_ZeroPlane;

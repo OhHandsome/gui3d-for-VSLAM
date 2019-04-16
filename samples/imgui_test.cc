@@ -198,7 +198,12 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 int multi_thread_test()
 {
   gui3d::CDisplayWindow3DPtr win(new gui3d::CDisplayWindow3D("1", 1080, 720));
-  win->backThreadRun();
+  volatile gui3d::Gui3dOption& guiOpt = win->Options();
+  while (!guiOpt.figOpt.bExit)
+  {
+      std::cout << (guiOpt.figOpt.bExit ? "True" : "False") << std::endl;
+  };
+  printf("Exit");
 }
 
 int main()

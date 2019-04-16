@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw_gl2.h>
-#include <gui3d/render/options.hpp>
+#include <gui3d/render/model_render.h>
 
 using namespace mrpt;
 using namespace mrpt::opengl;
@@ -11,7 +11,7 @@ using namespace mrpt::opengl;
 namespace gui3d{
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-static void processInput(GLFWwindow *window);
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 static void glfw_error_callback(int error, const char* description) {
   fprintf(stderr, "Error %d: %s\n", error, description);
@@ -101,7 +101,9 @@ CDisplayWindow3D::CDisplayWindow3D(const std::string &windowCaption,
   m_GlCanvas = new CGlCanvas(m_3Dscene);
   InitScene();
   RequestToRefresh3DView = true;
-  //m_renderLoopThread = std::thread(&CDisplayWindow3D::backThreadRun, this);
+  glfwSetKeyCallback(m_Window, key_callback);
+  glfwSetWindowUserPointer(m_Window, this);
+  m_renderLoopThread = std::thread(&CDisplayWindow3D::backThreadRun, this);
 }
 
 CDisplayWindow3D::~CDisplayWindow3D() {
@@ -110,19 +112,6 @@ CDisplayWindow3D::~CDisplayWindow3D() {
 
   delete m_GlCanvas;
   m_3Dscene.clear_unique();
-
-  {
-    GlfwContextScopeGuard gl_ctx_guard(m_Window);
-    ImGuiContextScopeGuard imgui_ctx_guard(m_ImGuiContext);
-    // Cleanup
-    // glfw: terminate, clearing all previously allocated GLFW resources.
-    ImGui_ImplGlfwGL2_Shutdown();
-  }
-
-  ImGui::DestroyContext();
-  glfwDestroyWindow(m_Window);
-  glfwTerminate();
-  printf("Exit BackEnd\n");
 }
 
 mrpt::opengl::COpenGLScenePtr& CDisplayWindow3D::get3DSceneAndLock() {
@@ -132,6 +121,11 @@ mrpt::opengl::COpenGLScenePtr& CDisplayWindow3D::get3DSceneAndLock() {
 
 void CDisplayWindow3D::unlockAccess3DScene() {
   m_access3Dscene.unlock();
+}
+
+bool CDisplayWindow3D::WindowClosed() const
+{
+  return glfwWindowShouldClose(m_Window);
 }
 
 void CDisplayWindow3D::forceRepaint() {
@@ -189,23 +183,6 @@ void CDisplayWindow3D::OnPreRender() {
     m_Axis3d->setFrequency(freq);
     m_ZeroPlane->setGridFrequency(freq);
     unlockAccess3DScene();
-
-    // IO
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    if(!io.WantCaptureKeyboard){
-
-      auto &bReadNextFrame = m_Observer.conOpt.ReadNextFrame;
-      auto &ReadFrameGap = m_Observer.conOpt.ReadFrameGap;
-      auto &bExit = m_Observer.figOpt.bExit;
-      if (io.KeysDown[GLFW_KEY_SPACE]){
-        printf("KeyDown SPACE\n");
-        bReadNextFrame ^= true;
-      }
-      else if(io.KeysDown[GLFW_KEY_RIGHT] || io.KeysDownDuration[GLFW_KEY_RIGHT] < 0.002)
-        ReadFrameGap = 1;
-      else if(io.KeysDown[GLFW_KEY_ESCAPE])
-        bExit = true;
-    }
   }
   ImGui::End();
 
@@ -282,7 +259,6 @@ void CDisplayWindow3D::backThreadRun() {
     ImGui_ImplGlfwGL2_NewFrame();
 
     // input
-    processInput(m_Window);
     OnPreRender();
 
     // 1. Zoom-pan-rotate mouse manipulation
@@ -326,14 +302,80 @@ void CDisplayWindow3D::backThreadRun() {
     ImGui_ImplGlfwGL2_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(m_Window);
   }
+
+  // Cleanup
+  // glfw: terminate, clearing all previously allocated GLFW resources.
+  {
+    GlfwContextScopeGuard gl_ctx_guard1(m_Window);
+    ImGuiContextScopeGuard imgui_ctx_guard1(m_ImGuiContext);
+    ImGui_ImplGlfwGL2_Shutdown();
+  }
+  ImGui::DestroyContext();
+  glfwDestroyWindow(m_Window);
+  glfwTerminate();
 }
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+  void* userPointer = glfwGetWindowUserPointer(window);
+  CDisplayWindow3D* window3d = (CDisplayWindow3D*) userPointer;
+  volatile FigureOption& fig_option = window3d->Options().figOpt;
+  volatile ControlOption& con_option = window3d->Options().conOpt;
+  volatile SceneOption& scene_option = window3d->Options().sceneOpt;
 
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window) {
-    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+  auto& ReadNextFrame = con_option.ReadNextFrame;
+  auto& ReadFrameGap = con_option.ReadFrameGap;
+  auto& bCacheIm = con_option.bCacheIm;
+
+  auto& bExit = fig_option.bExit;
+  auto& bViewPort = fig_option.bViewPort;
+  auto& bSave3DScene = fig_option.bSave3DScene;
+  auto& RequestToRefresh3DView = fig_option.RequestToRefresh3DView;
+
+  auto& bOpenOptimizerPlot = scene_option.bOpenOptimizerPlot;
+  auto& bViewAprilTags = scene_option.bViewAprilTags;
+  auto& bWaitKey = fig_option.bWaitKey;
+
+  switch (key) {
+    case GLFW_KEY_ESCAPE:
+    case GLFW_KEY_Q:
+      glfwSetWindowShouldClose(window, true);
+      bExit = true;
+      break;
+
+    case GLFW_KEY_SPACE:
+      ReadNextFrame ^= true;
+      break;
+
+    case GLFW_KEY_RIGHT:
+      ReadFrameGap += FRAME_GAP_LENGTH;
+      break;
+
+    case GLFW_KEY_S:
+    {
+      COpenGLScenePtr theScene = window3d->get3DSceneAndLock();
+      gui3d::SaveScene(theScene, dataRoute());
+      window3d->unlockAccess3DScene();
+    }
+      break;
+
+    case 'p':
+    case 'P':
+    {
+      bViewAprilTags ^= true;
+      RequestToRefresh3DView = true;
+    }
+      break;
+
+    case 'i':
+    case 'I':
+      bCacheIm ^= true;
+      break;
+
+    default:
+      bWaitKey ^= true;
+      printf("Key pushed: %c\n", key);
+  };
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
