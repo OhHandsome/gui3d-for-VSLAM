@@ -167,21 +167,6 @@ void CDisplayWindow3D::OnPreRender() {
 
   // Menu
   static bool show_scene_property_editor = false;
-  if (ImGui::BeginMainMenuBar()) {
-    if (ImGui::BeginMenu("File")) {
-      if (ImGui::MenuItem("Open", "Ctrl+O")) {}
-      if (ImGui::MenuItem("Save", "Ctrl+S")) {}
-      if (ImGui::MenuItem("Save As..")) {}
-      ImGui::EndMenu();
-    }
-
-    if (ImGui::BeginMenu("Edit")) {
-      if (ImGui::MenuItem("System", "Ctrl+T", &show_scene_property_editor)) {}
-      ImGui::EndMenu();
-    }
-    ImGui::EndMainMenuBar();
-  }
-
   // Show Scene Property
   if (show_scene_property_editor)
   {
@@ -197,7 +182,7 @@ void CDisplayWindow3D::OnPreRender() {
         m_Axis3d->setVisibility(visible);
       ImGui::SameLine();
       visible = m_ZeroPlane->isVisible();
-      if (ImGui::Checkbox("ZeroPlane", &visible))
+      if (ImGui::Checkbox("XY", &visible))
         m_ZeroPlane->setVisibility(visible);
 
       ImGui::Text("Label:");
@@ -209,12 +194,14 @@ void CDisplayWindow3D::OnPreRender() {
       m_Axis3d->setFrequency(v[0]);
       m_ZeroPlane->setGridFrequency(v[1]);
 
+      /*
       auto& im_visiable = m_Observer.figOpt.bViewPort;
       COpenGLViewportPtr vp = theScene->getViewport("Image");
       if (vp.get() != nullptr) {
-        if (ImGui::Checkbox("im", (bool *)&im_visiable))
-          vp->setTransparent(im_visiable);
-      }
+        if (ImGui::Checkbox("im", (bool *)&im_visiable)) {
+          vp->resetCloneView();
+        }
+      }*/
       unlockAccess3DScene();
     }
     ImGui::End();
@@ -224,8 +211,27 @@ void CDisplayWindow3D::OnPreRender() {
   static bool visible_all;
   static bool show_tool_panel = true;
   if (ImGui::Begin("Scene", &show_tool_panel,
-                   ImGuiWindowFlags_AlwaysAutoResize |
-                   ImGuiWindowFlags_NoScrollbar)) {
+       ImGuiWindowFlags_AlwaysAutoResize |
+       ImGuiWindowFlags_NoScrollbar |
+       ImGuiWindowFlags_MenuBar)) {
+
+    ImGui::Text("Arcsoft VSLAM Team: ");
+    ImGui::NewLine();
+    if (ImGui::BeginMenuBar()) {
+      if (ImGui::BeginMenu("File")) {
+        if (ImGui::MenuItem("Open", "Ctrl+O")) {}
+        if (ImGui::MenuItem("Save", "Ctrl+S")) {}
+        if (ImGui::MenuItem("Save As..")) {}
+        ImGui::EndMenu();
+      }
+
+      if (ImGui::BeginMenu("Edit")) {
+        if (ImGui::MenuItem("System", "Ctrl+T", &show_scene_property_editor)) {}
+        ImGui::EndMenu();
+      }
+      ImGui::EndMenuBar();
+    }
+
     get3DSceneAndLock();
     COpenGLViewportPtr mainVP = m_3Dscene->getViewport();
     visible_all = true;
