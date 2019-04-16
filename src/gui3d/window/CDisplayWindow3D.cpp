@@ -344,6 +344,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
   auto& bViewAprilTags = scene_option.bViewAprilTags;
   auto& bWaitKey = fig_option.bWaitKey;
 
+  if (action != GLFW_PRESS)
+    return;
+
   switch (key) {
     case GLFW_KEY_ESCAPE:
     case GLFW_KEY_Q:
