@@ -106,7 +106,7 @@ CDisplayWindow3D::CDisplayWindow3D(const std::string &windowCaption,
   glfwSetWindowUserPointer(m_Window, this);
 
   // must be add, sometimes crash
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  std::this_thread::sleep_for(std::chrono::microseconds(5));
   m_renderLoopThread = std::thread(&CDisplayWindow3D::backThreadRun, this);
 }
 
@@ -164,34 +164,61 @@ void CDisplayWindow3D::InitScene(){
 }
 
 void CDisplayWindow3D::OnPreRender() {
-  // Display panel
-  static bool show_axis3d = true;
-  if(ImGui::Begin("System", &show_axis3d,
-                  ImGuiWindowFlags_NoScrollbar |
-                  ImGuiWindowFlags_AlwaysAutoResize)) {
 
-    // Visible about Axis3d and ZeroPlane
-    get3DSceneAndLock();
-    bool visible = m_Axis3d->isVisible();
-    if (ImGui::Checkbox("Axis3d", &visible))
-      m_Axis3d->setVisibility(visible);
-    ImGui::SameLine();
-    visible = m_ZeroPlane->isVisible();
-    if (ImGui::Checkbox("ZeroPlane", &visible))
-      m_ZeroPlane->setVisibility(visible);
+  // Menu
+  static bool show_scene_property_editor = false;
+  if (ImGui::BeginMainMenuBar()) {
+    if (ImGui::BeginMenu("File")) {
+      if (ImGui::MenuItem("Open", "Ctrl+O")) {}
+      if (ImGui::MenuItem("Save", "Ctrl+S")) {}
+      if (ImGui::MenuItem("Save As..")) {}
+      ImGui::EndMenu();
+    }
 
-    ImGui::Text("Label:");
-    ImGui::SameLine();
-    int freq = m_Axis3d->getFrequency();
-    int v[2];
-    v[0] = m_Axis3d->getFrequency();
-    v[1] = m_ZeroPlane->getGridFrequency();
-    ImGui::SliderInt2("FREQ", v, 1, 8); // Edit 1 Int using a slider from 1 to 8
-    m_Axis3d->setFrequency(v[0]);
-    m_ZeroPlane->setGridFrequency(v[1]);
-    unlockAccess3DScene();
+    if (ImGui::BeginMenu("Edit")) {
+      if (ImGui::MenuItem("System", "Ctrl+T", &show_scene_property_editor)) {}
+      ImGui::EndMenu();
+    }
+    ImGui::EndMainMenuBar();
   }
-  ImGui::End();
+
+  // Show Scene Property
+  if (show_scene_property_editor)
+  {
+    // Display panel
+    if(ImGui::Begin("System", &show_scene_property_editor,
+                    ImGuiWindowFlags_NoScrollbar |
+                    ImGuiWindowFlags_AlwaysAutoResize)) {
+
+      // Visible about Axis3d and ZeroPlane
+      auto& theScene = get3DSceneAndLock();
+      bool visible = m_Axis3d->isVisible();
+      if (ImGui::Checkbox("Axis3d", &visible))
+        m_Axis3d->setVisibility(visible);
+      ImGui::SameLine();
+      visible = m_ZeroPlane->isVisible();
+      if (ImGui::Checkbox("ZeroPlane", &visible))
+        m_ZeroPlane->setVisibility(visible);
+
+      ImGui::Text("Label:");
+      ImGui::SameLine();
+      int v[2];
+      v[0] = m_Axis3d->getFrequency();
+      v[1] = m_ZeroPlane->getGridFrequency();
+      ImGui::SliderInt2("FREQ", v, 1, 8); // Edit 1 Int using a slider from 1 to 8
+      m_Axis3d->setFrequency(v[0]);
+      m_ZeroPlane->setGridFrequency(v[1]);
+
+      auto& im_visiable = m_Observer.figOpt.bViewPort;
+      COpenGLViewportPtr vp = theScene->getViewport("Image");
+      if (vp.get() != nullptr) {
+        if (ImGui::Checkbox("im", (bool *)&im_visiable))
+          vp->setTransparent(im_visiable);
+      }
+      unlockAccess3DScene();
+    }
+    ImGui::End();
+  }
 
   // Display [Scene] panel
   static bool visible_all;
@@ -320,6 +347,7 @@ void CDisplayWindow3D::backThreadRun() {
 
   // Cleanup
   // glfw: terminate, clearing all previously allocated GLFW resources.
+  std::this_thread::sleep_for(std::chrono::microseconds(10));
   {
     GlfwContextScopeGuard gl_ctx_guard1(m_Window);
     ImGuiContextScopeGuard imgui_ctx_guard1(m_ImGuiContext);
