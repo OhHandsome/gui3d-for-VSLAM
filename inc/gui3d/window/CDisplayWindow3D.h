@@ -48,13 +48,13 @@ class CDisplayWindow3D{
   void repaint() { RequestToRefresh3DView = true; }
   void addTextMessage(int , int , int, int , int ) {}
   volatile Gui3dOption& Options() { return m_Observer; }
+  void backThreadRun();
 
  private:
   void InitScene();
   void forceRepaint(); //!< Repaints the window. forceRepaint, repaint and updateWindow are all aliases of the same method
   void OnPreRender();
   void OnPostRender();
-  void backThreadRun();
 
   mrpt::opengl::CAxisPtr                m_Axis3d;
   mrpt::opengl::CGridPlaneXYPtr         m_ZeroPlane;

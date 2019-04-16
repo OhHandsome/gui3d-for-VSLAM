@@ -274,11 +274,10 @@ void CDisplayWindow3D::backThreadRun() {
   ImGuiContextScopeGuard imgui_ctx_guard(m_ImGuiContext);
 
   ImVec4 clear_color = ImVec4(0.6f, 0.6f, 0.60f, 0.00f);
-  glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
   // loop
   while (!glfwWindowShouldClose(m_Window)) {
+    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glfwPollEvents();
     ImGui_ImplGlfwGL2_NewFrame();
 
@@ -312,7 +311,7 @@ void CDisplayWindow3D::backThreadRun() {
     }
 
     // 2. Render
-    if(RequestToRefresh3DView)
+    //if(RequestToRefresh3DView)
     {
       get3DSceneAndLock();
       m_GlCanvas->OnPaint();

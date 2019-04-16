@@ -196,7 +196,7 @@ void CGlCanvas::Render()
   catch (std::exception &e)
   {
     glPopAttrib();
-    const std::string err_msg = std::string("[CMyGLCanvasBase::Render] Exception!: ") +std::string(e.what());
+    const std::string err_msg = std::string("[CGlCanvas::Render] Exception!: ") +std::string(e.what());
     std::cerr << err_msg;
   }
   catch (...)

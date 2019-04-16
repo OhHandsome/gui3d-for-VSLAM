@@ -74,15 +74,15 @@ int single_thread_test()
   bool show_another_window = false;
   ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-  // Rendering
-  glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-  glClear(GL_COLOR_BUFFER_BIT);
-
   bool is_clicked = false;
   // render loop
   // -----------
   while (!glfwWindowShouldClose(window))
   {
+    // Rendering
+    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     glfwPollEvents();
     ImGui_ImplGlfwGL2_NewFrame();
 
@@ -203,6 +203,6 @@ int multi_thread_test()
 
 int main()
 {
-  single_thread_test();
+  //single_thread_test();
   multi_thread_test();
 }
