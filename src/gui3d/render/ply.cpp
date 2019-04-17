@@ -10,6 +10,8 @@ void collectCloudFromRGBD(const cv::Mat& im, const cv::Mat& depth, PointCloud& c
     cv::Mat color;
     if (im.channels() == 1)
         cv::cvtColor(im, color, cv::COLOR_GRAY2BGR);
+    else
+        color = im;
 
     cloud.clear();
     for(int y = 0; y < depth.rows; y++)
