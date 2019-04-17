@@ -7,7 +7,7 @@
 
 using namespace mrpt;
 using namespace mrpt::opengl;
-#define USE_BACKEND_RENDER 1
+#define USE_BACKEND_RENDER 0
 
 namespace gui3d {
 
@@ -142,16 +142,18 @@ CDisplayWindow3D::~CDisplayWindow3D() {
   delete m_GlCanvas;
   m_3Dscene.clear_unique();
 
-  // glfw: terminate, clearing all previously allocated GLFW resources.
-  std::this_thread::sleep_for(std::chrono::microseconds(10));
-  {
-    GlfwContextScopeGuard gl_ctx_guard1(m_Window);
-    ImGuiContextScopeGuard imgui_ctx_guard1(m_ImGuiContext);
-    ImGui_ImplGlfwGL2_Shutdown();
+  if (!USE_BACKEND_RENDER) {
+    // glfw: terminate, clearing all previously allocated GLFW resources.
+    std::this_thread::sleep_for(std::chrono::microseconds(10));
+    {
+      GlfwContextScopeGuard gl_ctx_guard1(m_Window);
+      ImGuiContextScopeGuard imgui_ctx_guard1(m_ImGuiContext);
+      ImGui_ImplGlfwGL2_Shutdown();
+    }
+    ImGui::DestroyContext();
+    glfwDestroyWindow(m_Window);
+    //glfwTerminate();
   }
-  ImGui::DestroyContext();
-  glfwDestroyWindow(m_Window);
-  //glfwTerminate();
 }
 
 void CDisplayWindow3D::InitScene(){
@@ -339,32 +341,35 @@ void CDisplayWindow3D::RunOnce()
   ImGuiContextScopeGuard imgui_ctx_guard(m_ImGuiContext);
   ImVec4 clear_color = ImVec4(0.6f, 0.6f, 0.60f, 0.00f);
 
-  glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glfwPollEvents();
-  ImGui_ImplGlfwGL2_NewFrame();
+  while (!m_Observer.figOpt.bWaitKey) {
+    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glfwPollEvents();
+    ImGui_ImplGlfwGL2_NewFrame();
 
-  // input
-  OnPreRender();
+    // input
+    OnPreRender();
 
-  // 1. Zoom-pan-rotate mouse manipulation
-  OnEyeShotRender();
+    // 1. Zoom-pan-rotate mouse manipulation
+    OnEyeShotRender();
 
-  // 2. Render
-  //if(RequestToRefresh3DView)
-  {
-    get3DSceneAndLock();
-    m_GlCanvas->OnPaint();
-    unlockAccess3DScene();
-    RequestToRefresh3DView = false;
+    // 2. Render
+    //if(RequestToRefresh3DView)
+    {
+      get3DSceneAndLock();
+      m_GlCanvas->OnPaint();
+      unlockAccess3DScene();
+      RequestToRefresh3DView = false;
+    }
+    OnPostRender();
+
+    // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+    // -------------------------------------------------------------------------------
+    ImGui::Render();
+    ImGui_ImplGlfwGL2_RenderDrawData(ImGui::GetDrawData());
+    glfwSwapBuffers(m_Window);
   }
-  OnPostRender();
-
-  // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-  // -------------------------------------------------------------------------------
-  ImGui::Render();
-  ImGui_ImplGlfwGL2_RenderDrawData(ImGui::GetDrawData());
-  glfwSwapBuffers(m_Window);
+  m_Observer.figOpt.bWaitKey = false;
 }
 
 void CDisplayWindow3D::backThreadRun() {
@@ -403,6 +408,17 @@ void CDisplayWindow3D::backThreadRun() {
     ImGui_ImplGlfwGL2_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(m_Window);
   }
+
+  // glfw: terminate, clearing all previously allocated GLFW resources.
+  std::this_thread::sleep_for(std::chrono::microseconds(10));
+  {
+    GlfwContextScopeGuard gl_ctx_guard1(m_Window);
+    ImGuiContextScopeGuard imgui_ctx_guard1(m_ImGuiContext);
+    ImGui_ImplGlfwGL2_Shutdown();
+  }
+  ImGui::DestroyContext();
+  glfwDestroyWindow(m_Window);
+  //glfwTerminate();
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -466,7 +482,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
       break;
 
     default:
-      bWaitKey ^= true;
+      bWaitKey = true;
       printf("Key pushed: %c\n", key);
   };
 }
