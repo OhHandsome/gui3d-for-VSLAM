@@ -368,6 +368,8 @@ void CDisplayWindow3D::RunOnce()
     ImGui::Render();
     ImGui_ImplGlfwGL2_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(m_Window);
+
+    cv::waitKey(1);
   }
   m_Observer.figOpt.bWaitKey = false;
 }
