@@ -37,6 +37,18 @@ typedef std::vector<PointCloud >                                   PointCloudV;
 typedef Eigen::Vector3d                                            State;
 typedef std::vector<State >                                        StateV;
 
+template <class T, int rows, int cols>
+std::vector<Eigen::Matrix<float, rows, cols>> cast(const std::vector<Eigen::Matrix<T, rows, cols>>& d)
+{
+    std::vector<Eigen::Matrix<float, rows, cols>> res;
+    res.reserve(d.size());
+    for (auto& i : d)
+    {
+        res.push_back(i.cast<float>());
+    }
+    return res;
+}
+
 } // namespace gui3d
 
 
