@@ -45,11 +45,10 @@ class CDisplayWindow3D{
   void unlockAccess3DScene();
   void resize(int width, int height) {}
   void setPos(int x, int y) {}
-  void repaint() { RequestToRefresh3DView = true; }
+  void repaint() { forceRepaint(); }
   void addTextMessage(int , int , int, int , int ) {}
   volatile Gui3dOption& Options() { return m_Observer; }
   bool WindowClosed() const;
-  void RunOnce();
 
  private:
   void InitScene();
@@ -58,6 +57,7 @@ class CDisplayWindow3D{
   void OnPostRender();
   void OnEyeShotRender();    // handle eye shot from mouse wheel
   void backThreadRun();
+  void RunOnce();
 
   mrpt::opengl::CAxisPtr                m_Axis3d;
   mrpt::opengl::CGridPlaneXYPtr         m_ZeroPlane;

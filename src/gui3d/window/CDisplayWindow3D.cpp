@@ -7,8 +7,9 @@
 
 using namespace mrpt;
 using namespace mrpt::opengl;
+#define USE_BACKEND_RENDER 1
 
-namespace gui3d{
+namespace gui3d {
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -60,6 +61,27 @@ CDisplayWindow3D::Create(const std::string &windowCaption,
   return CDisplayWindow3DPtr(new CDisplayWindow3D(windowCaption, initialWindowWidth, initialWindowHeight));
 }
 
+mrpt::opengl::COpenGLScenePtr& CDisplayWindow3D::get3DSceneAndLock() {
+  m_access3Dscene.lock();
+  return m_3Dscene;
+}
+
+void CDisplayWindow3D::unlockAccess3DScene() {
+  m_access3Dscene.unlock();
+}
+
+bool CDisplayWindow3D::WindowClosed() const
+{
+  return glfwWindowShouldClose(m_Window);
+}
+
+void CDisplayWindow3D::forceRepaint() {
+  if (USE_BACKEND_RENDER)
+    RequestToRefresh3DView = true;
+  else
+    RunOnce();
+}
+
 CDisplayWindow3D::CDisplayWindow3D(const std::string &windowCaption,
                                    unsigned int initialWindowWidth,
                                    unsigned int initialWindowHeight) {
@@ -105,9 +127,12 @@ CDisplayWindow3D::CDisplayWindow3D(const std::string &windowCaption,
   glfwSetKeyCallback(m_Window, key_callback);
   glfwSetWindowUserPointer(m_Window, this);
 
-  // must be add, sometimes crash
-  std::this_thread::sleep_for(std::chrono::microseconds(30));
-  m_renderLoopThread = std::thread(&CDisplayWindow3D::backThreadRun, this);
+
+  if (USE_BACKEND_RENDER) {
+    // must be add, sometimes crash
+    std::this_thread::sleep_for(std::chrono::microseconds(30));
+    m_renderLoopThread = std::thread(&CDisplayWindow3D::backThreadRun, this);
+  }
 }
 
 CDisplayWindow3D::~CDisplayWindow3D() {
@@ -116,24 +141,17 @@ CDisplayWindow3D::~CDisplayWindow3D() {
 
   delete m_GlCanvas;
   m_3Dscene.clear_unique();
-}
 
-mrpt::opengl::COpenGLScenePtr& CDisplayWindow3D::get3DSceneAndLock() {
-  m_access3Dscene.lock();
-  return m_3Dscene;
-}
-
-void CDisplayWindow3D::unlockAccess3DScene() {
-  m_access3Dscene.unlock();
-}
-
-bool CDisplayWindow3D::WindowClosed() const
-{
-  return glfwWindowShouldClose(m_Window);
-}
-
-void CDisplayWindow3D::forceRepaint() {
-  RequestToRefresh3DView = true;
+  // glfw: terminate, clearing all previously allocated GLFW resources.
+  std::this_thread::sleep_for(std::chrono::microseconds(10));
+  {
+    GlfwContextScopeGuard gl_ctx_guard1(m_Window);
+    ImGuiContextScopeGuard imgui_ctx_guard1(m_ImGuiContext);
+    ImGui_ImplGlfwGL2_Shutdown();
+  }
+  ImGui::DestroyContext();
+  glfwDestroyWindow(m_Window);
+  //glfwTerminate();
 }
 
 void CDisplayWindow3D::InitScene(){
@@ -385,18 +403,6 @@ void CDisplayWindow3D::backThreadRun() {
     ImGui_ImplGlfwGL2_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(m_Window);
   }
-
-  // Cleanup
-  // glfw: terminate, clearing all previously allocated GLFW resources.
-  std::this_thread::sleep_for(std::chrono::microseconds(10));
-  {
-    GlfwContextScopeGuard gl_ctx_guard1(m_Window);
-    ImGuiContextScopeGuard imgui_ctx_guard1(m_ImGuiContext);
-    ImGui_ImplGlfwGL2_Shutdown();
-  }
-  ImGui::DestroyContext();
-  glfwDestroyWindow(m_Window);
-  //glfwTerminate();
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
