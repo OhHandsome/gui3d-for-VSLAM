@@ -501,7 +501,7 @@ hObject viewDepth(const cv::Mat& depth_pts, const cv::Mat& im)
         PointCloud cloud;
         collectCloudFromRGBD(im, depth_pts, cloud);
         renderPointCloud(theScene, obj, Twc, cloud, options);
-        if(obj) obj->setName(name);
+        if(obj) obj->setName("Color" + name);
         sCurrentFigure3d->mSysPointCloud[name] = obj;
         win->unlockAccess3DScene();
         return (hObject)(obj.get());
