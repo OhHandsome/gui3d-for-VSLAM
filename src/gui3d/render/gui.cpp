@@ -484,7 +484,7 @@ hObject viewImage(const cv::Mat &im)
     return (hObject)(obj.get());
 }
 
-hObject viewDepth(const cv::Mat& im, const cv::Mat& depth_pts)
+hObject viewDepth(const cv::Mat& depth_pts, const cv::Mat& im)
 {
     if(!sCurrentFigure3d)
         nFigure("default", 640, 480);
@@ -492,18 +492,33 @@ hObject viewDepth(const cv::Mat& im, const cv::Mat& depth_pts)
     const std::string& name = sysChannel[DepthPointCloud];
     tOptions options;
     systemChannelOptions(name, options);
-
-    CPointCloudColouredPtr obj = sCurrentFigure3d->hPointCloud(name);
-    auto win = sCurrentFigure3d->mMainWindow;
-    auto theScene = win->get3DSceneAndLock();
     const Pose Twc = Pose::Identity();
-    PointCloud cloud;
-    collectCloudFromRGBD(im, depth_pts, cloud);
-    renderPointCloud(theScene, obj, Twc, cloud, options);
-    if(obj) obj->setName(name);
-    win->unlockAccess3DScene();
-    sCurrentFigure3d->mSysPointCloud[name] = obj;
-    return (hObject)(obj.get());
+    if (!im.empty())
+    {
+        auto win = sCurrentFigure3d->mMainWindow;
+        auto theScene = win->get3DSceneAndLock();
+        CPointCloudColouredPtr obj = sCurrentFigure3d->hPointCloud(name);
+        PointCloud cloud;
+        collectCloudFromRGBD(im, depth_pts, cloud);
+        renderPointCloud(theScene, obj, Twc, cloud, options);
+        if(obj) obj->setName(name);
+        sCurrentFigure3d->mSysPointCloud[name] = obj;
+        win->unlockAccess3DScene();
+        return (hObject)(obj.get());
+    }
+    else
+    {
+        auto win = sCurrentFigure3d->mMainWindow;
+        auto theScene = win->get3DSceneAndLock();
+        CPointCloudPtr obj = sCurrentFigure3d->hMapPoint(name);
+        LandMark3dV cloud;
+        collectCloudFromDepth(depth_pts, cloud);
+        renderMapPoints(theScene, obj, Twc, cloud, options);
+        if(obj) obj->setName(name);
+        sCurrentFigure3d->mSysMapPoint[name] = obj;
+        win->unlockAccess3DScene();
+        return (hObject)(obj.get());
+    }
 }
 
 hObject auxViewAt(const Pose &pose)

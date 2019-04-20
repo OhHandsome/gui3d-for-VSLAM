@@ -3,10 +3,9 @@
 #include <gui3d/render/options.hpp>
 #include <gui3d/render/parameter.h>
 #include <gui3d/base/type_def.h>
+#include <opencv2/core.hpp>
 
-namespace cv{ class Mat; };
-
-namespace gui3d{
+namespace gui3d {
 
 // System include base Channel for SLAM's Render
 /*
@@ -77,13 +76,14 @@ hObject renderModel3d   (const Channel& name,
                          const PoseV&   Twc , const PointCloudV& cloud,  const tOptions& options = tOptions());
 hObject renderRobot     (const Channel& name, const Pose& Twb,           const tOptions& options = tOptions());
 hObject viewImage       (const cv::Mat& im);  // Render ViewPort, for example, imshow(), Aux Viewport
-hObject viewDepth       (const cv::Mat& im, const cv::Mat& array2d_pt3d);
+hObject viewDepth       (const cv::Mat& array2d_pt3d, const cv::Mat& im = cv::Mat());
 hObject auxViewAt       (const Pose& pose);    // GL Camera Pose in Aux ViewPort for Multi-View
 void    update          (hObject obj, const Pose& Twc);
 void    clear();
 void    repaint();
 
 void collectCloudFromRGBD(const cv::Mat& im, const cv::Mat& depth, PointCloud& cloud);
+void collectCloudFromDepth(const cv::Mat& depth, LandMark3dV& cloud);
 void saveAsPLY(const std::string& name, const Pose& Twc, const PointCloud& cloud);
 void saveAsPLY(const std::string& name, const Pose& Twc, const cv::Mat& im, const cv::Mat& depth);
 

@@ -5,6 +5,24 @@
 namespace gui3d{
 extern std::string mDataRoute;
 
+void collectCloudFromDepth(const cv::Mat& depth, LandMark3dV& cloud)
+{
+    for(int y = 0; y < depth.rows; y++)
+    {
+        auto pdepth = depth.ptr<cv::Vec3f>(y);
+        for(int x = 0; x < depth.cols; x++)
+        {
+            cv::Vec3f pt = pdepth[x];
+            if(pt(2) == 0.0f)
+                continue;
+
+            LandMark3d info;
+            info << pt(0), pt(1), pt(2);
+            cloud.push_back(info);
+        }
+    }
+}
+
 void collectCloudFromRGBD(const cv::Mat& im, const cv::Mat& depth, PointCloud& cloud)
 {
     cv::Mat color;
