@@ -23,6 +23,7 @@ inline void appendText(const std::string& message, cv::Mat& im)
     im.copyTo(imText.rowRange(0, im.rows).colRange(0,im.cols));
     imText.rowRange(im.rows, imText.rows) = cv::Mat::zeros(textSize.height+10,im.cols,im.type());
     cv::putText(imText, message, cv::Point(5,imText.rows-5), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255,255,255), 1, 8);
+    im = imText;
 }
 
 inline void adjust_uv(const cv::Size& imsz, cv::Point& pt)
