@@ -55,7 +55,7 @@ struct MouseCapture
     explicit MouseCapture(
             const std::string& name,
             const cv::Mat& im)
-        : cur_pt(-1, -1), pre_pt(-1, -1)
+        : cur_pt(-1, -1), pre_pt(-1, -1), click_pt(-1, -1)
     {
         this->name = name;
         org = im;
