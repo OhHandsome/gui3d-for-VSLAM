@@ -14,6 +14,17 @@ inline cv::Mat convert(const cv::Mat& m)
     return gray;
 }
 
+inline void appendText(const std::string& message, cv::Mat& im)
+{
+    int baseline=0;
+    cv::Size textSize = cv::getTextSize(message,cv::FONT_HERSHEY_PLAIN, 1, 1, &baseline);
+
+    cv::Mat imText = cv::Mat(im.rows + textSize.height + 10, im.cols, im.type());
+    im.copyTo(imText.rowRange(0, im.rows).colRange(0,im.cols));
+    imText.rowRange(im.rows, imText.rows) = cv::Mat::zeros(textSize.height+10,im.cols,im.type());
+    cv::putText(imText, message, cv::Point(5,imText.rows-5), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255,255,255), 1, 8);
+}
+
 inline void adjust_uv(const cv::Size& imsz, cv::Point& pt)
 {
     const int width = imsz.width;
@@ -52,6 +63,7 @@ struct MouseCapture
 
     cv::Rect roi;
     cv::Mat dst;
+    cv::Point click_pt;
 private:
     cv::Mat org, img;
     std::string name;
@@ -62,11 +74,12 @@ private:
 inline void on_mouse(int event, int x, int y, int flags, void *ustc)
 {
     using namespace cv;
-    static cv::Point pre_pt{-1,-1};//初始坐标
-    static cv::Point cur_pt{-1,-1};//实时坐标
     MouseCapture *pState = (MouseCapture *)(ustc);
     cv::Mat &org = pState->org;
     cv::Mat &img = pState->img;
+    cv::Point &pre_pt = pState->pre_pt;
+    cv::Point &cur_pt = pState->cur_pt;
+    cv::Point &click_pt = pState->click_pt;
     std::string &window = pState->name;
 
     char str[16];
@@ -75,6 +88,7 @@ inline void on_mouse(int event, int x, int y, int flags, void *ustc)
         org.copyTo(img);  //将原始图片复制到img中
         sprintf(str,"(%d,%d)",x,y);
         pre_pt = cv::Point(x,y);
+        click_pt = pre_pt;
         cv::putText(img, str, pre_pt, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0,0,0,255), 1, 8);//在窗口上显示坐标
         cv::circle(img,pre_pt,2,cv::Scalar(255,0,0,0),CV_FILLED,CV_AA,0);//划圆
         cv::imshow(window,img);
