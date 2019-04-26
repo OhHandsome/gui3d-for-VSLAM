@@ -120,6 +120,16 @@ void SaveScene(COpenGLScenePtr theScene, const std::string& route)
     const std::string saveRoute = route.empty() ? "." : route;
     if (theScene->saveToFile(saveRoute + "/" + file_name))
         std::cout << "save theScene To " << file_name << std::endl;
+
+    /*
+    size_t id = 0;
+    while (theScene->getByClass<CPointCloud>(id))
+    {
+        CPointCloudPtr landmarkObj = theScene->getByClass<CPointCloud>(id);
+        landmarkObj->saveToPlyFile(saveRoute + "/" + landmarkObj->getName() + ".ply");
+        id++;
+    }
+     */
 }
 
 // -------------------------------  Render All Component -----------------------------------//
