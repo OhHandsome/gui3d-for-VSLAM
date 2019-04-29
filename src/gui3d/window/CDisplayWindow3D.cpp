@@ -7,7 +7,7 @@
 
 using namespace mrpt;
 using namespace mrpt::opengl;
-#define USE_BACKEND_RENDER 0
+#define USE_BACKEND_RENDER 1
 
 namespace gui3d {
 
@@ -409,6 +409,8 @@ void CDisplayWindow3D::backThreadRun() {
     ImGui::Render();
     ImGui_ImplGlfwGL2_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(m_Window);
+
+    //cv::waitKey(1);
   }
 
   // glfw: terminate, clearing all previously allocated GLFW resources.
