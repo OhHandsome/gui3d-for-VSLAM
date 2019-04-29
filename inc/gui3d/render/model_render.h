@@ -15,7 +15,10 @@ CSetOfObjectsPtr   ModelRobot ();                                    // Create i
 void               ZoomObjects(CSetOfObjectsPtr objs, float scale);
 void               ZoomAxis   (GLScenePtr theScene, float freq);
 bool               VisibleText(GLScenePtr theScene, bool bShow);
+void               saveToPlyFile(const std::string& name, CPointCloudPtr landmark, bool have_color = false);
+void               saveToPlyFile(const std::string& name, CPointCloudColouredPtr landmark, bool have_color = true);
 void               SaveScene  (GLScenePtr theScene, const std::string& route = ".");
+void               SaveSceneAsPLY(GLScenePtr theScene, const std::string& route = ".");
 
 // Render Utils
 bool renderFrame(GLScenePtr theScene, CFrustumPtr     & obj, const Pose& Twc, const tOptions& options);

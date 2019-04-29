@@ -1,6 +1,7 @@
 #include <gui3d/utils/cast_utils.h>
 #include <gui3d/render/model_render.h>
 #include <gui3d/render/style.h>
+#include <sys/stat.h>
 
 namespace gui3d {
 
@@ -104,13 +105,64 @@ bool VisibleText(COpenGLScenePtr theScene, bool bShow)
     return true;
 }
 
+void saveToPlyFile(const std::string& name, CPointCloudPtr landmark, bool have_color)
+{
+    std::vector<TPoint3D> vertices(landmark->size());
+    for(int i = 0; i < landmark->size(); ++i)
+        vertices[i] = landmark->getPoint(i);
+    TColor color = landmark->getColor_u8();
+
+    FILE *fp = fopen(name.c_str(), "w");
+    if (!fp) return;
+
+    const std::vector<TPoint3D>& v = vertices;
+    fprintf(fp, "ply\nformat ascii 1.0\ncomment file created by arc3d!\n");
+    fprintf(fp, "element vertex %ld\n", v.size());
+    fprintf(fp, "property float x\nproperty float y\nproperty float z\n");
+    if (have_color)fprintf(fp, "property uchar red\nproperty uchar green\nproperty uchar blue\n");
+    fprintf(fp, "end_header\n");
+    fflush(fp);
+    //v
+    for (int i = 0; i < v.size(); ++i) {
+        fprintf(fp, "%f %f %f", v[i][0], v[i][1], v[i][2]);
+        if (have_color) fprintf(fp, " %d %d %d", color.R, color.G, color.B);
+        fprintf(fp, "\n");
+    }
+    fclose(fp);
+}
+
+void saveToPlyFile(const std::string& name, CPointCloudColouredPtr landmark, bool have_color)
+{
+    std::vector<CPointCloudColoured::TPointColour> vertices(landmark->size());
+    for(int i = 0; i < landmark->size(); ++i)
+        vertices[i] = landmark->getPoint(i);
+
+    FILE *fp = fopen(name.c_str(), "w");
+    if (!fp) return;
+
+    const std::vector<CPointCloudColoured::TPointColour>& v = vertices;
+    fprintf(fp, "ply\nformat ascii 1.0\ncomment file created by arc3d!\n");
+    fprintf(fp, "element vertex %ld\n", v.size());
+    fprintf(fp, "property float x\nproperty float y\nproperty float z\n");
+    if (have_color)fprintf(fp, "property uchar red\nproperty uchar green\nproperty uchar blue\n");
+    fprintf(fp, "end_header\n");
+    fflush(fp);
+    //v
+    for (int i = 0; i < v.size(); ++i) {
+        fprintf(fp, "%f %f %f", v[i].x, v[i].y, v[i].z);
+        if (have_color) fprintf(fp, " %d %d %d", (int)(255*v[i].R), (int)(255*v[i].G), (int)(255*v[i].B));
+        fprintf(fp, "\n");
+    }
+    fclose(fp);
+}
+
 void SaveScene(COpenGLScenePtr theScene, const std::string& route)
 {
     time_t t = std::time(0);
     struct tm* now = std::localtime( &t );
     string file_name;
     //the name of file is better to be determined by the system time
-    file_name = format("%d_%d_%d_%d_%d_%d.3Dscene",
+    file_name = format("%d_%d_%d_%d_%d_%d",
         now->tm_year + 1900,
         now->tm_mon + 1,
         now->tm_mday,
@@ -118,18 +170,37 @@ void SaveScene(COpenGLScenePtr theScene, const std::string& route)
         now->tm_min,
         now->tm_sec);
     const std::string saveRoute = route.empty() ? "." : route;
-    if (theScene->saveToFile(saveRoute + "/" + file_name))
-        std::cout << "save theScene To " << file_name << std::endl;
+    if (theScene->saveToFile(saveRoute + "/" + file_name + ".3Dscene"))
+        std::cout << "save theScene To " << file_name + ".3Dscene" << std::endl;
 
-    /*
+    std::string dst_dir = saveRoute + "/" + file_name;
+    SaveSceneAsPLY(theScene, dst_dir);
+}
+
+void SaveSceneAsPLY(GLScenePtr theScene, const std::string& dst_dir)
+{
+    if (access(dst_dir.c_str(), 0) == -1)
+    {
+        printf("%s is not existing, now make dir: ", dst_dir.c_str());
+        int flag= mkdir(dst_dir.c_str(), 0777);
+        printf(flag == 0 ? "make successfully\n" : "make errorly\n");
+    }
+
     size_t id = 0;
     while (theScene->getByClass<CPointCloud>(id))
     {
         CPointCloudPtr landmarkObj = theScene->getByClass<CPointCloud>(id);
-        landmarkObj->saveToPlyFile(saveRoute + "/" + landmarkObj->getName() + ".ply");
+        saveToPlyFile(dst_dir + "/" + landmarkObj->getName() + ".ply", landmarkObj, true);
         id++;
     }
-     */
+
+    id = 0;
+    while (theScene->getByClass<CPointCloudColoured>(id))
+    {
+        CPointCloudColouredPtr landmarkObj = theScene->getByClass<CPointCloudColoured>(id);
+        saveToPlyFile(dst_dir + "/" + landmarkObj->getName() + ".ply", landmarkObj, true);
+        id++;
+    }
 }
 
 // -------------------------------  Render All Component -----------------------------------//
