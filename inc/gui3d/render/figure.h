@@ -31,7 +31,8 @@ public:
 
 	void lock()   { mMainWindow->get3DSceneAndLock(); }
 	void unlock() { mMainWindow->unlockAccess3DScene(); }
-
+	void init();
+    void clear();
 	volatile Gui3dOption& Options();
 
 public:

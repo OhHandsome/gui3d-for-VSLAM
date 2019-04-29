@@ -18,39 +18,12 @@ Figure::Figure(const string &name, int width, int height)
   this->name = name;
   mFigureID = mNextID++;
 #else
-  auto &bAxis3d  = mOption.figOpt.bAxis3d;
-  auto &bPlaneXY = mOption.figOpt.bPlaneXY;
-
   // Create 3D Windows
   mrpt::gui::CDisplayWindow3DPtr win = mrpt::gui::CDisplayWindow3DPtr(new mrpt::gui::CDisplayWindow3D(name, width, height));
   mMainWindow = win;
   this->name = name;
   mFigureID = mNextID++;
-
-  //  Get the smart pointer to the main viewport object in this mMainWindow:
-  {
-    COpenGLScenePtr &theScene = win->get3DSceneAndLock();
-    CAxisPtr Axis = CAxis::Create(-AXISLength, -AXISLength, -AXISLength,
-                                  AXISLength, AXISLength /* / 2.0 + 1*/, AXISLength /* / 2.0 + 1*/, 4, 2, true);
-    Axis->setLocation(0, 0, 0);
-//        Axis->setTextScale(0.1f);
-    Axis->setName("CXYZ");
-    Axis->enableTickMarks();
-    theScene->insert(Axis);
-    mAxis3d = Axis;
-    VisiableModel(mAxis3d, bAxis3d);
-
-    auto XY = CGridPlaneXY::Create(-AXISLength, AXISLength, -AXISLength, AXISLength);
-    XY->setName("CXY");
-    theScene->insert(XY);
-    mGridXY = XY;
-    VisiableModel(mGridXY, bPlaneXY);
-
-    mScene = theScene;
-
-    // IMPORTANT!!! IF NOT UNLOCKED, THE WINDOW WILL NOT BE UPDATED!
-    win->unlockAccess3DScene();
-  }
+  init();
 
   win->setCameraAzimuthDeg(-53);
   win->setCameraElevationDeg(32);
@@ -70,6 +43,57 @@ Figure::Figure(const string &name, int width, int height)
   }
   win->repaint();
 #endif
+}
+
+void Figure::init()
+{
+#if HAS_IMGUI == 1
+  mMainWindow->InitScene();
+#else
+  auto &bAxis3d  = mOption.figOpt.bAxis3d;
+  auto &bPlaneXY = mOption.figOpt.bPlaneXY;
+  //  Get the smart pointer to the main viewport object in this mMainWindow:
+  {
+    COpenGLScenePtr &theScene = mMainWindow->get3DSceneAndLock();
+    CAxisPtr Axis = CAxis::Create(-AXISLength, -AXISLength, -AXISLength,
+                                  AXISLength, AXISLength /* / 2.0 + 1*/, AXISLength /* / 2.0 + 1*/, 4, 2, true);
+    Axis->setLocation(0, 0, 0);
+//        Axis->setTextScale(0.1f);
+    Axis->setName("CXYZ");
+    Axis->enableTickMarks();
+    theScene->insert(Axis);
+    mAxis3d = Axis;
+    VisiableModel(mAxis3d, bAxis3d);
+
+    auto XY = CGridPlaneXY::Create(-AXISLength, AXISLength, -AXISLength, AXISLength);
+    XY->setName("CXY");
+    theScene->insert(XY);
+    mGridXY = XY;
+    VisiableModel(mGridXY, bPlaneXY);
+
+    mScene = theScene;
+
+    // IMPORTANT!!! IF NOT UNLOCKED, THE WINDOW WILL NOT BE UPDATED!
+    mMainWindow->unlockAccess3DScene();
+  }
+#endif
+}
+
+void Figure::clear()
+{
+  mAxis3d.clear();
+  mGridXY.clear();
+
+  mGLViewImage.clear();
+  mGLSubView.clear();
+
+  mSysFrame.clear();
+  mSysRobot.clear();
+  mSysPoseList.clear();
+  mSysMapPoint.clear();
+  mSysPointCloud.clear();
+  mSysLine.clear();
+  mSysModel3d.clear();
 }
 
 volatile Gui3dOption& Figure::Options()

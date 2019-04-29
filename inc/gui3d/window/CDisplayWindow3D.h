@@ -49,9 +49,9 @@ class CDisplayWindow3D{
   void addTextMessage(int , int , int, int , int ) {}
   volatile Gui3dOption& Options() { return m_Observer; }
   bool WindowClosed() const;
+  void InitScene();
 
  private:
-  void InitScene();
   void forceRepaint(); //!< Repaints the window. forceRepaint, repaint and updateWindow are all aliases of the same method
   void OnPreRender();
   void OnPostRender();
