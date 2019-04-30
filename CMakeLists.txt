@@ -13,6 +13,7 @@ file(GLOB_RECURSE SRCS src/gui3d/render/*.cpp src/gui3d/utils/*.cpp)
 option(HAS_IMGUI "Use System MRPT Lib" OFF)
 if(HAS_IMGUI)
   list(APPEND SRCS
+
        src/gui3d/window/CDisplayWindow3D.cpp
        src/gui3d/window/CGlCanvas.cpp)
 endif()
