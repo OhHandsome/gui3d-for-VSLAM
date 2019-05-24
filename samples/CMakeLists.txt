@@ -25,4 +25,4 @@ set(SRCS example_glfw_opengl2.cpp
         ../src/gui3d/imgui/imgui_draw.cpp
         ../src/gui3d/imgui/imgui_widgets.cpp)
 add_executable(${PROJECT_NAME} ${SRCS})
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw ${OPENGL_gl_LIBRARY})
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw ${OPENGL_gl_LIBRARY} pthread)

@@ -24,7 +24,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
         libmrpt-base.so libmrpt-opengl.so libmrpt-gui.so
         ${OpenCV_LIBRARIES} )
 if(HAS_IMGUI)
-  target_link_libraries(${PROJECT_NAME} PRIVATE ${GLUT_LIBRARY} glfw glad imgui imgui_impl )
+  target_link_libraries(${PROJECT_NAME} PRIVATE ${GLUT_LIBRARY} glfw glad imgui imgui_impl)
   target_compile_definitions(${PROJECT_NAME} PRIVATE -DHAS_IMGUI=1)
 endif()
 target_compile_definitions(${PROJECT_NAME} PRIVATE
