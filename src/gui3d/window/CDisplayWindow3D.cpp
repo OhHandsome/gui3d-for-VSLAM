@@ -167,6 +167,7 @@ void CDisplayWindow3D::InitScene(){
     Axis->setName("CAxis");
     Axis->enableTickMarks();
     Axis->setFrequency(3);
+    Axis->setVisibility(false);
     theScene->insert(Axis);
     m_Axis3d = Axis;
     unlockAccess3DScene();
@@ -177,6 +178,7 @@ void CDisplayWindow3D::InitScene(){
     auto XY = CGridPlaneXY::Create(-AXISLength, AXISLength, -AXISLength, AXISLength);
     XY->setName("CXY");
     XY->setGridFrequency(3);
+    XY->setVisibility(false);
     theScene->insert(XY);
     m_ZeroPlane = XY;
     unlockAccess3DScene();
