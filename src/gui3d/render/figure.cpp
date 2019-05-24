@@ -7,6 +7,15 @@
 #include <gui3d/window/CDisplayWindow3D.h>
 #endif
 namespace gui3d{
+template <class T>
+void removeObject(COpenGLViewportPtr mainVP, std::map<Channel, T>& m)
+{
+  for (auto item : m) {
+    if (item.second)
+      mainVP->removeObject(item.second);
+  }
+  m.clear();
+}
 
 int Figure::mNextID = 1;
 Figure::Figure(const string &name, int width, int height)
@@ -81,19 +90,28 @@ void Figure::init()
 
 void Figure::clear()
 {
-  mAxis3d.clear();
-  mGridXY.clear();
+  if (!mMainWindow)
+    return;
 
-  mGLViewImage.clear();
-  mGLSubView.clear();
+  mScene = mMainWindow->get3DSceneAndLock();
+  if (!mGLViewImage) mGLViewImage.clear();
+  if (!mGLSubView)   mGLSubView.clear();
 
-  mSysFrame.clear();
-  mSysRobot.clear();
-  mSysPoseList.clear();
-  mSysMapPoint.clear();
-  mSysPointCloud.clear();
-  mSysLine.clear();
-  mSysModel3d.clear();
+  if (mScene)
+  {
+    COpenGLViewportPtr mainVP = mScene->getViewport();
+    if (mainVP)
+    {
+      removeObject(mainVP, mSysFrame);
+      removeObject(mainVP, mSysRobot);
+      removeObject(mainVP, mSysPoseList);
+      removeObject(mainVP, mSysMapPoint);
+      removeObject(mainVP, mSysLine);
+      removeObject(mainVP, mSysModel3d);
+    }
+  }
+
+  mMainWindow->unlockAccess3DScene();
 }
 
 volatile Gui3dOption& Figure::Options()

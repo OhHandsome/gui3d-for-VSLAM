@@ -560,12 +560,7 @@ void clear()
     if(!sCurrentFigure3d)
         return;
 
-    auto& theScene = sCurrentFigure3d->mMainWindow->get3DSceneAndLock();
     sCurrentFigure3d->clear();
-    theScene->clear();
-    sCurrentFigure3d->mMainWindow->unlockAccess3DScene();
-
-    sCurrentFigure3d->init();
 }
 
 
