@@ -336,7 +336,7 @@ hObject renderFrames(const Channel& name, const PoseV& vTwc, const NameV& vLabel
     return (hObject)(obj.get());
 }
 
-hObject renderLines(const Channel& name, const Position3dV& vPoint, const tOptions& options)
+hObject renderLines(const Channel& name, const Pose& Twq, const Position3dV& vPoint, const tOptions& options)
 {
     if(!sCurrentFigure3d)
         nFigure("default", 640, 480);
@@ -348,6 +348,7 @@ hObject renderLines(const Channel& name, const Position3dV& vPoint, const tOptio
     auto win = sCurrentFigure3d->mMainWindow;
     auto theScene = win->get3DSceneAndLock();
     renderLines(theScene, obj, vPoint, real_options);
+    obj->setPose(castPose(Twq));
     if(obj) obj->setName(name);
     win->unlockAccess3DScene();
     sCurrentFigure3d->mSysLine[name] = obj;
@@ -362,7 +363,7 @@ hObject renderPath(const Channel& name, const Position3dV& vPoints, const tOptio
         vLines.push_back(vPoints[i-1]);
         vLines.push_back(vPoints[i]);
     }
-    return renderLines(name, vLines, options);
+    return renderLines(name, Pose::Identity(), vLines, options);
 }
 
 hObject renderPolygon(const Channel& name, const Pose& Twq, const Position3dV& vPoint, const tOptions& options)
@@ -376,9 +377,7 @@ hObject renderPolygon(const Channel& name, const Pose& Twq, const Position3dV& v
         vLines.push_back(Point1);
         vLines.push_back(Point2);
     }
-    hObject h = renderLines(name, vLines, options);
-    CSetOfLines* obj = (CSetOfLines*)(h);
-    obj->setPose(castPose(Twq));
+    hObject h = renderLines(name, Twq, vLines, options);
     return h;
 }
 
