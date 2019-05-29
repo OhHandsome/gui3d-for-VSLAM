@@ -13,7 +13,7 @@
 // Smart Window
 const int MainWidth = 1080;
 const int MainHeight = 720;
-const double ZoomOfImage = 1;
+const double ZoomOfImage = 0.5;
 const int VideoWidth = int(160*4*0.8);
 const int VideoHeight = int(160*3*0.8);
 const int VP1_Width = VideoWidth; // cloned viewport
