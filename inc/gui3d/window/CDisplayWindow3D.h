@@ -57,7 +57,10 @@ class CDisplayWindow3D{
   void OnPostRender();
   void OnEyeShotRender();    // handle eye shot from mouse wheel
   void backThreadRun();
-  void RunOnce();
+
+  std::string                           m_windowCaption;
+  int                                   m_initialWindowWidth;
+  int                                   m_initialWindowHeight;
 
   mrpt::opengl::CAxisPtr                m_Axis3d;
   mrpt::opengl::CGridPlaneXYPtr         m_ZeroPlane;

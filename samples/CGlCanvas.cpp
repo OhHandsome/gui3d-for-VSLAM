@@ -1,4 +1,4 @@
-#include <gui3d/window/CGlCanvas.h>
+#include "CGlCanvas.h"
 
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -9,7 +9,6 @@ using namespace mrpt::utils;
 using namespace mrpt::opengl;
 using namespace std;
 
-namespace gui3d {
 float  CGlCanvas::SENSIBILITY_DEG_PER_PIXEL = 0.1f;
 
 void CGlCanvas::OnMouseDown(MouseEvent& event)
@@ -223,5 +222,3 @@ void CGlCanvas::OnPaint()
 {
   Render();
 }
-
-} // namespace gui3d

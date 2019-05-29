@@ -17,7 +17,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glfw glad imgui imgui_impl gui3d)
 set(PROJECT_NAME example_glfw_opengl2)
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
+find_package(GLUT REQUIRED)
 set(SRCS example_glfw_opengl2.cpp
+        CGlCanvas.cpp
         ../src/gui3d/imgui/imgui_impl_glfw.cpp
         ../src/gui3d/imgui/imgui_impl_opengl2.cpp
         ../src/gui3d/imgui/imgui.cpp
@@ -25,4 +27,6 @@ set(SRCS example_glfw_opengl2.cpp
         ../src/gui3d/imgui/imgui_draw.cpp
         ../src/gui3d/imgui/imgui_widgets.cpp)
 add_executable(${PROJECT_NAME} ${SRCS})
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw ${OPENGL_gl_LIBRARY} pthread)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+        glfw ${OPENGL_gl_LIBRARY} ${GLUT_LIBRARY} pthread
+        libmrpt-base.so libmrpt-opengl.so)

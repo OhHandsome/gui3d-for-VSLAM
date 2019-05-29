@@ -38,17 +38,11 @@ public:
 
     Viz()
     {
-#if HAS_IMGUI
-        glfwInit();
-#endif
     }
 
     ~Viz()
     {
         sSystemFigure3d.clear();
-#if HAS_IMGUI
-        glfwTerminate();
-#endif
     }
 
     void add(const std::string& name, FigurePtr fig)

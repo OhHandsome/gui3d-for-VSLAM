@@ -1,13 +1,13 @@
 #include <gui3d/window/CDisplayWindow3D.h>
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
-#include <imgui_impl_glfw_gl2.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl2.h>
+#include <imgui_internal.h>
 #include <gui3d/render/model_render.h>
 
 using namespace mrpt;
 using namespace mrpt::opengl;
-#define USE_BACKEND_RENDER 1
 
 namespace gui3d {
 
@@ -28,31 +28,6 @@ static void ShowHelpMarker(const char* desc) {
     ImGui::EndTooltip();
   }
 }
-
-struct GlfwContextScopeGuard {
-  explicit GlfwContextScopeGuard(GLFWwindow* win){
-    prev_win = glfwGetCurrentContext();
-    glfwMakeContextCurrent(win);
-  }
-
-  ~GlfwContextScopeGuard(){
-    glfwMakeContextCurrent(prev_win);
-  }
-  GLFWwindow* prev_win;
-};
-
-struct ImGuiContextScopeGuard {
-  explicit ImGuiContextScopeGuard(ImGuiContext* ctx) {
-    prev_ctx = ImGui::GetCurrentContext();
-    ImGui::SetCurrentContext(ctx);
-  }
-
-  ~ImGuiContextScopeGuard() {
-    ImGui::SetCurrentContext(prev_ctx);
-  }
-
-  ImGuiContext* prev_ctx;
-};
 
 CDisplayWindow3DPtr
 CDisplayWindow3D::Create(const std::string &windowCaption,
@@ -76,63 +51,18 @@ bool CDisplayWindow3D::WindowClosed() const
 }
 
 void CDisplayWindow3D::forceRepaint() {
-  if (USE_BACKEND_RENDER)
     RequestToRefresh3DView = true;
-  else
-    RunOnce();
 }
 
 CDisplayWindow3D::CDisplayWindow3D(const std::string &windowCaption,
                                    unsigned int initialWindowWidth,
-                                   unsigned int initialWindowHeight) {
-  //glfwSetErrorCallback(glfw_error_callback);
+                                   unsigned int initialWindowHeight)
+   : m_windowCaption(windowCaption)
+   , m_initialWindowWidth(initialWindowWidth)
+   , m_initialWindowHeight(initialWindowHeight) {
 
-  // glfw: initialize and configure
-  //glfwInit();
-
-  // glfw window creation
-  m_Window = glfwCreateWindow(initialWindowWidth, initialWindowHeight, windowCaption.c_str(), nullptr, nullptr);
-  if (m_Window == nullptr) {
-      std::cerr << "Failed to create GLFW window" << std::endl;
-      glfwTerminate();
-      exit(1);
-  }
-
-  // Make the window's context current
-  GlfwContextScopeGuard gl_ctx_guard(m_Window);
-  // glad: load all OpenGL function pointers
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-      std::cerr << "Failed to initialize GLAD" << std::endl;
-      exit(1);
-  }
-  //glfwMakeContextCurrent(m_Window);
-  glfwSetFramebufferSizeCallback(m_Window, framebuffer_size_callback);
-
-  // Setup Dear ImGui binding
-  IMGUI_CHECKVERSION();
-  m_ImGuiContext = ImGui::CreateContext();
-  ImGuiContextScopeGuard imgui_ctx_guard(m_ImGuiContext);
-  ImGui_ImplGlfwGL2_Init(m_Window, true);
-
-  // Setup style
-  ImGui::StyleColorsClassic();
-
-  ImGuiIO& io = ImGui::GetIO(); (void)io;
-  m_lastWheelRotation = io.MouseWheel;
-
-  m_3Dscene = mrpt::opengl::COpenGLScene::Create();
-  m_GlCanvas = new CGlCanvas(m_3Dscene);
-  InitScene();
-  RequestToRefresh3DView = true;
-  glfwSetKeyCallback(m_Window, key_callback);
-  glfwSetWindowUserPointer(m_Window, this);
-
-
-  if (USE_BACKEND_RENDER) {
-    // must be add, sometimes crash
-    std::this_thread::sleep_for(std::chrono::microseconds(30));
-    m_renderLoopThread = std::thread(&CDisplayWindow3D::backThreadRun, this);
-  }
+  // must be add, sometimes crash
+  m_renderLoopThread = std::thread(&CDisplayWindow3D::backThreadRun, this);
 }
 
 CDisplayWindow3D::~CDisplayWindow3D() {
@@ -141,19 +71,6 @@ CDisplayWindow3D::~CDisplayWindow3D() {
 
   delete m_GlCanvas;
   m_3Dscene.clear_unique();
-
-  if (!USE_BACKEND_RENDER) {
-    // glfw: terminate, clearing all previously allocated GLFW resources.
-    std::this_thread::sleep_for(std::chrono::microseconds(10));
-    {
-      GlfwContextScopeGuard gl_ctx_guard1(m_Window);
-      ImGuiContextScopeGuard imgui_ctx_guard1(m_ImGuiContext);
-      ImGui_ImplGlfwGL2_Shutdown();
-    }
-    ImGui::DestroyContext();
-    glfwDestroyWindow(m_Window);
-    //glfwTerminate();
-  }
 }
 
 void CDisplayWindow3D::InitScene(){
@@ -167,7 +84,7 @@ void CDisplayWindow3D::InitScene(){
     Axis->setName("CAxis");
     Axis->enableTickMarks();
     Axis->setFrequency(3);
-    Axis->setVisibility(false);
+    Axis->setVisibility(true);
     theScene->insert(Axis);
     m_Axis3d = Axis;
     unlockAccess3DScene();
@@ -178,7 +95,7 @@ void CDisplayWindow3D::InitScene(){
     auto XY = CGridPlaneXY::Create(-AXISLength, AXISLength, -AXISLength, AXISLength);
     XY->setName("CXY");
     XY->setGridFrequency(3);
-    XY->setVisibility(false);
+    XY->setVisibility(true);
     theScene->insert(XY);
     m_ZeroPlane = XY;
     unlockAccess3DScene();
@@ -300,9 +217,6 @@ void CDisplayWindow3D::OnPreRender() {
 
 void CDisplayWindow3D::OnEyeShotRender()
 {
-  GlfwContextScopeGuard gl_ctx_guard(m_Window);
-  ImGuiContextScopeGuard imgui_ctx_guard(m_ImGuiContext);
-
   ImGuiIO& io = ImGui::GetIO(); (void)io;
   if(!io.WantCaptureMouse || !io.WantCaptureKeyboard){
     MouseEvent event;
@@ -337,58 +251,56 @@ void CDisplayWindow3D::OnPostRender()
 //  }
 }
 
-void CDisplayWindow3D::RunOnce()
-{
-  GlfwContextScopeGuard gl_ctx_guard(m_Window);
-  ImGuiContextScopeGuard imgui_ctx_guard(m_ImGuiContext);
-  ImVec4 clear_color = ImVec4(0.6f, 0.6f, 0.60f, 0.00f);
-
-  while (!m_Observer.figOpt.bWaitKey) {
-    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glfwPollEvents();
-    ImGui_ImplGlfwGL2_NewFrame();
-
-    // input
-    OnPreRender();
-
-    // 1. Zoom-pan-rotate mouse manipulation
-    OnEyeShotRender();
-
-    // 2. Render
-    //if(RequestToRefresh3DView)
-    {
-      get3DSceneAndLock();
-      m_GlCanvas->OnPaint();
-      unlockAccess3DScene();
-      RequestToRefresh3DView = false;
-    }
-    OnPostRender();
-
-    // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-    // -------------------------------------------------------------------------------
-    ImGui::Render();
-    ImGui_ImplGlfwGL2_RenderDrawData(ImGui::GetDrawData());
-    glfwSwapBuffers(m_Window);
-
-    cv::waitKey(1);
-  }
-  m_Observer.figOpt.bWaitKey = false;
-}
-
 void CDisplayWindow3D::backThreadRun() {
 
-  GlfwContextScopeGuard gl_ctx_guard(m_Window);
-  ImGuiContextScopeGuard imgui_ctx_guard(m_ImGuiContext);
-  ImVec4 clear_color = ImVec4(0.6f, 0.6f, 0.60f, 0.00f);
+  glfwSetErrorCallback(glfw_error_callback);
+  if (!glfwInit())
+      return ;
+
+  m_Window = glfwCreateWindow(m_initialWindowWidth, m_initialWindowHeight, m_windowCaption.c_str(), NULL, NULL);
+  if (m_Window == NULL)
+      return ;
+
+  glfwMakeContextCurrent(m_Window);
+  glfwSwapInterval(1); // Enable vsync
+
+  // Setup Dear ImGui context
+  IMGUI_CHECKVERSION();
+  m_ImGuiContext = ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO(); (void)io;
+  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+  m_lastWheelRotation = io.MouseWheel;
+
+  // Setup Dear ImGui style
+  ImGui::StyleColorsDark();
+  //ImGui::StyleColorsClassic();
+
+  m_3Dscene = mrpt::opengl::COpenGLScene::Create();
+  m_GlCanvas = new CGlCanvas(m_3Dscene);
+  InitScene();
+
+  // Setup Platform/Renderer bindings
+  ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
+  ImGui_ImplOpenGL2_Init();
+  ImVec4 clear_color = ImVec4(0.6f, 0.6f, 0.60f, 1.00f);
 
   // loop
   while (!glfwWindowShouldClose(m_Window)) {
     std::this_thread::sleep_for(std::chrono::microseconds(10));
     glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Poll and handle events (inputs, window resize, etc.)
+    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+    // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
+    // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
+    // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
     glfwPollEvents();
-    ImGui_ImplGlfwGL2_NewFrame();
+    // Start the Dear ImGui frame
+    ImGui_ImplOpenGL2_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
 
     // input
     OnPreRender();
@@ -409,7 +321,8 @@ void CDisplayWindow3D::backThreadRun() {
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
     // -------------------------------------------------------------------------------
     ImGui::Render();
-    ImGui_ImplGlfwGL2_RenderDrawData(ImGui::GetDrawData());
+    ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+    glfwMakeContextCurrent(m_Window);
     glfwSwapBuffers(m_Window);
 
     //cv::waitKey(1);
@@ -417,14 +330,13 @@ void CDisplayWindow3D::backThreadRun() {
 
   // glfw: terminate, clearing all previously allocated GLFW resources.
   std::this_thread::sleep_for(std::chrono::microseconds(10));
-  {
-    GlfwContextScopeGuard gl_ctx_guard1(m_Window);
-    ImGuiContextScopeGuard imgui_ctx_guard1(m_ImGuiContext);
-    ImGui_ImplGlfwGL2_Shutdown();
-  }
+  // Cleanup
+  ImGui_ImplOpenGL2_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
+
   glfwDestroyWindow(m_Window);
-  //glfwTerminate();
+  glfwTerminate();
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
