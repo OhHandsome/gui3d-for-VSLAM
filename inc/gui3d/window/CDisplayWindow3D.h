@@ -61,6 +61,7 @@ class CDisplayWindow3D{
   std::string                           m_windowCaption;
   int                                   m_initialWindowWidth;
   int                                   m_initialWindowHeight;
+  bool                                  m_ReadyContext = false;
 
   mrpt::opengl::CAxisPtr                m_Axis3d;
   mrpt::opengl::CGridPlaneXYPtr         m_ZeroPlane;

@@ -63,6 +63,10 @@ CDisplayWindow3D::CDisplayWindow3D(const std::string &windowCaption,
 
   // must be add, sometimes crash
   m_renderLoopThread = std::thread(&CDisplayWindow3D::backThreadRun, this);
+
+  while (!m_ReadyContext) {
+    std::cout << "Wait Context Ready" << std::endl;
+  };
 }
 
 CDisplayWindow3D::~CDisplayWindow3D() {
@@ -284,6 +288,7 @@ void CDisplayWindow3D::backThreadRun() {
   ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
   ImGui_ImplOpenGL2_Init();
   ImVec4 clear_color = ImVec4(0.6f, 0.6f, 0.60f, 1.00f);
+  m_ReadyContext = true;
 
   // loop
   while (!glfwWindowShouldClose(m_Window)) {
