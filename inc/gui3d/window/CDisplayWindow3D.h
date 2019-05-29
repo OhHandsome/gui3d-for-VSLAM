@@ -6,6 +6,7 @@
 
 #include <gui3d/render/options.hpp>
 #include <gui3d/window/CGlCanvas.h>
+#include <gui3d/window/CDisplayImages.h>
 #include <string>
 #include <mutex>
 #include <thread>
@@ -18,7 +19,7 @@ namespace gui3d{
 class CDisplayWindow3D;
 using CDisplayWindow3DPtr = std::shared_ptr<CDisplayWindow3D>;
 
-class CDisplayWindow3D{
+class CDisplayWindow3D {
  public:
   /** Constructor */
   CDisplayWindow3D(
@@ -50,12 +51,15 @@ class CDisplayWindow3D{
   volatile Gui3dOption& Options() { return m_Observer; }
   bool WindowClosed() const;
   void InitScene();
+  CDisplayImagesPtr createViewImage(const std::string& name);
+  CDisplayImagesPtr getViewImage() { return m_subview_image; }
 
  private:
   void forceRepaint(); //!< Repaints the window. forceRepaint, repaint and updateWindow are all aliases of the same method
   void OnPreRender();
   void OnPostRender();
   void OnEyeShotRender();    // handle eye shot from mouse wheel
+  void OnImGuiRender();
   void backThreadRun();
 
   std::string                           m_windowCaption;
@@ -63,6 +67,7 @@ class CDisplayWindow3D{
   int                                   m_initialWindowHeight;
   bool                                  m_ReadyContext = false;
 
+  CDisplayImagesPtr                     m_subview_image = nullptr;
   mrpt::opengl::CAxisPtr                m_Axis3d;
   mrpt::opengl::CGridPlaneXYPtr         m_ZeroPlane;
 

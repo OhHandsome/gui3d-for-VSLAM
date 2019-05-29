@@ -466,7 +466,19 @@ hObject viewImage(const cv::Mat &im)
     COpenGLViewportPtr &obj = sCurrentFigure3d->mGLViewImage;
     auto win = sCurrentFigure3d->mMainWindow;
     auto theScene = win->get3DSceneAndLock();
+#if HAS_IMGUI
+    CDisplayImagesPtr sub_view = win->getViewImage();
+    if (!sub_view) {
+        sub_view = win->createViewImage("im");
+        sub_view->setViewPosition(MainWidth  - im.cols * ZoomOfImage,
+                                  0,
+                                  im.cols * ZoomOfImage,
+                                  im.rows * ZoomOfImage);
+    }
+    sub_view->setImageView_fast(im);
+#else
     viewImage(theScene, obj, im);
+#endif
     win->unlockAccess3DScene();
 
     static size_t num = 0;

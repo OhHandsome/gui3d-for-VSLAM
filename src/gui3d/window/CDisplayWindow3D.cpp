@@ -5,9 +5,11 @@
 #include <imgui_impl_opengl2.h>
 #include <imgui_internal.h>
 #include <gui3d/render/model_render.h>
+#include <gui3d/render/style.h>
 
 using namespace mrpt;
 using namespace mrpt::opengl;
+static std::list<std::function<void(void)>> destoryOpenGLResourcesOnExit;
 
 namespace gui3d {
 
@@ -75,6 +77,12 @@ CDisplayWindow3D::~CDisplayWindow3D() {
 
   delete m_GlCanvas;
   m_3Dscene.clear_unique();
+}
+
+CDisplayImagesPtr
+CDisplayWindow3D::createViewImage(const std::string &name) {
+  m_subview_image = std::make_shared<CDisplayImages>(name);
+  return m_subview_image;
 }
 
 void CDisplayWindow3D::InitScene(){
@@ -255,6 +263,64 @@ void CDisplayWindow3D::OnPostRender()
 //  }
 }
 
+void CDisplayWindow3D::OnImGuiRender() {
+
+  if (!m_subview_image)
+    return;
+
+  const cv::Mat& frame = m_subview_image->m_image;
+  const float x = m_subview_image->m_view_x;
+  const float y = m_subview_image->m_view_y;
+  const float width = m_subview_image->m_view_width;
+  const float height = m_subview_image->m_view_height;
+
+  const float BX = 16;
+  const float BY = 36;
+
+  if (!ImGui::Begin(m_subview_image->getName().c_str(),
+                    nullptr,
+                    ImVec2(width + BX, height + BY),
+                    0.5f)) {
+    ImGui::End();
+    return;
+  }
+
+  static GLuint texId = 0;
+  if (texId == 0) {
+    glGenTextures(1, &texId);
+    destoryOpenGLResourcesOnExit.emplace_back([&]() {
+        glDeleteTextures(1, &texId);
+    });
+    glBindTexture(GL_TEXTURE_2D, texId);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glPixelStoref(GL_UNPACK_ALIGNMENT, 1); // default is 4
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame.cols, frame.rows, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, frame.data);
+    glBindTexture(GL_TEXTURE_2D, 0);
+  }
+  else if (!frame.empty()) {
+    glBindTexture(GL_TEXTURE_2D, texId);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, frame.cols, frame.rows, GL_BGR_EXT, GL_UNSIGNED_BYTE, frame.data);
+    glBindTexture(GL_TEXTURE_2D, 0);
+  }
+  ImVec2 showSize(ImGui::GetWindowWidth() - BX, ImGui::GetWindowHeight() - BY);
+  ImGui::Image((void*) texId, showSize);
+
+  if (ImGui::BeginPopupContextWindow()) {
+    if (ImGui::Button("Reset Size")) {
+      ImGui::SetWindowSize(m_subview_image->getName().c_str(),
+              ImVec2(frame.cols * ZoomOfImage + BX,
+                     frame.rows * ZoomOfImage + BY));
+      ImGui::CloseCurrentPopup();
+    }
+    ImGui::EndPopup();
+  }
+
+  ImGui::End();
+}
+
 void CDisplayWindow3D::backThreadRun() {
 
   glfwSetErrorCallback(glfw_error_callback);
@@ -268,6 +334,7 @@ void CDisplayWindow3D::backThreadRun() {
   glfwMakeContextCurrent(m_Window);
   glfwSwapInterval(1); // Enable vsync
 
+  glfwSetFramebufferSizeCallback(m_Window, framebuffer_size_callback);
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   m_ImGuiContext = ImGui::CreateContext();
@@ -283,6 +350,8 @@ void CDisplayWindow3D::backThreadRun() {
   m_3Dscene = mrpt::opengl::COpenGLScene::Create();
   m_GlCanvas = new CGlCanvas(m_3Dscene);
   InitScene();
+  glfwSetKeyCallback(m_Window, key_callback);
+  glfwSetWindowUserPointer(m_Window, this);
 
   // Setup Platform/Renderer bindings
   ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
@@ -317,6 +386,7 @@ void CDisplayWindow3D::backThreadRun() {
     //if(RequestToRefresh3DView)
     {
       get3DSceneAndLock();
+      OnImGuiRender();
       m_GlCanvas->OnPaint();
       unlockAccess3DScene();
       RequestToRefresh3DView = false;
@@ -339,6 +409,7 @@ void CDisplayWindow3D::backThreadRun() {
   ImGui_ImplOpenGL2_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
+  for (auto& f : destoryOpenGLResourcesOnExit) f();
 
   glfwDestroyWindow(m_Window);
   glfwTerminate();
