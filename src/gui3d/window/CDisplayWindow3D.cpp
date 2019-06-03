@@ -34,6 +34,7 @@ static void ShowHelpMarker(const char* desc) {
 }
 
 static bool openSceneFile = false;
+static bool saveSceneAs = false;
 CDisplayWindow3DPtr
 CDisplayWindow3D::Create(const std::string &windowCaption,
                          unsigned int initialWindowWidth,
@@ -179,7 +180,7 @@ void CDisplayWindow3D::OnPreRender() {
             gui3d::SaveScene(theScene, dataRoute());
             unlockAccess3DScene();
         }
-        if (ImGui::MenuItem("Save As..")) {}
+        if (ImGui::MenuItem("Save As..", nullptr, &saveSceneAs)) {}
         ImGui::EndMenu();
       }
 
@@ -273,19 +274,48 @@ void CDisplayWindow3D::OnPostRender()
   {
     const char* startingFolder = dataRoute().c_str();
     const char* optionalFileExtensionFilterString = ".3Dscene";//".jpg;.jpeg;.png;.tiff;.bmp;.gif;.txt";
-    ImGui::Begin("FileSystem");
-    ImGui::Text("Please choose a file: ");
-    ImGui::SameLine();
-    const bool browseButtonPressed = ImGui::Button("...");
-    static ImGuiFs::Dialog fsInstance;
-    const char* chosenPath = fsInstance.chooseFileDialog(browseButtonPressed,
-                                                         startingFolder,
-                                                         optionalFileExtensionFilterString);
-    if (strlen(chosenPath)>0) {
-      // A path (chosenPath) has been chosen right now.
-      // However we can retrieve it later using: fsInstance.getChosenPath()
+    if (ImGui::Begin("FileSystem",
+                     &openSceneFile,
+                     ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize)
+       ) {
+      ImGui::Text("Please choose a file:  ");
+      ImGui::SameLine();
+      const bool browseButtonPressed = ImGui::Button("...");
+      static ImGuiFs::Dialog fsInstance;
+      const char* chosenPath = fsInstance.chooseFileDialog(browseButtonPressed,
+                                                           startingFolder,
+                                                           optionalFileExtensionFilterString);
+      if (strlen(chosenPath)>0) {
+        // A path (chosenPath) has been chosen right now.
+        // However we can retrieve it later using: fsInstance.getChosenPath()
+      }
+      if (strlen(fsInstance.getChosenPath())>0) {
+        ImGui::Text("Chosen path: \"%s\"", fsInstance.getChosenPath());
+        openSceneFile = false;
+      }
     }
-    if (strlen(fsInstance.getChosenPath())>0) ImGui::Text("Chosen path: \"%s\"",fsInstance.getChosenPath());
+    ImGui::End();
+  }
+
+  if (saveSceneAs)
+  {
+    if (ImGui::Begin("FileSystem",
+                     &saveSceneAs,
+                     ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize)
+      ) {
+      ImGui::Text("Please pretend to save the dummy file 'myFilename.png' to: ");
+      ImGui::SameLine();
+      const bool browseButtonPressed3 = ImGui::Button("...##3");
+      static ImGuiFs::Dialog fsInstance3;
+      const char* savePath = fsInstance3.saveFileDialog(
+                                    browseButtonPressed3,
+                                    dataRoute().c_str(), "myFilename.3Dscene");
+      //optionalFileExtensionFilterString);
+      if (strlen(fsInstance3.getChosenPath())>0) {
+        ImGui::Text("Chosen save path: \"%s\"",fsInstance3.getChosenPath());
+        saveSceneAs = false;
+      }
+    }
     ImGui::End();
   }
 }
