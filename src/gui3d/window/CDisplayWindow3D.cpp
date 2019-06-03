@@ -171,7 +171,11 @@ void CDisplayWindow3D::OnPreRender() {
     if (ImGui::BeginMenuBar()) {
       if (ImGui::BeginMenu("File")) {
         if (ImGui::MenuItem("Open", "Ctrl+O")) {}
-        if (ImGui::MenuItem("Save", "Ctrl+S")) {}
+        if (ImGui::MenuItem("Save", "Ctrl+S")) {
+            auto theScene = get3DSceneAndLock();
+            gui3d::SaveScene(theScene, dataRoute());
+            unlockAccess3DScene();
+        }
         if (ImGui::MenuItem("Save As..")) {}
         ImGui::EndMenu();
       }
@@ -456,9 +460,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
     case GLFW_KEY_S:
     {
-      COpenGLScenePtr theScene = window3d->get3DSceneAndLock();
-      gui3d::SaveScene(theScene, dataRoute());
-      window3d->unlockAccess3DScene();
+      if (mods & GLFW_MOD_CONTROL) {
+          COpenGLScenePtr theScene = window3d->get3DSceneAndLock();
+          gui3d::SaveScene(theScene, dataRoute());
+          window3d->unlockAccess3DScene();
+      }
     }
       break;
 

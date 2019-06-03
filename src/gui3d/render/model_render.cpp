@@ -173,8 +173,10 @@ void SaveScene(COpenGLScenePtr theScene, const std::string& route)
     if (theScene->saveToFile(saveRoute + "/" + file_name + ".3Dscene"))
         std::cout << "save theScene To " << file_name + ".3Dscene" << std::endl;
 
+#if 0
     std::string dst_dir = saveRoute + "/" + file_name;
     SaveSceneAsPLY(theScene, dst_dir);
+#endif
 }
 
 void SaveSceneAsPLY(GLScenePtr theScene, const std::string& dst_dir)
