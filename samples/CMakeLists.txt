@@ -1,18 +1,14 @@
-set(PROJECT_NAME mrpt_demo)
-add_executable(${PROJECT_NAME} example_mrpt.cpp)
+set(PROJECT_NAME example_load_scene)
+add_executable(${PROJECT_NAME} example_load_scene.cpp)
 target_link_libraries(${PROJECT_NAME} gui3d)
 
-set(PROJECT_NAME viz_demo)
+set(PROJECT_NAME example_viz_demo)
 add_executable(${PROJECT_NAME} example_viz.cpp)
 target_link_libraries(${PROJECT_NAME} gui3d vslam_viz)
 
 set(PROJECT_NAME mrpt_test)
 add_executable(${PROJECT_NAME} mrpt_test.cpp)
 target_link_libraries(${PROJECT_NAME} gui3d)
-
-set(PROJECT_NAME scene_demo)
-add_executable(${PROJECT_NAME} example_imgui_scene.cc)
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw glad imgui imgui_impl gui3d)
 
 set(PROJECT_NAME example_imgui_demo)
 find_package(OpenGL REQUIRED)
