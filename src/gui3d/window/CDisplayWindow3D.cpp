@@ -291,6 +291,7 @@ void CDisplayWindow3D::OnPostRender()
       }
       if (strlen(fsInstance.getChosenPath())>0) {
         ImGui::Text("Chosen path: \"%s\"", fsInstance.getChosenPath());
+
         openSceneFile = false;
       }
     }
@@ -303,7 +304,7 @@ void CDisplayWindow3D::OnPostRender()
                      &saveSceneAs,
                      ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize)
       ) {
-      ImGui::Text("Please pretend to save the dummy file 'myFilename.png' to: ");
+      ImGui::Text("Please pretend to save the dummy file 'myFilename.3Dscene' to: ");
       ImGui::SameLine();
       const bool browseButtonPressed3 = ImGui::Button("...##3");
       static ImGuiFs::Dialog fsInstance3;
@@ -313,6 +314,10 @@ void CDisplayWindow3D::OnPostRender()
       //optionalFileExtensionFilterString);
       if (strlen(fsInstance3.getChosenPath())>0) {
         ImGui::Text("Chosen save path: \"%s\"",fsInstance3.getChosenPath());
+        COpenGLScenePtr theScene = get3DSceneAndLock();
+        if (theScene->saveToFile(fsInstance3.getChosenPath()))
+          std::cout << "save theScene To " << fsInstance3.getChosenPath() << std::endl;
+        unlockAccess3DScene();
         saveSceneAs = false;
       }
     }
