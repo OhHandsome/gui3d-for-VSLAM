@@ -23,7 +23,8 @@ if(HAS_IMGUI)
        src/gui3d/imgui/imgui.cpp
        src/gui3d/imgui/imgui_demo.cpp
        src/gui3d/imgui/imgui_draw.cpp
-       src/gui3d/imgui/imgui_widgets.cpp)
+       src/gui3d/imgui/imgui_widgets.cpp
+       src/gui3d/imguifilesystem/imguifilesystem.cpp)
 endif()
 
 add_library(${PROJECT_NAME} STATIC ${SRCS})
@@ -34,7 +35,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 if(HAS_IMGUI)
   target_link_libraries(${PROJECT_NAME} PRIVATE ${GLUT_LIBRARY} glfw ${OPENGL_gl_LIBRARY} ${GLUT_LIBRARY})
   target_compile_definitions(${PROJECT_NAME} PRIVATE -DHAS_IMGUI=1)
-  target_include_directories(${PROJECT_NAME} PUBLIC ./src/gui3d/imgui)
+  target_include_directories(${PROJECT_NAME} PUBLIC ./src/gui3d/imgui ./src/gui3d/imguifilesystem)
 endif()
 target_compile_definitions(${PROJECT_NAME} PRIVATE
         _CRT_NONSTDC_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS)

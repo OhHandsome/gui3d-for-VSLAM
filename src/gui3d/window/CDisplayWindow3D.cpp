@@ -4,6 +4,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl2.h>
 #include <imgui_internal.h>
+#include <imguifilesystem.h>
+
 #include <gui3d/render/model_render.h>
 #include <gui3d/render/style.h>
 
@@ -31,6 +33,7 @@ static void ShowHelpMarker(const char* desc) {
   }
 }
 
+static bool openSceneFile = false;
 CDisplayWindow3DPtr
 CDisplayWindow3D::Create(const std::string &windowCaption,
                          unsigned int initialWindowWidth,
@@ -170,7 +173,7 @@ void CDisplayWindow3D::OnPreRender() {
     ImGui::NewLine();
     if (ImGui::BeginMenuBar()) {
       if (ImGui::BeginMenu("File")) {
-        if (ImGui::MenuItem("Open", "Ctrl+O")) {}
+        ImGui::MenuItem("Open", "Ctrl+O", &openSceneFile);
         if (ImGui::MenuItem("Save", "Ctrl+S")) {
             auto theScene = get3DSceneAndLock();
             gui3d::SaveScene(theScene, dataRoute());
@@ -265,6 +268,26 @@ void CDisplayWindow3D::OnPostRender()
 //      static float arr[] = { 0.6f, 0.1f, 1.0f, 0.5f, 0.92f, 0.1f, 0.2f };
 //      ImGui::PlotLines("Frame Times", arr, IM_ARRAYSIZE(arr));
 //  }
+
+  if (openSceneFile)
+  {
+    const char* startingFolder = dataRoute().c_str();
+    const char* optionalFileExtensionFilterString = ".3Dscene";//".jpg;.jpeg;.png;.tiff;.bmp;.gif;.txt";
+    ImGui::Begin("FileSystem");
+    ImGui::Text("Please choose a file: ");
+    ImGui::SameLine();
+    const bool browseButtonPressed = ImGui::Button("...");
+    static ImGuiFs::Dialog fsInstance;
+    const char* chosenPath = fsInstance.chooseFileDialog(browseButtonPressed,
+                                                         startingFolder,
+                                                         optionalFileExtensionFilterString);
+    if (strlen(chosenPath)>0) {
+      // A path (chosenPath) has been chosen right now.
+      // However we can retrieve it later using: fsInstance.getChosenPath()
+    }
+    if (strlen(fsInstance.getChosenPath())>0) ImGui::Text("Chosen path: \"%s\"",fsInstance.getChosenPath());
+    ImGui::End();
+  }
 }
 
 void CDisplayWindow3D::OnImGuiRender() {
@@ -464,6 +487,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
           COpenGLScenePtr theScene = window3d->get3DSceneAndLock();
           gui3d::SaveScene(theScene, dataRoute());
           window3d->unlockAccess3DScene();
+      }
+    }
+      break;
+
+    case GLFW_KEY_O:
+    {
+      if (mods & GLFW_MOD_CONTROL) {
+        openSceneFile = true;
       }
     }
       break;
