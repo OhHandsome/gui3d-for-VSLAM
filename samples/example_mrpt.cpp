@@ -14,6 +14,9 @@ bool ReadTrajectory(const char* filename, PoseV& _vWindowKeyframePoses);
 bool ReadGT(const char* filename, PoseV& _vWindowKeyframePoses);
 std::vector<int > range(int N);
 
+int RunShowScene(int argc, char **argv);
+int RunAppLoadScene(int argc, char **argv);
+
 int main(int argc, char **argv)
 {
     string name = Engine();
@@ -26,40 +29,8 @@ int main(int argc, char **argv)
     volatile Gui3dOption& guiOpt = Option();
     auto &RequestToRefresh3DView = guiOpt.figOpt.RequestToRefresh3DView;
     auto &bExit = guiOpt.figOpt.bExit;
-    auto &KFScale = guiOpt.sceneOpt.KFScale;
 
-    std::string route = "./data/scene.txt";
-    if(argc >= 2)
-        route = argv[1];
-
-    PoseV _vWindowKeyframePoses;
-    LandMark3dV _vRefMapPoints;
-#ifdef READ_SCENE
-    if(!ReadData(route.c_str(), _vWindowKeyframePoses, _vRefMapPoints))
-    {
-        printf("Usage: [exec] scene.txt\n");
-        printf("please find the scene in drawer/vslam/data\n");
-        return -1;
-    }
-#else
-    if (!ReadGT(route.c_str(), _vWindowKeyframePoses))
-    {
-        printf("Usage: [exec] trajectory.txt\n");
-        return -1;
-    }
-#endif
-
-    KFScale *= 0.25;
-    auto pos= route.find_last_of('/');
-    std::string file(route.substr(pos+1));
-
-    addTextMessage(TEXT_X, TEXT_LOCALMAP_Y, file, TextID::LOCALMAP);
-    setDataRoute(route.substr(0, pos).c_str());
-    renderFrames(sysChannel[LocalFrames], _vWindowKeyframePoses);
-    //renderPath(sysChannel[Path], _vWindowKeyframePoses);
-    renderMapPoints(sysChannel[RefMapPoints], _vRefMapPoints);
-    auto Tp = _vWindowKeyframePoses[_vWindowKeyframePoses.size() - 2];
-    renderFrame(sysChannel[CurCamera], Tp);
+    RunAppLoadScene(argc, argv);
 
     bool bNeedRefresh3DView = true;
     while (!bExit)
@@ -74,6 +45,52 @@ int main(int argc, char **argv)
     bExit = false;
 
     return 0;
+}
+
+int RunAppLoadScene(int argc, char **argv)
+{
+    gui3d::setDataRoute("/media/oyg5285/developer/gitRespo/data");
+}
+
+int RunShowScene(int argc, char **argv)
+{
+    volatile Gui3dOption& guiOpt = Option();
+    auto &RequestToRefresh3DView = guiOpt.figOpt.RequestToRefresh3DView;
+    auto &bExit = guiOpt.figOpt.bExit;
+    auto &KFScale = guiOpt.sceneOpt.KFScale;
+
+    std::string route = "./data/scene.txt";
+    if(argc >= 2)
+      route = argv[1];
+
+    PoseV _vWindowKeyframePoses;
+    LandMark3dV _vRefMapPoints;
+  #ifdef READ_SCENE
+    if(!ReadData(route.c_str(), _vWindowKeyframePoses, _vRefMapPoints))
+    {
+      printf("Usage: [exec] scene.txt\n");
+      printf("please find the scene in drawer/vslam/data\n");
+      return -1;
+    }
+  #else
+    if (!ReadGT(route.c_str(), _vWindowKeyframePoses))
+      {
+          printf("Usage: [exec] trajectory.txt\n");
+          return -1;
+      }
+  #endif
+
+    KFScale *= 0.25;
+    auto pos= route.find_last_of('/');
+    std::string file(route.substr(pos+1));
+
+    addTextMessage(TEXT_X, TEXT_LOCALMAP_Y, file, TextID::LOCALMAP);
+    setDataRoute(route.substr(0, pos).c_str());
+    renderFrames(sysChannel[LocalFrames], _vWindowKeyframePoses);
+    //renderPath(sysChannel[Path], _vWindowKeyframePoses);
+    renderMapPoints(sysChannel[RefMapPoints], _vRefMapPoints);
+    auto Tp = _vWindowKeyframePoses[_vWindowKeyframePoses.size() - 2];
+    renderFrame(sysChannel[CurCamera], Tp);
 }
 
 bool ReadData(const char* filename, PoseV& _vWindowKeyframePoses, LandMark3dV& _vRefMapPoints)
