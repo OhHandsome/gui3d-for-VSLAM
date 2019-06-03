@@ -386,9 +386,13 @@ void CDisplayWindow3D::loadSceneFrom(const char* fileName)
   std::cout << "load Scene: " << fileName << std::endl;
   CFileGZInputStream f(fileName);
   auto theScene = get3DSceneAndLock();
+  m_Axis3d.clear();
+  m_ZeroPlane.clear();
   m_3Dscene->clear();
   f >> m_3Dscene;
   m_GlCanvas->m_openGLScene = m_3Dscene;
+  m_Axis3d = m_3Dscene->getByClass<CAxis>();
+  m_ZeroPlane = m_3Dscene->getByClass<CGridPlaneXY>();
   unlockAccess3DScene();
 }
 
