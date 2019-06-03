@@ -60,6 +60,7 @@ class CDisplayWindow3D {
   void OnPostRender();
   void OnEyeShotRender();    // handle eye shot from mouse wheel
   void OnImGuiRender();
+  void loadSceneFrom(const char* fileName);
   void backThreadRun();
 
   std::string                           m_windowCaption;

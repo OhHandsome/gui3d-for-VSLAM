@@ -288,10 +288,7 @@ void CDisplayWindow3D::OnPostRender()
       if (strlen(chosenPath)>0) {
         // A path (chosenPath) has been chosen right now.
         // However we can retrieve it later using: fsInstance.getChosenPath()
-      }
-      if (strlen(fsInstance.getChosenPath())>0) {
-        ImGui::Text("Chosen path: \"%s\"", fsInstance.getChosenPath());
-
+        loadSceneFrom(fsInstance.getChosenPath());
         openSceneFile = false;
       }
     }
@@ -304,16 +301,17 @@ void CDisplayWindow3D::OnPostRender()
                      &saveSceneAs,
                      ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize)
       ) {
-      ImGui::Text("Please pretend to save the dummy file 'myFilename.3Dscene' to: ");
+      ImGui::Text("Please pretend to save the dummy file 'final.3Dscene' to: ");
       ImGui::SameLine();
       const bool browseButtonPressed3 = ImGui::Button("...##3");
       static ImGuiFs::Dialog fsInstance3;
       const char* savePath = fsInstance3.saveFileDialog(
                                     browseButtonPressed3,
-                                    dataRoute().c_str(), "myFilename.3Dscene");
-      //optionalFileExtensionFilterString);
-      if (strlen(fsInstance3.getChosenPath())>0) {
-        ImGui::Text("Chosen save path: \"%s\"",fsInstance3.getChosenPath());
+                                    dataRoute().c_str(), "final.3Dscene");
+
+      if (strlen(savePath)>0) {
+        // A path (chosenPath) has been chosen right now.
+        // However we can retrieve it later using: fsInstance.getChosenPath()
         COpenGLScenePtr theScene = get3DSceneAndLock();
         if (theScene->saveToFile(fsInstance3.getChosenPath()))
           std::cout << "save theScene To " << fsInstance3.getChosenPath() << std::endl;
@@ -381,6 +379,17 @@ void CDisplayWindow3D::OnImGuiRender() {
   }
 
   ImGui::End();
+}
+
+void CDisplayWindow3D::loadSceneFrom(const char* fileName)
+{
+  std::cout << "load Scene: " << fileName << std::endl;
+  CFileGZInputStream f(fileName);
+  auto theScene = get3DSceneAndLock();
+  m_3Dscene->clear();
+  f >> m_3Dscene;
+  m_GlCanvas->m_openGLScene = m_3Dscene;
+  unlockAccess3DScene();
 }
 
 void CDisplayWindow3D::backThreadRun() {
