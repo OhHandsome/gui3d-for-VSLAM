@@ -23,9 +23,9 @@ set(SRCS example_imgui_demo.cpp
 add_executable(${PROJECT_NAME} ${SRCS})
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw ${OPENGL_gl_LIBRARY})
 
-set(PROJECT_NAME example_glfw_opengl2)
+set(PROJECT_NAME example_CDisplayWindow3D)
 find_package(GLUT REQUIRED)
-set(SRCS example_glfw_opengl2.cpp
+set(SRCS example_CDisplayWindow3D.cpp
         CGlCanvas.cpp
         ../src/gui3d/imgui/imgui_impl_glfw.cpp
         ../src/gui3d/imgui/imgui_impl_opengl2.cpp

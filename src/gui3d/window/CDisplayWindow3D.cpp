@@ -122,46 +122,6 @@ void CDisplayWindow3D::OnPreRender() {
 
   // Menu
   static bool show_scene_property_editor = false;
-  // Show Scene Property
-  if (show_scene_property_editor)
-  {
-    // Display panel
-    if(ImGui::Begin("System", &show_scene_property_editor,
-                    ImGuiWindowFlags_NoScrollbar |
-                    ImGuiWindowFlags_AlwaysAutoResize)) {
-
-      // Visible about Axis3d and ZeroPlane
-      auto& theScene = get3DSceneAndLock();
-      bool visible = m_Axis3d->isVisible();
-      if (ImGui::Checkbox("Axis3d", &visible))
-        m_Axis3d->setVisibility(visible);
-      ImGui::SameLine();
-      visible = m_ZeroPlane->isVisible();
-      if (ImGui::Checkbox("XY", &visible))
-        m_ZeroPlane->setVisibility(visible);
-
-      ImGui::Text("Label:");
-      ImGui::SameLine();
-      int v[2];
-      v[0] = m_Axis3d->getFrequency();
-      v[1] = m_ZeroPlane->getGridFrequency();
-      ImGui::SliderInt2("FREQ", v, 1, 8); // Edit 1 Int using a slider from 1 to 8
-      m_Axis3d->setFrequency(v[0]);
-      m_ZeroPlane->setGridFrequency(v[1]);
-
-      /*
-      auto& im_visiable = m_Observer.figOpt.bViewPort;
-      COpenGLViewportPtr vp = theScene->getViewport("Image");
-      if (vp.get() != nullptr) {
-        if (ImGui::Checkbox("im", (bool *)&im_visiable)) {
-          vp->resetCloneView();
-        }
-      }*/
-      unlockAccess3DScene();
-    }
-    ImGui::End();
-  }
-
   // Display [Scene] panel
   static bool visible_all;
   static bool show_tool_panel = true;
@@ -233,6 +193,46 @@ void CDisplayWindow3D::OnPreRender() {
     unlockAccess3DScene();
   }
   ImGui::End();
+
+  // Show Scene Property
+  if (show_scene_property_editor)
+  {
+    // Display panel
+    if(ImGui::Begin("System", &show_scene_property_editor,
+                    ImGuiWindowFlags_NoScrollbar |
+                    ImGuiWindowFlags_AlwaysAutoResize)) {
+
+      // Visible about Axis3d and ZeroPlane
+      auto& theScene = get3DSceneAndLock();
+      bool visible = m_Axis3d->isVisible();
+      if (ImGui::Checkbox("Axis3d", &visible))
+        m_Axis3d->setVisibility(visible);
+      ImGui::SameLine();
+      visible = m_ZeroPlane->isVisible();
+      if (ImGui::Checkbox("XY", &visible))
+        m_ZeroPlane->setVisibility(visible);
+
+      ImGui::Text("Label:");
+      ImGui::SameLine();
+      int v[2];
+      v[0] = m_Axis3d->getFrequency();
+      v[1] = m_ZeroPlane->getGridFrequency();
+      ImGui::SliderInt2("FREQ", v, 1, 8); // Edit 1 Int using a slider from 1 to 8
+      m_Axis3d->setFrequency(v[0]);
+      m_ZeroPlane->setGridFrequency(v[1]);
+
+      /*
+      auto& im_visiable = m_Observer.figOpt.bViewPort;
+      COpenGLViewportPtr vp = theScene->getViewport("Image");
+      if (vp.get() != nullptr) {
+        if (ImGui::Checkbox("im", (bool *)&im_visiable)) {
+          vp->resetCloneView();
+        }
+      }*/
+      unlockAccess3DScene();
+    }
+    ImGui::End();
+  }
 }
 
 void CDisplayWindow3D::OnEyeShotRender()
@@ -329,11 +329,8 @@ void CDisplayWindow3D::OnImGuiRender() {
     return;
 
   const cv::Mat& frame = m_subview_image->m_image;
-  const float x = m_subview_image->m_view_x;
-  const float y = m_subview_image->m_view_y;
   const float width = m_subview_image->m_view_width;
   const float height = m_subview_image->m_view_height;
-
   const float BX = 16;
   const float BY = 36;
 
@@ -367,7 +364,6 @@ void CDisplayWindow3D::OnImGuiRender() {
   }
   ImVec2 showSize(ImGui::GetWindowWidth() - BX, ImGui::GetWindowHeight() - BY);
   ImGui::Image((void*) texId, showSize);
-
   if (ImGui::BeginPopupContextWindow()) {
     if (ImGui::Button("Reset Size")) {
       ImGui::SetWindowSize(m_subview_image->getName().c_str(),
@@ -377,7 +373,6 @@ void CDisplayWindow3D::OnImGuiRender() {
     }
     ImGui::EndPopup();
   }
-
   ImGui::End();
 }
 
@@ -419,8 +414,8 @@ void CDisplayWindow3D::backThreadRun() {
   m_lastWheelRotation = io.MouseWheel;
 
   // Setup Dear ImGui style
-  ImGui::StyleColorsDark();
-  //ImGui::StyleColorsClassic();
+  //ImGui::StyleColorsDark();
+  ImGui::StyleColorsClassic();
 
   m_3Dscene = mrpt::opengl::COpenGLScene::Create();
   m_GlCanvas = new CGlCanvas(m_3Dscene);
