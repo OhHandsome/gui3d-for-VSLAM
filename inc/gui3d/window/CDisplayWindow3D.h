@@ -62,11 +62,12 @@ class CDisplayWindow3D {
   void OnImGuiRender();
   void loadSceneFrom(const char* fileName);
   void backThreadRun();
+  void RunOnce();
 
   std::string                           m_windowCaption;
   int                                   m_initialWindowWidth;
   int                                   m_initialWindowHeight;
-  bool                                  m_ReadyContext = false;
+  volatile bool                         m_ReadyContext = false;
 
   CDisplayImagesPtr                     m_subview_image = nullptr;
   mrpt::opengl::CAxisPtr                m_Axis3d;

@@ -30,12 +30,12 @@ int main(int argc, char **argv)
     auto &RequestToRefresh3DView = guiOpt.figOpt.RequestToRefresh3DView;
     auto &bExit = guiOpt.figOpt.bExit;
 
-    RunAppLoadScene(argc, argv);
+    RunShowScene(argc, argv);
 
     bool bNeedRefresh3DView = true;
     while (!bExit)
     {
-        if(RequestToRefresh3DView || bNeedRefresh3DView)
+        //if (RequestToRefresh3DView || bNeedRefresh3DView)
         {
             repaint();
             RequestToRefresh3DView = false;

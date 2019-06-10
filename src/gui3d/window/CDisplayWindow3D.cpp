@@ -8,6 +8,7 @@
 
 #include <gui3d/render/model_render.h>
 #include <gui3d/render/style.h>
+#define USE_BACKEND_RENDER 0
 
 using namespace mrpt;
 using namespace mrpt::opengl;
@@ -24,7 +25,7 @@ static void glfw_error_callback(int error, const char* description) {
 
 static void ShowHelpMarker(const char* desc) {
   ImGui::TextDisabled("(?)");
-  if (ImGui::IsItemHovered()){
+  if (ImGui::IsItemHovered()) {
     ImGui::BeginTooltip();
     ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
     ImGui::TextUnformatted(desc);
@@ -32,6 +33,31 @@ static void ShowHelpMarker(const char* desc) {
     ImGui::EndTooltip();
   }
 }
+
+struct GlfwContextScopeGuard {
+  explicit GlfwContextScopeGuard(GLFWwindow* win){
+    prev_win = glfwGetCurrentContext();
+    glfwMakeContextCurrent(win);
+  }
+
+  ~GlfwContextScopeGuard(){
+    glfwMakeContextCurrent(prev_win);
+  }
+  GLFWwindow* prev_win;
+};
+
+struct ImGuiContextScopeGuard {
+  explicit ImGuiContextScopeGuard(ImGuiContext* ctx) {
+    prev_ctx = ImGui::GetCurrentContext();
+    ImGui::SetCurrentContext(ctx);
+  }
+
+  ~ImGuiContextScopeGuard() {
+    ImGui::SetCurrentContext(prev_ctx);
+  }
+
+  ImGuiContext* prev_ctx;
+};
 
 static bool openSceneFile = false;
 static bool saveSceneAs = false;
@@ -57,7 +83,10 @@ bool CDisplayWindow3D::WindowClosed() const
 }
 
 void CDisplayWindow3D::forceRepaint() {
+  if (USE_BACKEND_RENDER)
     RequestToRefresh3DView = true;
+  else
+    RunOnce();
 }
 
 CDisplayWindow3D::CDisplayWindow3D(const std::string &windowCaption,
@@ -67,12 +96,45 @@ CDisplayWindow3D::CDisplayWindow3D(const std::string &windowCaption,
    , m_initialWindowWidth(initialWindowWidth)
    , m_initialWindowHeight(initialWindowHeight) {
 
-  // must be add, sometimes crash
+#if USE_BACKEND_RENDER
   m_renderLoopThread = std::thread(&CDisplayWindow3D::backThreadRun, this);
+  // must be add, sometimes crash in cmake debug model
+  while (!m_ReadyContext) {};
+#else
+  glfwSetErrorCallback(glfw_error_callback);
+  if (!glfwInit())
+      return ;
 
-  while (!m_ReadyContext) {
-    std::cout << "Wait Context Ready" << std::endl;
-  };
+  m_Window = glfwCreateWindow(m_initialWindowWidth, m_initialWindowHeight, m_windowCaption.c_str(), NULL, NULL);
+  if (m_Window == NULL)
+      return ;
+
+  GlfwContextScopeGuard gl_ctx_guard(m_Window);
+  glfwSwapInterval(1); // Enable vsync
+  glfwSetFramebufferSizeCallback(m_Window, framebuffer_size_callback);
+
+  // Setup Dear ImGui context
+  IMGUI_CHECKVERSION();
+  m_ImGuiContext = ImGui::CreateContext();
+  ImGuiContextScopeGuard imgui_ctx_guard(m_ImGuiContext);
+  // Setup Platform/Renderer bindings
+  ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
+  ImGui_ImplOpenGL2_Init();
+
+  ImGuiIO& io = ImGui::GetIO(); (void)io;
+  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+  m_lastWheelRotation = io.MouseWheel;
+
+  // Setup Dear ImGui style
+  ImGui::StyleColorsClassic();
+
+  m_3Dscene = mrpt::opengl::COpenGLScene::Create();
+  m_GlCanvas = new CGlCanvas(m_3Dscene);
+  InitScene();
+  glfwSetKeyCallback(m_Window, key_callback);
+  glfwSetWindowUserPointer(m_Window, this);
+#endif
 }
 
 CDisplayWindow3D::~CDisplayWindow3D() {
@@ -81,6 +143,16 @@ CDisplayWindow3D::~CDisplayWindow3D() {
 
   delete m_GlCanvas;
   m_3Dscene.clear_unique();
+
+
+  // glfw: terminate, clearing all previously allocated GLFW resources.
+  ImGui_ImplOpenGL2_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
+  for (auto& f : destoryOpenGLResourcesOnExit) f();
+
+  glfwDestroyWindow(m_Window);
+  glfwTerminate();
 }
 
 CDisplayImagesPtr
@@ -391,6 +463,46 @@ void CDisplayWindow3D::loadSceneFrom(const char* fileName)
   unlockAccess3DScene();
 }
 
+void CDisplayWindow3D::RunOnce()
+{
+  GlfwContextScopeGuard gl_ctx_guard(m_Window);
+  ImGuiContextScopeGuard imgui_ctx_guard(m_ImGuiContext);
+  ImVec4 clear_color = ImVec4(0.6f, 0.6f, 0.60f, 0.00f);
+
+  glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glfwPollEvents();
+  // Start the Dear ImGui frame
+  ImGui_ImplOpenGL2_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+
+  // input
+  OnPreRender();
+
+  // 1. Zoom-pan-rotate mouse manipulation
+  OnEyeShotRender();
+
+  // 2. Render
+  //if(RequestToRefresh3DView)
+  {
+    get3DSceneAndLock();
+    m_GlCanvas->OnPaint();
+    OnImGuiRender();
+    unlockAccess3DScene();
+    RequestToRefresh3DView = false;
+  }
+  OnPostRender();
+
+  // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+  // -------------------------------------------------------------------------------
+  ImGui::Render();
+  ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+  glfwMakeContextCurrent(m_Window);
+  glfwSwapBuffers(m_Window);
+  cv::waitKey(1);
+}
+
 void CDisplayWindow3D::backThreadRun() {
 
   glfwSetErrorCallback(glfw_error_callback);
@@ -469,8 +581,7 @@ void CDisplayWindow3D::backThreadRun() {
     ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
     glfwMakeContextCurrent(m_Window);
     glfwSwapBuffers(m_Window);
-
-    //cv::waitKey(1);
+    cv::waitKey(1);
   }
 
   // glfw: terminate, clearing all previously allocated GLFW resources.
