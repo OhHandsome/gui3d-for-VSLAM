@@ -45,6 +45,12 @@ public:
         sSystemFigure3d.clear();
     }
 
+    void repaint()
+    {
+      for (auto& fig : sSystemFigure3d)
+        fig.second->mMainWindow->repaint();
+    }
+
     void add(const std::string& name, FigurePtr fig)
     {
         sSystemFigure3d[name] = fig;
@@ -553,10 +559,11 @@ void update(hObject obj, const Pose& Twc)
 
 void repaint()
 {
-	if(!sCurrentFigure3d)
-		return;
-
-  sCurrentFigure3d->mMainWindow->repaint();
+//	if(!sCurrentFigure3d)
+//		return;
+//
+//  sCurrentFigure3d->mMainWindow->repaint();
+  Viz::instance().repaint();
 	//sCurrentFigure3d->mMainWindow->RunOnce();
 }
 
