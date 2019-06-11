@@ -8,7 +8,7 @@
 
 #include <gui3d/render/model_render.h>
 #include <gui3d/render/style.h>
-#define USE_BACKEND_RENDER 0
+#define USE_BACKEND_RENDER 1
 
 using namespace mrpt;
 using namespace mrpt::opengl;
@@ -581,7 +581,7 @@ void CDisplayWindow3D::backThreadRun() {
     ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
     glfwMakeContextCurrent(m_Window);
     glfwSwapBuffers(m_Window);
-    cv::waitKey(1);
+    //cv::waitKey(1);
   }
 
   // glfw: terminate, clearing all previously allocated GLFW resources.
