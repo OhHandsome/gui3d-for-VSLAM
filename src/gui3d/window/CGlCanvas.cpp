@@ -134,7 +134,7 @@ CGlCanvas::CGlCanvas(mrpt::opengl::COpenGLScenePtr parent) :
 
   useCameraFromScene	= false;
 
-  cameraZoomDistance	= 40;
+  cameraZoomDistance	= 5;
   cameraFOV           = 30;
   cameraElevationDeg 	= 45;
   cameraAzimuthDeg	= 45;
