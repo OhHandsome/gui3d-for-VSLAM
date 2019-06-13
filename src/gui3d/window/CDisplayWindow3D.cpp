@@ -34,23 +34,6 @@ static void ShowHelpMarker(const char* desc) {
   }
 }
 
-struct Book {
-    int FrameId = 0;
-    int KeyFrames = 0;
-};
-
-void bookCallBack(void* usrParam)
-{
-    Book* book = (Book*)usrParam;
-    ImGui::Begin("Hello, world!");
-    ImGui::Text("This is some useful text.");
-    ImGui::SameLine();
-    ImGui::Text("id = %d", book->FrameId);
-    ImGui::Text("KeyFrames: %d", book->KeyFrames);
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    ImGui::End();
-}
-
 struct GlfwContextScopeGuard {
   explicit GlfwContextScopeGuard(GLFWwindow* win){
     prev_win = glfwGetCurrentContext();
@@ -554,8 +537,6 @@ void CDisplayWindow3D::backThreadRun() {
   glfwSetKeyCallback(m_Window, key_callback);
   glfwSetWindowUserPointer(m_Window, this);
 
-  static Book book;
-  pushRenderCallBack(bookCallBack, &book);
   // Setup Platform/Renderer bindings
   ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
   ImGui_ImplOpenGL2_Init();
