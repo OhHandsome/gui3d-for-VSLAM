@@ -149,6 +149,25 @@ void CDisplayWindow3D::OnPreRender() {
       m_Axis3d->setFrequency(v[0]);
       m_ZeroPlane->setGridFrequency(v[1]);
 
+      if (ImGui::TreeNode("TheScene")) {
+        COpenGLViewportPtr mainVP = m_3Dscene->getViewport();
+        for (COpenGLViewport::iterator itO = mainVP->begin();
+             itO!= mainVP->end();
+             ++itO) {
+          if((*itO)->getName() == m_Axis3d->getName() ||
+             (*itO)->getName() == m_ZeroPlane->getName())
+            continue;
+
+          if (ImGui::TreeNode((*itO)->getName().c_str())) {
+            float s = (*itO)->getScaleX();
+            ImGui::InputFloat("scale", &s, 0.1f, 1.0f, "%.3f");
+            (*itO)->setScale(s);
+            ImGui::TreePop();
+          }
+        }
+        ImGui::TreePop();
+      }
+
       /*
       auto& im_visiable = m_Observer.figOpt.bViewPort;
       COpenGLViewportPtr vp = theScene->getViewport("Image");
