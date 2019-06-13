@@ -19,6 +19,9 @@ namespace gui3d{
 class CDisplayWindow3D;
 using CDisplayWindow3DPtr = std::shared_ptr<CDisplayWindow3D>;
 
+//!< Type for the callback function used in pushRenderCallback
+typedef void (* TCallbackRender) (void* userParam);
+
 class CDisplayWindow3D {
  public:
   /** Constructor */
@@ -54,6 +57,11 @@ class CDisplayWindow3D {
   CDisplayImagesPtr createViewImage(const std::string& name);
   CDisplayImagesPtr getViewImage() { return m_subview_image; }
 
+    /** Must be called to have a callback
+    *   when the user selects one of the user-defined entries
+    */
+  void pushRenderCallBack(TCallbackRender userFunction, void* userParam = NULL);
+
  private:
   void forceRepaint(); //!< Repaints the window. forceRepaint, repaint and updateWindow are all aliases of the same method
   void OnPreRender();
@@ -64,6 +72,11 @@ class CDisplayWindow3D {
   void backThreadRun();
   void RunOnce();
 
+  struct HookFunc{
+      TCallbackRender userFunction;
+      void* userParam = nullptr;
+  };
+
   std::string                           m_windowCaption;
   int                                   m_initialWindowWidth;
   int                                   m_initialWindowHeight;
@@ -72,6 +85,7 @@ class CDisplayWindow3D {
   CDisplayImagesPtr                     m_subview_image = nullptr;
   mrpt::opengl::CAxisPtr                m_Axis3d;
   mrpt::opengl::CGridPlaneXYPtr         m_ZeroPlane;
+  std::vector<HookFunc>                 m_hookFuncs;
 
   volatile Gui3dOption                   m_Observer;
 

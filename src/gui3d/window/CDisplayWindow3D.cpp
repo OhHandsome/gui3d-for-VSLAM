@@ -34,6 +34,23 @@ static void ShowHelpMarker(const char* desc) {
   }
 }
 
+struct Book {
+    int FrameId = 0;
+    int KeyFrames = 0;
+};
+
+void bookCallBack(void* usrParam)
+{
+    Book* book = (Book*)usrParam;
+    ImGui::Begin("Hello, world!");
+    ImGui::Text("This is some useful text.");
+    ImGui::SameLine();
+    ImGui::Text("id = %d", book->FrameId);
+    ImGui::Text("KeyFrames: %d", book->KeyFrames);
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::End();
+}
+
 struct GlfwContextScopeGuard {
   explicit GlfwContextScopeGuard(GLFWwindow* win){
     prev_win = glfwGetCurrentContext();
@@ -489,6 +506,8 @@ void CDisplayWindow3D::RunOnce()
     get3DSceneAndLock();
     m_GlCanvas->OnPaint();
     OnImGuiRender();
+    for (auto hook : m_hookFuncs)
+        hook.userFunction(hook.userParam);
     unlockAccess3DScene();
     RequestToRefresh3DView = false;
   }
@@ -535,6 +554,8 @@ void CDisplayWindow3D::backThreadRun() {
   glfwSetKeyCallback(m_Window, key_callback);
   glfwSetWindowUserPointer(m_Window, this);
 
+  static Book book;
+  pushRenderCallBack(bookCallBack, &book);
   // Setup Platform/Renderer bindings
   ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
   ImGui_ImplOpenGL2_Init();
@@ -570,6 +591,8 @@ void CDisplayWindow3D::backThreadRun() {
       get3DSceneAndLock();
       OnImGuiRender();
       m_GlCanvas->OnPaint();
+      for (auto hook : m_hookFuncs)
+          hook.userFunction(hook.userParam);
       unlockAccess3DScene();
       RequestToRefresh3DView = false;
     }
@@ -594,6 +617,14 @@ void CDisplayWindow3D::backThreadRun() {
 
   glfwDestroyWindow(m_Window);
   glfwTerminate();
+}
+
+void CDisplayWindow3D::pushRenderCallBack(gui3d::TCallbackRender userFunction, void *userParam)
+{
+    HookFunc hook;
+    hook.userFunction = userFunction;
+    hook.userParam = userParam;
+    m_hookFuncs.push_back(hook);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
