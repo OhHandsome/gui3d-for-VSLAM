@@ -23,7 +23,7 @@
 
 namespace gui3d {
 
-Figure* sCurrentFigure3d = nullptr;
+static Figure* sCurrentFigure3d = nullptr;
 // Engine
 class Viz
 {
@@ -36,35 +36,19 @@ public:
         return ins;
     }
 
-    Viz()
-    {
-    }
+    Viz() {}
+    ~Viz() { sSystemFigure3d.clear(); }
 
-    ~Viz()
+    void add(const std::string& name, const FigurePtr& fig)
     {
-        sSystemFigure3d.clear();
+        sSystemFigure3d[name] = fig;
+        sCurrentFigure3d = fig.get();
     }
 
     void repaint()
     {
       for (auto& fig : sSystemFigure3d)
         fig.second->mMainWindow->repaint();
-    }
-
-    void add(const std::string& name, FigurePtr fig)
-    {
-        sSystemFigure3d[name] = fig;
-        sCurrentFigure3d = fig.get();
-    }
-
-    FigurePtr findFigure(const std::string& name)
-    {
-        auto it = sSystemFigure3d.find(name);
-        if(it != sSystemFigure3d.end())
-        {
-            return it->second;
-        }
-        return nullptr;
     }
 
     void setAsCurrentFigure(hObject fig)
@@ -79,9 +63,7 @@ public:
 
     void destory(const std::string& name)
     {
-        if (sSystemFigure3d.empty())
-            return;
-
+        if (sSystemFigure3d.empty()) return;
         auto it = sSystemFigure3d.find(name);
         if(it != sSystemFigure3d.end())
         {
@@ -106,6 +88,12 @@ public:
         destory(fig->name);
     }
 
+    FigurePtr findFigure(const std::string& name)
+    {
+        auto it = sSystemFigure3d.find(name);
+        return (it != sSystemFigure3d.end()) ? it->second : nullptr;
+    }
+
 private:
     // when delete figure, need choose and set sCurrentFigure3d
     void csCurFigureFromExistWindows()
@@ -119,7 +107,7 @@ private:
 
         // Engine Main Figure as sCurrentFigure3d
         string AppName = Engine();
-        FigurePtr win = Viz::instance().findFigure(AppName);
+        FigurePtr win = findFigure(AppName);
         if(win)
         {
             sCurrentFigure3d = win.get();
@@ -202,7 +190,7 @@ hObject nFigure(const string& name, int width, int height)
 
 void moveFigure(int x, int y)
 {
-	if (!sCurrentFigure3d)  return;
+	  if (!sCurrentFigure3d)  return;
     auto& win = sCurrentFigure3d->mMainWindow;
     win->setPos(x, y);
 }
@@ -235,8 +223,8 @@ void play_control()
 
 void waitKey(int delay_ms)
 {
-	if(!sCurrentFigure3d)
-		throw "None Found Figure3d";
+	  if(!sCurrentFigure3d)
+		    throw "None Found Figure3d";
 
     volatile Gui3dOption& guiOpt = sCurrentFigure3d->mOption;
     volatile bool &bWaitKey = guiOpt.figOpt.bWaitKey;
@@ -244,8 +232,8 @@ void waitKey(int delay_ms)
     volatile bool &RequestToRefresh3DView = guiOpt.figOpt.RequestToRefresh3DView;
 
 #if HAS_IMGUI == 0
-	auto& win = sCurrentFigure3d->mMainWindow;
-	win->addTextMessage(TEXT_RUN_STATE_X, TEXT_RUN_STATE_Y,
+	  auto& win = sCurrentFigure3d->mMainWindow;
+	  win->addTextMessage(TEXT_RUN_STATE_X, TEXT_RUN_STATE_Y,
                         "VSLAM Stop", TColorf(1, 0, 0),
                         TextID::RUN_STATE, MRPT_GLUT_BITMAP_HELVETICA_12);
     win->repaint();

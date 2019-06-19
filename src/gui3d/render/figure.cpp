@@ -3,10 +3,13 @@
 #include <gui3d/render/model_render.h>
 #include <gui3d/render/observer.h>
 #include <gui3d/render/style.h>
+
 #if HAS_IMGUI
 #include <gui3d/window/CDisplayWindow3D.h>
 #endif
-namespace gui3d{
+
+namespace gui3d {
+
 template <class T>
 void removeObject(COpenGLViewportPtr mainVP, std::map<Channel, T>& m)
 {
