@@ -52,11 +52,12 @@ void collectCloudFromRGBD(const cv::Mat& im, const cv::Mat& depth, PointCloud& c
 
 void collectLinesFromRGBDNormal(const cv::Mat& depth, const cv::Mat& normal, Position3dV& vecN, const float l)
 {
-    for(int y = 0; y < depth.rows; y++)
+    int step = 2;
+    for(int y = 0; y < depth.rows; y=y+step)
     {
         auto pdepth = depth.ptr<cv::Vec3f>(y);
         auto pnormal = normal.ptr<cv::Vec3f>(y);
-        for(int x = 0; x < depth.cols; x++)
+        for(int x = 0; x < depth.cols; x=x+step)
         {
             cv::Vec3f pt = pdepth[x];
             if(pt(2) == 0.0f)
