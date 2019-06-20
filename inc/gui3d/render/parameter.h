@@ -4,7 +4,7 @@
 #define M_PI 3.1415926
 #endif
 
-#define White  Color(255,255,255,255)
+#define White  Color(255,255,255,128)
 #define Black  Color(0  ,0  ,0  ,255)
 #define Red    Color(255,0  ,0  ,255)
 #define Green  Color(0  ,255,0  ,255)

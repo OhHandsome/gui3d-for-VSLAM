@@ -9,7 +9,7 @@ typedef COpenGLScenePtr GLScenePtr;
 // Construct Model
 CFrustumPtr        ModelFrame (int width, int height, float fx);    // Create Camera Model
 void               ModelFrames(CSetOfObjects* objs, const PoseV& vPose, const NameV& vLabel, const tOptions& options);
-
+CSetOfObjectsPtr   ModelRGBAxis(const float lenght);
 CSetOfObjectsPtr   ModelRobot ();                                    // Create iRobot Model
 
 void               ZoomObjects(CSetOfObjectsPtr objs, float scale);
@@ -23,12 +23,14 @@ void               SaveSceneAsPLY(GLScenePtr theScene, const std::string& route 
 // Render Utils
 bool renderFrame(GLScenePtr theScene, CFrustumPtr     & obj, const Pose& Twc, const tOptions& options);
 bool renderRobot(GLScenePtr theScene, CSetOfObjectsPtr& obj, const Pose& Twb, const tOptions& options);
+bool renderRGBAxis(GLScenePtr theScene, CSetOfObjectsPtr &obj, const Pose &Twb, const tOptions &options);
 
 bool renderFrames(GLScenePtr theScene, CSetOfObjectsPtr& obj, const PoseV& vPose, const NameV& vLabels, const tOptions& options);
 bool renderLines (GLScenePtr theScene, CSetOfLinesPtr&   obj, const Position3dV& vvPoints, const tOptions& options);
 
 bool renderMapPoints (GLScenePtr theScene, CPointCloudPtr&         obj, const Pose& Twc, const LandMark3dV& vPoints, const tOptions& options);
 bool renderPointCloud(GLScenePtr theScene, CPointCloudColouredPtr& obj, const Pose& Twc, const PointCloud& vPoints, const tOptions& options);
+
 
 // Render ViewPort
 bool auxViewAt(GLScenePtr theScene, COpenGLViewportPtr& gl_view_Camera, const Pose& pose);

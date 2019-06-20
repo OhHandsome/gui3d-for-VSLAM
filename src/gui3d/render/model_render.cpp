@@ -44,6 +44,27 @@ void ModelFrames(CSetOfObjects* objs, const PoseV& vPose, const NameV& vLabel, c
     }
 }
 
+CSetOfObjectsPtr ModelRGBAxis(const float lenght)
+{
+    CSetOfObjectsPtr obj = CSetOfObjects::Create();
+
+    CSimpleLinePtr x = CSimpleLine::Create(0.0f, 0.0f, 0.0f,
+                                           lenght, 0.0f, 0.0f, 1.0f);
+    x->setColor(TColorf(1, 0, 0));
+    obj->insert(x);
+
+    CSimpleLinePtr y = CSimpleLine::Create(0.0f, 0.0f, 0.0f,
+                                           0.0f, lenght * 1.0f, 0.0f, 1.0f);
+    y->setColor(TColorf(0, 1, 0));
+    obj->insert(y);
+
+    CSimpleLinePtr z = CSimpleLine::Create(0.0f, 0.0f, 0.0f,
+                                           0.0f, 0.0f, lenght * 1.0f, 1.0f);
+    z->setColor(TColorf(0, 0, 1));
+    obj->insert(z);
+    return obj;
+}
+
 CSetOfObjectsPtr ModelRobot()
 {
     CSetOfObjectsPtr cleanrobot = CSetOfObjects::Create();
@@ -224,6 +245,17 @@ bool renderRobot(GLScenePtr theScene, CSetOfObjectsPtr& obj, const Pose& Twb, co
 {
     if (!obj) {
         obj = ModelRobot();
+        theScene->insert(obj);
+    }
+
+    obj->setPose(castPose(Twb));
+    return true;
+}
+
+bool renderRGBAxis(GLScenePtr theScene, CSetOfObjectsPtr &obj, const Pose &Twb, const tOptions &options)
+{
+    if (!obj) {
+        obj = ModelRGBAxis(0.02);
         theScene->insert(obj);
     }
 

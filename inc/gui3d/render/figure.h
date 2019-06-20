@@ -28,6 +28,7 @@ public:
 	CPointCloudColouredPtr hPointCloud(const Channel& name);
 	CSetOfLinesPtr         hLine(const Channel& name);
 	CSetOfObjectsPtr       hModel3d(const Channel& name);
+    CSetOfObjectsPtr       hAxis3d(const Channel& name);
 
 	void lock()   { mMainWindow->get3DSceneAndLock(); }
 	void unlock() { mMainWindow->unlockAccess3DScene(); }
@@ -62,6 +63,8 @@ public:
 	std::map<Channel, CPointCloudColouredPtr> mSysPointCloud;
 	std::map<Channel, CSetOfLinesPtr>         mSysLine;
 	std::map<Channel, CSetOfObjectsPtr>       mSysModel3d;
+
+	std::map<Channel, CSetOfObjectsPtr>       mSysAxis3d;
 
 	volatile Gui3dOption mOption;
 };

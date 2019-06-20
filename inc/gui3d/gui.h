@@ -73,6 +73,7 @@ hObject renderPolygon   (const Channel& name, // name
 hObject renderMapPoints (const Channel& name, const LandMark3dV& vPoint, const tOptions& options = tOptions());
 hObject renderPointCloud(const Channel& name, const PointCloud& cloud,   const tOptions& options = tOptions());
 
+hObject renderRGBAxis(const Channel &name, const Pose &Twb, const tOptions &options = tOptions());
 hObject renderModel3d   (const Channel& name,
                          const PoseV&   Twc , const PointCloudV& cloud,  const tOptions& options = tOptions());
 hObject renderRobot     (const Channel& name, const Pose& Twb,           const tOptions& options = tOptions());

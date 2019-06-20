@@ -419,6 +419,24 @@ hObject renderPointCloud(const Channel& name, const PointCloud& cloud,  const tO
     return (hObject)(obj.get());
 }
 
+hObject renderRGBAxis(const Channel &name, const Pose &Twb, const tOptions &options)
+{
+    if(!sCurrentFigure3d)
+        nFigure("default", 640, 480);
+
+    tOptions real_options = options;
+    systemChannelOptions(name, real_options);
+
+    CSetOfObjectsPtr obj = sCurrentFigure3d->hAxis3d(name);
+    auto win = sCurrentFigure3d->mMainWindow;
+    auto theScene = win->get3DSceneAndLock();
+    renderRGBAxis(theScene, obj, Twb, real_options);
+    if(obj) obj->setName(name);
+    win->unlockAccess3DScene();
+    sCurrentFigure3d->mSysAxis3d[name] = obj;
+    return (hObject)(obj.get());
+}
+
 hObject renderModel3d(const Channel& name, const PoseV& vTwc, const PointCloudV& cloud, const tOptions& options)
 {
     assert(vTwc.size() == cloud.size());
