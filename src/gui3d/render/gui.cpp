@@ -532,6 +532,28 @@ hObject viewDepth(const cv::Mat& depth_pts, const cv::Mat& im)
     }
 }
 
+hObject viewRgbdNormals(const cv::Mat& array2d_pt3d, const cv::Mat& normals)
+{
+    if(!sCurrentFigure3d)
+        nFigure("default", 640, 480);
+
+    const std::string& name = sysChannel[RgbdNormals];
+    tOptions options;
+    systemChannelOptions(name, options);
+
+    const Pose Twc = Pose::Identity();
+    auto win = sCurrentFigure3d->mMainWindow;
+    auto theScene = win->get3DSceneAndLock();
+    CSetOfLinesPtr obj = sCurrentFigure3d->hLine(name);
+    Position3dV lines;
+    collectLinesFromRGBDNormal(array2d_pt3d, normals, lines);
+    renderLines(theScene, obj, lines, options);
+    if(obj) obj->setName(name);
+    sCurrentFigure3d->mSysLine[name] = obj;
+    win->unlockAccess3DScene();
+    return (hObject)(obj.get());
+}
+
 hObject auxViewAt(const Pose &pose)
 {
     if(!sCurrentFigure3d)

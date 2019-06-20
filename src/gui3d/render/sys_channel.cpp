@@ -10,6 +10,7 @@
 #define DepthPointCloudOptions  tOptions(White,  1.1f, tOptions::HOLD_OFF)
 #define Model3dOptions          tOptions(White,  1.0f, tOptions::HOLD_OFF)
 #define PathOptions             tOptions(Orange, 1.0f, tOptions::HOLD_OFF)
+#define RgbdNormals             tOptions(White, 0.02f, tOptions::HOLD_OFF)
 
 namespace gui3d{
 

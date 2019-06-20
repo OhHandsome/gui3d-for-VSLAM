@@ -50,6 +50,33 @@ void collectCloudFromRGBD(const cv::Mat& im, const cv::Mat& depth, PointCloud& c
     }
 }
 
+void collectLinesFromRGBDNormal(const cv::Mat& depth, const cv::Mat& normal, Position3dV& vecN, const float l)
+{
+    for(int y = 0; y < depth.rows; y++)
+    {
+        auto pdepth = depth.ptr<cv::Vec3f>(y);
+        auto pnormal = normal.ptr<cv::Vec3f>(y);
+        for(int x = 0; x < depth.cols; x++)
+        {
+            cv::Vec3f pt = pdepth[x];
+            if(pt(2) == 0.0f)
+                continue;
+
+            cv::Vec3f n = pnormal[x];
+            if (cv::norm(n) == 0.0f)
+                continue;
+
+            LandMark3d info;
+            info << pt(0), pt(1), pt(2);
+            vecN.push_back(info);
+
+            pt += l * n;
+            info << pt(0), pt(1), pt(2);
+            vecN.push_back(info);
+        }
+    }
+}
+
 void saveAsPLY(const std::string& name, const Pose& Twc, const PointCloud& cloud)
 {
     LandMark3dV vertices(cloud.size());
