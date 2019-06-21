@@ -173,8 +173,8 @@ CSetOfObjectsPtr Figure::hModel3d(const Channel &name) {
 
 CSetOfObjectsPtr Figure::hAxis3d(const Channel &name) {
   CSetOfObjectsPtr obj;
-  auto it = mSysAxis3d.find(name);
-  if (it != mSysAxis3d.end()) obj = it->second;
+  auto it = mSysRgbAxis3d.find(name);
+  if (it != mSysRgbAxis3d.end()) obj = it->second;
   return obj;
 }
 

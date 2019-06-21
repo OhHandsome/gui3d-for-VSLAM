@@ -2,7 +2,7 @@
 #include <mrpt/opengl.h>
 #include <gui3d/plot.h>
 #include <gui3d/gui.h>
-#include <gui3d/base/system.h>
+#include <gui3d/base/math.h>
 #include <thread>
 using namespace gui3d;
 using namespace gui3d::system;
