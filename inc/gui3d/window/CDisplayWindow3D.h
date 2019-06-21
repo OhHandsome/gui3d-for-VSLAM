@@ -1,4 +1,5 @@
 #pragma once
+
 #include <mrpt/opengl/COpenGLScene.h>
 #include <mrpt/opengl/COpenGLViewport.h>
 #include <mrpt/opengl/CAxis.h>
@@ -14,27 +15,27 @@
 class GLFWwindow;
 class ImGuiContext;
 
-namespace gui3d{
+namespace gui3d {
 
 class CDisplayWindow3D;
 using CDisplayWindow3DPtr = std::shared_ptr<CDisplayWindow3D>;
 
 //!< Type for the callback function used in pushRenderCallback
-typedef void (* TCallbackRender) (void* userParam);
+typedef void (* TCallbackRender)(void* userParam);
 
 class CDisplayWindow3D {
- public:
+public:
   /** Constructor */
   CDisplayWindow3D(
-    const std::string	&windowCaption = "Arcsoft3d",
-    unsigned int		initialWindowWidth = 1080,
-    unsigned int		initialWindowHeight = 720 );
+      const std::string& windowCaption = "Arcsoft3d",
+      unsigned int initialWindowWidth = 1080,
+      unsigned int initialWindowHeight = 720);
 
   /** Class factory returning a smart pointer */
   static CDisplayWindow3DPtr Create(
-    const std::string	&windowCaption,
-    unsigned int		initialWindowWidth = 1080,
-    unsigned int		initialWindowHeight = 720 );
+      const std::string& windowCaption,
+      unsigned int initialWindowWidth = 1080,
+      unsigned int initialWindowHeight = 720);
 
   /** Destructor */
   virtual ~CDisplayWindow3D();
@@ -50,20 +51,22 @@ class CDisplayWindow3D {
   void resize(int width, int height) {}
   void setPos(int x, int y) {}
   void repaint() { forceRepaint(); }
-  void addTextMessage(int , int , int, int , int ) {}
+  void addTextMessage(int, int, int, int, int) {}
   volatile Gui3dOption& Options() { return m_Observer; }
   bool WindowClosed() const;
   void InitScene();
   CDisplayImagesPtr createViewImage(const std::string& name);
   CDisplayImagesPtr getViewImage() { return m_subview_image; }
 
-    /** Must be called to have a callback
-    *   when the user selects one of the user-defined entries
-    */
-  void pushRenderCallBack(TCallbackRender userFunction, void* userParam = NULL);
+  /*
+   * Must be called to have a callback
+   * when the user selects one of the user-defined entries
+   */
+  void pushRenderCallBack(TCallbackRender userFunction, void* userParam = nullptr);
 
- private:
-  void forceRepaint(); //!< Repaints the window. forceRepaint, repaint and updateWindow are all aliases of the same method
+private:
+  void
+  forceRepaint(); //!< Repaints the window. forceRepaint, repaint and updateWindow are all aliases of the same method
   void OnPreRender();
   void OnPostRender();
   void OnEyeShotRender();    // handle eye shot from mouse wheel
@@ -71,11 +74,6 @@ class CDisplayWindow3D {
   void loadSceneFrom(const char* fileName);
   void backThreadRun();
   void RunOnce();
-
-  struct HookFunc{
-      TCallbackRender userFunction;
-      void* userParam = nullptr;
-  };
 
   std::string                           m_windowCaption;
   int                                   m_initialWindowWidth;
@@ -85,7 +83,6 @@ class CDisplayWindow3D {
   CDisplayImagesPtr                     m_subview_image = nullptr;
   mrpt::opengl::CAxisPtr                m_Axis3d;
   mrpt::opengl::CGridPlaneXYPtr         m_ZeroPlane;
-  std::vector<HookFunc>                 m_hookFuncs;
 
   volatile Gui3dOption                   m_Observer;
 
@@ -97,6 +94,28 @@ class CDisplayWindow3D {
   ImGuiContext*                          m_ImGuiContext;
   mrpt::opengl::COpenGLScenePtr          m_3Dscene;   //!< Internal OpenGL object (see general discussion in about usage of this object)
   CGlCanvas*                             m_GlCanvas;  //!< Internal Mouse View object
+
+private:
+  struct HookFunc {
+    TCallbackRender userFunction;
+    void* userParam = nullptr;
+
+    void run() {
+      if (userFunction == nullptr)
+        return;
+      userFunction(userParam);
+    }
+  };
+
+  void setEditTheScene(
+      TCallbackRender userFunction,
+      void* userParam) {
+    m_editTheSceneFunc.userFunction = userFunction;
+    m_editTheSceneFunc.userParam = userParam;
+  }
+  std::vector<HookFunc>                 m_hookFuncs;
+  HookFunc                              m_editTheSceneFunc;
+  friend class Figure;
 };
 
 } // namespace gui3d

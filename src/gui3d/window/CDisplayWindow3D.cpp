@@ -285,42 +285,46 @@ void CDisplayWindow3D::OnPreRender() {
         m_ZeroPlane->setVisibility(visible);
 
       ImGui::Text("Label:");
-      ImGui::SameLine();
+      //ImGui::SameLine();
       int v[2];
       v[0] = m_Axis3d->getFrequency();
       v[1] = m_ZeroPlane->getGridFrequency();
       ImGui::SliderInt2("FREQ", v, 1, 8); // Edit 1 Int using a slider from 1 to 8
       m_Axis3d->setFrequency(v[0]);
       m_ZeroPlane->setGridFrequency(v[1]);
-
-      if (ImGui::TreeNode("TheScene")) {
-        COpenGLViewportPtr mainVP = m_3Dscene->getViewport();
-        for (COpenGLViewport::iterator itO = mainVP->begin();
-             itO!= mainVP->end();
-             ++itO) {
-          if((*itO)->getName() == m_Axis3d->getName() ||
-             (*itO)->getName() == m_ZeroPlane->getName())
-            continue;
-
-          if (ImGui::TreeNode((*itO)->getName().c_str())) {
-            float s = (*itO)->getScaleX();
-            ImGui::InputFloat("scale", &s, 0.1f, 1.0f, "%.3f");
-            (*itO)->setScale(s);
-            ImGui::TreePop();
-          }
-        }
-        ImGui::TreePop();
-      }
-
-      /*
-      auto& im_visiable = m_Observer.figOpt.bViewPort;
-      COpenGLViewportPtr vp = theScene->getViewport("Image");
-      if (vp.get() != nullptr) {
-        if (ImGui::Checkbox("im", (bool *)&im_visiable)) {
-          vp->resetCloneView();
-        }
-      }*/
       unlockAccess3DScene();
+
+      m_editTheSceneFunc.run();
+
+
+//      if (ImGui::TreeNode("TheScene")) {
+//        COpenGLViewportPtr mainVP = m_3Dscene->getViewport();
+//        for (COpenGLViewport::iterator itO = mainVP->begin();
+//             itO!= mainVP->end();
+//             ++itO) {
+//          if((*itO)->getName() == m_Axis3d->getName() ||
+//             (*itO)->getName() == m_ZeroPlane->getName())
+//            continue;
+//
+//          if (ImGui::TreeNode((*itO)->getName().c_str())) {
+//            float s = (*itO)->getScaleX();
+//            ImGui::InputFloat("scale", &s, 0.1f, 1.0f, "%.3f");
+//            (*itO)->setScale(s);
+//            ImGui::TreePop();
+//          }
+//        }
+//        ImGui::TreePop();
+//      }
+//
+//      /*
+//      auto& im_visiable = m_Observer.figOpt.bViewPort;
+//      COpenGLViewportPtr vp = theScene->getViewport("Image");
+//      if (vp.get() != nullptr) {
+//        if (ImGui::Checkbox("im", (bool *)&im_visiable)) {
+//          vp->resetCloneView();
+//        }
+//      }*/
+//      unlockAccess3DScene();
     }
     ImGui::End();
   }
@@ -509,7 +513,7 @@ void CDisplayWindow3D::RunOnce()
     m_GlCanvas->OnPaint();
     OnImGuiRender();
     for (auto hook : m_hookFuncs)
-        hook.userFunction(hook.userParam);
+        hook.run();
     unlockAccess3DScene();
     RequestToRefresh3DView = false;
   }

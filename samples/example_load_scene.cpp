@@ -31,6 +31,7 @@ int main(int argc, char** argv) {
   auto& bExit = guiOpt.figOpt.bExit;
 
   RunShowScene(argc, argv);
+  //RunAppLoadScene(argc, argv);
 
   bool bNeedRefresh3DView = true;
   while (!bExit) {

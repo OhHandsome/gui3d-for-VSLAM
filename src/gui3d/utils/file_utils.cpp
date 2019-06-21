@@ -11,43 +11,39 @@
 #include <stdarg.h> // va_list
 #include <stdio.h> // vsnprintf
 
-const std::vector<std::string> explode(const std::string& s, const char& c)
-{
-    std::string buff{""};
-    std::vector<std::string> v;
+const std::vector<std::string> explode(const std::string& s, const char& c) {
+  std::string buff{""};
+  std::vector<std::string> v;
 
-    for(auto n:s)
-    {
-        if(n != c) buff+=n; else
-        if(n == c && buff != "") { v.push_back(buff); buff = ""; }
+  for (auto n:s) {
+    if (n != c) buff += n;
+    else if (n == c && buff != "") {
+      v.push_back(buff);
+      buff = "";
     }
-    if(buff != "") v.push_back(buff);
+  }
+  if (buff != "") v.push_back(buff);
 
-    return v;
+  return v;
 }
 
-std::string format(const char* fmt, ...)
-{
-    std::string str;
-    str.resize(std::max(256, (int) strlen(fmt) + 1));
-    for (;;)
-    {
-        va_list args;
-        va_start(args, fmt); // Initialize variable arguments
-        const int bsize = (int) str.size();
-        const int len = vsnprintf((char *) str.data(), bsize, fmt, args);
-        va_end(args); // Reset variable argument list
-        if (len < 0 || len >= bsize)
-        {
-            str.resize(std::max(bsize * 2, len + 1));
-            continue;
-        }
-        else
-        {
-            str.resize(len);
-            return str;
-        }
+std::string format(const char* fmt, ...) {
+  std::string str;
+  str.resize(std::max(256, (int) strlen(fmt) + 1));
+  for (;;) {
+    va_list args;
+    va_start(args, fmt); // Initialize variable arguments
+    const int bsize = (int) str.size();
+    const int len = vsnprintf((char*) str.data(), bsize, fmt, args);
+    va_end(args); // Reset variable argument list
+    if (len < 0 || len >= bsize) {
+      str.resize(std::max(bsize * 2, len + 1));
+      continue;
+    } else {
+      str.resize(len);
+      return str;
     }
+  }
 }
 
 #if WIN32
@@ -135,81 +131,72 @@ void removeAllFile(const std::string& dir)
     }
 }
 #else
-void dfs_remove_dir()
-{
-    DIR *cur_dir = opendir(".");
-    struct dirent *ent = NULL;
-    struct stat st;
 
-    if (!cur_dir)
-    {
-        perror("opendir:");
-        return;
+void dfs_remove_dir() {
+  DIR* cur_dir = opendir(".");
+  struct dirent* ent = NULL;
+  struct stat st;
+
+  if (!cur_dir) {
+    perror("opendir:");
+    return;
+  }
+
+  while ((ent = readdir(cur_dir)) != NULL) {
+    stat(ent->d_name, &st);
+
+    if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
+      continue;
     }
 
-    while ((ent = readdir(cur_dir)) != NULL)
-    {
-        stat(ent->d_name, &st);
-
-        if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
-        {
-            continue;
-        }
-
-        if (S_ISDIR(st.st_mode))
-        {
-            int tmp = chdir(ent->d_name);
-            dfs_remove_dir();
-            tmp = chdir("..");
-        }
-
-        remove(ent->d_name);
+    if (S_ISDIR(st.st_mode)) {
+      int tmp = chdir(ent->d_name);
+      dfs_remove_dir();
+      tmp = chdir("..");
     }
-    closedir(cur_dir);
+
+    remove(ent->d_name);
+  }
+  closedir(cur_dir);
 }
 
-void remove_dir(const char *path_raw)
-{
-    char old_path[100];
+void remove_dir(const char* path_raw) {
+  char old_path[100];
 
-    if (!path_raw)
-    {
-        return;
-    }
+  if (!path_raw) {
+    return;
+  }
 
-    auto tmp = getcwd(old_path, 100);
+  auto tmp = getcwd(old_path, 100);
 
-    if (chdir(path_raw) == -1)
-    {
-        fprintf(stderr, "not a dir or access error\n");
-        return;
-    }
+  if (chdir(path_raw) == -1) {
+    fprintf(stderr, "not a dir or access error\n");
+    return;
+  }
 
-    printf("path: %s\n", path_raw);
-    dfs_remove_dir();
-    int n = chdir(old_path);
+  printf("path: %s\n", path_raw);
+  dfs_remove_dir();
+  int n = chdir(old_path);
 
-    /*
-       unlink(old_path);
-     */
+  /*
+     unlink(old_path);
+   */
 }
 
-void removeAllFile(const std::string& dir)
-{
-    if (access(dir.c_str(), 0) == 0)
-    {
-        remove_dir(dir.c_str());
-    }
+void removeAllFile(const std::string& dir) {
+  if (access(dir.c_str(), 0) == 0) {
+    remove_dir(dir.c_str());
+  }
 
-    if (access(dir.c_str(), 0) == -1)
-    {
-        LOGI("%s is not existing.", dir.c_str());
-        LOGI("now make it.");
-        int flag= mkdir(dir.c_str(), 0777);
-        if (flag == 0)
-            LOGI("make successfully");
-        else
-            LOGE("make errorly");
-    }
+  if (access(dir.c_str(), 0) == -1) {
+    LOGI("%s is not existing.", dir.c_str());
+    LOGI("now make it.");
+    int flag = mkdir(dir.c_str(), 0777);
+    if (flag == 0)
+      LOGI("make successfully");
+    else
+      LOGE("make errorly");
+  }
 }
+
 #endif // end of #if WIN32

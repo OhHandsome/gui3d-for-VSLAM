@@ -6,6 +6,7 @@
 
 #if HAS_IMGUI
 #include <gui3d/window/CDisplayWindow3D.h>
+#include <imgui.h>
 #endif
 
 //-------------------    Local Function   ---------------------------//
@@ -18,6 +19,70 @@ void removeObject(COpenGLViewportPtr mainVP, std::map<std::string, T>& m) {
   m.clear();
 }
 
+#if HAS_IMGUI
+// common edit
+template <class Object>
+void editObjects(
+    const std::string& name,
+    std::map<std::string, Object>& map_objects)
+{
+  if (map_objects.empty())
+    return;
+
+  if (ImGui::TreeNode(name.c_str())) {
+    for (auto& item : map_objects) {
+      auto obj = item.second;
+      if (ImGui::TreeNode(obj->getName().c_str())) {
+        float s = obj->getScaleX();
+        ImGui::InputFloat("scale", &s, 0.1f, 1.0f, "%.3f");
+        obj->setScale(s);
+        ImGui::TreePop();
+      }
+    }
+    ImGui::TreePop();
+  }
+}
+
+void editPoseList(
+    const std::string& name,
+    std::map<std::string, CSetOfObjectsPtr>& map_poselist){
+
+  if (map_poselist.empty())
+    return;
+
+  if (ImGui::TreeNode(name.c_str())) {
+    for (auto& item : map_poselist) {
+      auto obj = item.second;
+      if (ImGui::TreeNode(obj->getName().c_str())) {
+        float s = (*obj->begin())->getScaleX();
+        ImGui::InputFloat("scale", &s, 0.1f, 1.0f, "%.3f");
+        for (auto itO = obj->begin(); itO != obj->end(); ++itO) {
+          (*itO)->setScale(s);
+        }
+        ImGui::TreePop();
+      }
+    }
+    ImGui::TreePop();
+  }
+}
+
+void editTheScene(void* hObject) {
+
+  gui3d::Figure* figure = (gui3d::Figure*)(hObject);
+  const auto& window = figure->mMainWindow;
+  if (ImGui::CollapsingHeader("TheScene")) {
+    editObjects("Frame",        figure->mSysFrame);
+    editPoseList("Frames",      figure->mSysPoseList);
+    editObjects("Robot",        figure->mSysRobot);
+    editObjects("MapPoint",     figure->mSysMapPoint);
+    editObjects("PointCloud",   figure->mSysPointCloud);
+    editObjects("Model",        figure->mSysModel3d);
+    editObjects("RgbAxis3d",    figure->mSysRgbAxis3d);
+  }
+  window->unlockAccess3DScene();
+}
+#endif
+
 namespace gui3d {
 
 int Figure::mNextID = 1;
@@ -28,6 +93,7 @@ Figure::Figure(const string& name, int width, int height) {
   mMainWindow = win;
   this->name = name;
   mFigureID = mNextID++;
+  win->setEditTheScene(editTheScene, this);
 #else
   // Create 3D Windows
   mrpt::gui::CDisplayWindow3DPtr win = mrpt::gui::CDisplayWindow3DPtr(new mrpt::gui::CDisplayWindow3D(name, width, height));

@@ -21,20 +21,36 @@ namespace gui3d {
 */
 
 // Render Parameter
-struct tOptions{
-    enum { HOLD_ON, HOLD_OFF };
+struct tOptions {
+  enum {
+    HOLD_ON, HOLD_OFF
+  };
 
-    tOptions& setColor(const Color& color) { _color = color; return *this;}
-    tOptions& setScale(const float scale)  { _scale = scale; return *this;}
-    tOptions& setMethod(bool method)       { _method = method; return *this;}
+  tOptions()
+      : color(Blue), scale(0.25f), method(HOLD_OFF) {}
 
-    tOptions() : _color(Blue), _scale(0.250f), _method(HOLD_OFF){}
-    tOptions(const Color& color, float scale, bool flag) :
-        _color(color), _scale(scale), _method(flag) {}
+  tOptions(const Color& color, float scale, bool flag)
+      : color(color), scale(scale), method(flag) {}
 
-    Color _color;
-    float _scale;
-    bool  _method;
+  tOptions& setColor(const Color& color) {
+    this->color = color;
+    return *this;
+  }
+
+  tOptions& setScale(const float scale) {
+    this->scale = scale;
+    return *this;
+  }
+
+  tOptions& setMethod(bool method) {
+    this->method = method;
+    return *this;
+  }
+
+  Color color;
+  float scale;
+  bool method;
+  bool locked = false;
 };
 
 
@@ -49,6 +65,7 @@ void moveFigure(int x, int y);
 void destoryFigure(const string& name);
 void destoryFigure(hObject fig);
 void play_control();
+void try_pause();
 void waitKey(int delay_ms = 0);
 
 // Image Display
@@ -73,7 +90,7 @@ hObject renderPolygon   (const Channel& name, // name
 hObject renderMapPoints (const Channel& name, const LandMark3dV& vPoint, const tOptions& options = tOptions());
 hObject renderPointCloud(const Channel& name, const PointCloud& cloud,   const tOptions& options = tOptions());
 
-hObject renderRGBAxis(const Channel &name, const Pose &Twb, const tOptions &options = tOptions());
+hObject renderRGBAxis   (const Channel &name, const Pose &Twb,           const tOptions &options = tOptions());
 hObject renderModel3d   (const Channel& name,
                          const PoseV&   Twc , const PointCloudV& cloud,  const tOptions& options = tOptions());
 hObject renderRobot     (const Channel& name, const Pose& Twb,           const tOptions& options = tOptions());
