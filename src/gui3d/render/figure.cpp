@@ -10,7 +10,7 @@
 
 //-------------------    Local Function   ---------------------------//
 template<class T>
-void removeObject(COpenGLViewportPtr mainVP, std::map<std::string, T> &m) {
+void removeObject(COpenGLViewportPtr mainVP, std::map<std::string, T>& m) {
   for (auto item : m) {
     if (item.second)
       mainVP->removeObject(item.second);
@@ -21,7 +21,7 @@ void removeObject(COpenGLViewportPtr mainVP, std::map<std::string, T> &m) {
 namespace gui3d {
 
 int Figure::mNextID = 1;
-Figure::Figure(const string &name, int width, int height) {
+Figure::Figure(const string& name, int width, int height) {
 #if HAS_IMGUI == 1
   // Create 3D Windows
   gui3d::CDisplayWindow3DPtr win = gui3d::CDisplayWindow3DPtr(new CDisplayWindow3D(name, width, height));
@@ -112,7 +112,7 @@ void Figure::clear() {
   mMainWindow->unlockAccess3DScene();
 }
 
-volatile Gui3dOption &Figure::Options() {
+volatile Gui3dOption& Figure::Options() {
 #if HAS_IMGUI
   return mMainWindow->Options();
 #else
@@ -120,58 +120,57 @@ volatile Gui3dOption &Figure::Options() {
 #endif
 }
 
-
 // Find Channel's hObject
-CFrustumPtr Figure::hFrame(const Channel &name) {
+CFrustumPtr Figure::hFrame(const Channel& name) {
   CFrustumPtr obj;
   auto it = mSysFrame.find(name);
   if (it != mSysFrame.end()) obj = it->second;
   return obj;
 }
 
-CSetOfObjectsPtr Figure::hRobot(const Channel &name) {
+CSetOfObjectsPtr Figure::hRobot(const Channel& name) {
   CSetOfObjectsPtr obj;
   auto it = mSysRobot.find(name);
   if (it != mSysRobot.end()) obj = it->second;
   return obj;
 }
 
-CSetOfObjectsPtr Figure::hPoseList(const Channel &name) {
+CSetOfObjectsPtr Figure::hPoseList(const Channel& name) {
   CSetOfObjectsPtr obj;
   auto it = mSysPoseList.find(name);
   if (it != mSysPoseList.end()) obj = it->second;
   return obj;
 }
 
-CPointCloudPtr Figure::hMapPoint(const Channel &name) {
+CPointCloudPtr Figure::hMapPoint(const Channel& name) {
   CPointCloudPtr obj;
   auto it = mSysMapPoint.find(name);
   if (it != mSysMapPoint.end()) obj = it->second;
   return obj;
 }
 
-CPointCloudColouredPtr Figure::hPointCloud(const Channel &name) {
+CPointCloudColouredPtr Figure::hPointCloud(const Channel& name) {
   CPointCloudColouredPtr obj;
   auto it = mSysPointCloud.find(name);
   if (it != mSysPointCloud.end()) obj = it->second;
   return obj;
 }
 
-CSetOfLinesPtr Figure::hLine(const Channel &name) {
+CSetOfLinesPtr Figure::hLine(const Channel& name) {
   CSetOfLinesPtr obj;
   auto it = mSysLine.find(name);
   if (it != mSysLine.end()) obj = it->second;
   return obj;
 }
 
-CSetOfObjectsPtr Figure::hModel3d(const Channel &name) {
+CSetOfObjectsPtr Figure::hModel3d(const Channel& name) {
   CSetOfObjectsPtr obj;
   auto it = mSysModel3d.find(name);
   if (it != mSysModel3d.end()) obj = it->second;
   return obj;
 }
 
-CSetOfObjectsPtr Figure::hAxis3d(const Channel &name) {
+CSetOfObjectsPtr Figure::hAxis3d(const Channel& name) {
   CSetOfObjectsPtr obj;
   auto it = mSysRgbAxis3d.find(name);
   if (it != mSysRgbAxis3d.end()) obj = it->second;

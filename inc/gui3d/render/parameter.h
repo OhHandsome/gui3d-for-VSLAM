@@ -30,7 +30,6 @@ enum TextID
     RENDER_FPS,
     NEED_KEYFRAME,
     CAPTURE_IMAGES
-
 };
 
 enum EVENT_TYPE {

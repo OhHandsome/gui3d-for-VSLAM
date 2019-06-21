@@ -4,8 +4,7 @@
 
 namespace gui3d {
 
-struct FigureOption
-{
+struct FigureOption {
 	bool bWaitKey     = false;              // For waitKey
 	bool bExit        = false;              // Exit GUI Window
 	bool bSave3DScene = false;              // Save .3DScene
@@ -25,8 +24,7 @@ struct FigureOption
 //     case 1: flag for control running, sleep
 //     case 2: flag for switch show or hide rendering model
 // Option in Program Control Stream
-struct ControlOption
-{
+struct ControlOption {
 	// Other toggles
 	int ReadFrameGap = FRAME_GAP_LENGTH;   // Read n Frame and Stop when ReadNextFrame = false
 	bool ReadNextFrame = true;             // Read Next Frame
@@ -37,8 +35,7 @@ struct ControlOption
 };
 
 // Option in 3d SLAM's Scene
-struct SceneOption
-{
+struct SceneOption {
 	// Display toggles
 	bool bViewKeyframes = true;
 	bool bViewPoseNames = true;
@@ -60,11 +57,10 @@ struct SceneOption
 	float CurKFScale = 1;
 };
 
-struct Gui3dOption
-{
-	FigureOption  figOpt;
-	ControlOption conOpt;
-	SceneOption   sceneOpt;
+struct Gui3dOption {
+  FigureOption figOpt;
+  ControlOption conOpt;
+  SceneOption sceneOpt;
 };
 
 } // namespace gui3d

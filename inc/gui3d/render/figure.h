@@ -13,7 +13,6 @@ using GuiObserverPtr = std::shared_ptr<GuiObserver>;
 #endif
 
 class Figure;
-
 using FigurePtr = std::shared_ptr<Figure>;
 
 class Figure {
