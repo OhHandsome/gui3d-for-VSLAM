@@ -8,11 +8,9 @@
 #include <gui3d/window/CDisplayWindow3D.h>
 #endif
 
-namespace gui3d {
-
-template <class T>
-void removeObject(COpenGLViewportPtr mainVP, std::map<Channel, T>& m)
-{
+//-------------------    Local Function   ---------------------------//
+template<class T>
+void removeObject(COpenGLViewportPtr mainVP, std::map<std::string, T> &m) {
   for (auto item : m) {
     if (item.second)
       mainVP->removeObject(item.second);
@@ -20,9 +18,10 @@ void removeObject(COpenGLViewportPtr mainVP, std::map<Channel, T>& m)
   m.clear();
 }
 
+namespace gui3d {
+
 int Figure::mNextID = 1;
-Figure::Figure(const string &name, int width, int height)
-{
+Figure::Figure(const string &name, int width, int height) {
 #if HAS_IMGUI == 1
   // Create 3D Windows
   gui3d::CDisplayWindow3DPtr win = gui3d::CDisplayWindow3DPtr(new CDisplayWindow3D(name, width, height));
@@ -57,8 +56,7 @@ Figure::Figure(const string &name, int width, int height)
 #endif
 }
 
-void Figure::init()
-{
+void Figure::init() {
 #if HAS_IMGUI == 1
   mMainWindow->InitScene();
 #else
@@ -91,20 +89,17 @@ void Figure::init()
 #endif
 }
 
-void Figure::clear()
-{
+void Figure::clear() {
   if (!mMainWindow)
     return;
 
   mScene = mMainWindow->get3DSceneAndLock();
   if (!mGLViewImage) mGLViewImage.clear();
-  if (!mGLSubView)   mGLSubView.clear();
+  if (!mGLSubView) mGLSubView.clear();
 
-  if (mScene)
-  {
+  if (mScene) {
     COpenGLViewportPtr mainVP = mScene->getViewport();
-    if (mainVP)
-    {
+    if (mainVP) {
       removeObject(mainVP, mSysFrame);
       removeObject(mainVP, mSysRobot);
       removeObject(mainVP, mSysPoseList);
@@ -117,8 +112,7 @@ void Figure::clear()
   mMainWindow->unlockAccess3DScene();
 }
 
-volatile Gui3dOption& Figure::Options()
-{
+volatile Gui3dOption &Figure::Options() {
 #if HAS_IMGUI
   return mMainWindow->Options();
 #else
@@ -128,67 +122,59 @@ volatile Gui3dOption& Figure::Options()
 
 
 // Find Channel's hObject
-CFrustumPtr Figure::hFrame(const Channel& name)
-{
+CFrustumPtr Figure::hFrame(const Channel &name) {
   CFrustumPtr obj;
   auto it = mSysFrame.find(name);
-  if(it != mSysFrame.end())  obj = it->second;
+  if (it != mSysFrame.end()) obj = it->second;
   return obj;
 }
 
-CSetOfObjectsPtr Figure::hRobot(const Channel& name)
-{
+CSetOfObjectsPtr Figure::hRobot(const Channel &name) {
   CSetOfObjectsPtr obj;
   auto it = mSysRobot.find(name);
-  if(it != mSysRobot.end())  obj = it->second;
+  if (it != mSysRobot.end()) obj = it->second;
   return obj;
 }
 
-CSetOfObjectsPtr Figure::hPoseList(const Channel& name)
-{
+CSetOfObjectsPtr Figure::hPoseList(const Channel &name) {
   CSetOfObjectsPtr obj;
   auto it = mSysPoseList.find(name);
-  if(it != mSysPoseList.end())  obj = it->second;
+  if (it != mSysPoseList.end()) obj = it->second;
   return obj;
 }
 
-CPointCloudPtr Figure::hMapPoint(const Channel& name)
-{
+CPointCloudPtr Figure::hMapPoint(const Channel &name) {
   CPointCloudPtr obj;
   auto it = mSysMapPoint.find(name);
-  if(it != mSysMapPoint.end())  obj = it->second;
+  if (it != mSysMapPoint.end()) obj = it->second;
   return obj;
 }
 
-CPointCloudColouredPtr Figure::hPointCloud(const Channel& name)
-{
+CPointCloudColouredPtr Figure::hPointCloud(const Channel &name) {
   CPointCloudColouredPtr obj;
   auto it = mSysPointCloud.find(name);
-  if(it != mSysPointCloud.end())  obj = it->second;
+  if (it != mSysPointCloud.end()) obj = it->second;
   return obj;
 }
 
-CSetOfLinesPtr Figure::hLine(const Channel& name)
-{
+CSetOfLinesPtr Figure::hLine(const Channel &name) {
   CSetOfLinesPtr obj;
   auto it = mSysLine.find(name);
-  if(it != mSysLine.end())  obj = it->second;
+  if (it != mSysLine.end()) obj = it->second;
   return obj;
 }
 
-CSetOfObjectsPtr Figure::hModel3d(const Channel& name)
-{
+CSetOfObjectsPtr Figure::hModel3d(const Channel &name) {
   CSetOfObjectsPtr obj;
   auto it = mSysModel3d.find(name);
-  if(it != mSysModel3d.end())  obj = it->second;
+  if (it != mSysModel3d.end()) obj = it->second;
   return obj;
 }
 
-CSetOfObjectsPtr Figure::hAxis3d(const Channel& name)
-{
+CSetOfObjectsPtr Figure::hAxis3d(const Channel &name) {
   CSetOfObjectsPtr obj;
   auto it = mSysAxis3d.find(name);
-  if(it != mSysAxis3d.end())  obj = it->second;
+  if (it != mSysAxis3d.end()) obj = it->second;
   return obj;
 }
 
