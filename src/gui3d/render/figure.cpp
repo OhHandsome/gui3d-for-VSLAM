@@ -33,9 +33,17 @@ void editObjects(
     for (auto& item : map_objects) {
       auto obj = item.second;
       if (ImGui::TreeNode(obj->getName().c_str())) {
+        // scale
         float s = obj->getScaleX();
-        ImGui::InputFloat("scale", &s, 0.1f, 1.0f, "%.3f");
-        obj->setScale(s);
+        if (ImGui::InputFloat("scale", &s, 0.1f, 1.0f, "%.3f")) {
+          obj->setScale(s);
+        }
+        // color
+        TColorf tmp = obj->getColor();
+        float color[3] = {tmp.R, tmp.G, tmp.B};
+        if (ImGui::ColorEdit3("color", (float*)&color)) {  // Edit 3 floats representing a color
+          obj->setColor(TColorf(color[0], color[1], color[2]));
+        }
         ImGui::TreePop();
       }
     }
@@ -43,7 +51,7 @@ void editObjects(
   }
 }
 
-void editPoseList(
+void editObjects(
     const std::string& name,
     std::map<std::string, CSetOfObjectsPtr>& map_poselist){
 
@@ -54,10 +62,17 @@ void editPoseList(
     for (auto& item : map_poselist) {
       auto obj = item.second;
       if (ImGui::TreeNode(obj->getName().c_str())) {
+        // scale
         float s = (*obj->begin())->getScaleX();
-        ImGui::InputFloat("scale", &s, 0.1f, 1.0f, "%.3f");
-        for (auto itO = obj->begin(); itO != obj->end(); ++itO) {
-          (*itO)->setScale(s);
+        if (ImGui::InputFloat("scale", &s, 0.1f, 1.0f, "%.3f")) {
+          for (auto itO = obj->begin(); itO != obj->end(); ++itO)
+            (*itO)->setScale(s);
+        }
+        // color
+        TColorf tmp = obj->getColor();
+        float color[3] = {tmp.R, tmp.G, tmp.B};
+        if (ImGui::ColorEdit3("color", (float*)&color)) {  // Edit 3 floats representing a color
+          obj->setColor(TColorf(color[0], color[1], color[2]));
         }
         ImGui::TreePop();
       }
@@ -72,7 +87,7 @@ void editTheScene(void* hObject) {
   const auto& window = figure->mMainWindow;
   if (ImGui::CollapsingHeader("TheScene")) {
     editObjects("Frame",        figure->mSysFrame);
-    editPoseList("Frames",      figure->mSysPoseList);
+    editObjects("Frames",       figure->mSysPoseList);
     editObjects("Robot",        figure->mSysRobot);
     editObjects("MapPoint",     figure->mSysMapPoint);
     editObjects("PointCloud",   figure->mSysPointCloud);
