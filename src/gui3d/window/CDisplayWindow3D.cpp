@@ -162,32 +162,9 @@ CDisplayWindow3D::createViewImage(const std::string &name) {
 }
 
 void CDisplayWindow3D::InitScene(){
-  const int AXISLength  = 6;
-  // Add Axis
-  {
-    auto theScene = get3DSceneAndLock();
-    CAxisPtr Axis = CAxis::Create(-AXISLength, -AXISLength, -AXISLength,
-                                  AXISLength, AXISLength /* / 2.0 + 1*/, AXISLength /* / 2.0 + 1*/, 4, 2, true);
-    Axis->setTextScale(0.25f);
-    Axis->setName("CAxis");
-    Axis->enableTickMarks();
-    Axis->setFrequency(3);
-    Axis->setVisibility(false);
-    theScene->insert(Axis);
-    m_Axis3d = Axis;
-    unlockAccess3DScene();
-  }
-  // Add Plane XY
-  {
-    auto theScene = get3DSceneAndLock();
-    auto XY = CGridPlaneXY::Create(-AXISLength, AXISLength, -AXISLength, AXISLength);
-    XY->setName("CXY");
-    XY->setGridFrequency(3);
-    XY->setVisibility(false);
-    theScene->insert(XY);
-    m_ZeroPlane = XY;
-    unlockAccess3DScene();
-  }
+  auto theScene = get3DSceneAndLock();
+  gui3d::renderCartesianCoordinate(theScene, m_Axis3d, m_ZeroPlane);
+  unlockAccess3DScene();
 }
 
 void CDisplayWindow3D::OnPreRender() {

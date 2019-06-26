@@ -364,5 +364,29 @@ bool auxViewAt(GLScenePtr theScene, COpenGLViewportPtr& gl_view_Camera, const Po
   return true;
 }
 
+bool renderCartesianCoordinate(GLScenePtr theScene, CAxisPtr& Axis, CGridPlaneXYPtr& horizon, const bool visible) {
+  const int AXISLength  = 6;
+  // Add Axis
+  {
+    Axis = CAxis::Create(-AXISLength, -AXISLength, -AXISLength,
+                          AXISLength,  AXISLength,  AXISLength,
+                         4, 2, true);
+    Axis->setTextScale(0.25f);
+    Axis->setName("CAxis");
+    Axis->enableTickMarks();
+    Axis->setFrequency(3);
+    Axis->setVisibility(visible);
+    theScene->insert(Axis);
+  }
+  // Add Plane XY
+  {
+    horizon = CGridPlaneXY::Create(-AXISLength, AXISLength, -AXISLength, AXISLength);
+    horizon->setName("CXY");
+    horizon->setGridFrequency(3);
+    horizon->setVisibility(visible);
+    theScene->insert(horizon);
+  }
+}
+
 } // namespace gui3d
 

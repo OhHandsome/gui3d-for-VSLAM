@@ -31,6 +31,7 @@ bool renderLines (GLScenePtr theScene, CSetOfLinesPtr&   obj, const Position3dV&
 bool renderMapPoints (GLScenePtr theScene, CPointCloudPtr&         obj, const Pose& Twc, const LandMark3dV& vPoints, const tOptions& options);
 bool renderPointCloud(GLScenePtr theScene, CPointCloudColouredPtr& obj, const Pose& Twc, const PointCloud& vPoints, const tOptions& options);
 
+bool renderCartesianCoordinate(GLScenePtr theScene, CAxisPtr& axis, CGridPlaneXYPtr& horizon, const bool visible = false);
 
 // Render ViewPort
 bool auxViewAt(GLScenePtr theScene, COpenGLViewportPtr& gl_view_Camera, const Pose& pose);
