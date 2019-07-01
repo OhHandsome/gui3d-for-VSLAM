@@ -45,11 +45,6 @@ hObject nFigure(const string& name, int width = -1, int height = -1);
 void play_control();
 void waitKey(int delay_ms = 0);
 
-// Image Display
-hObject imshow(const string& name, const cv::Mat& im);
-hObject imshow(const string& name, const cv::Mat& im, const cv::Mat& array2d_pt3d);
-void waitExit(hObject hfig, int delay_ms = 0);
-
 // Render Base Complement
 const string& workRoute();
 const string& dataRoute();

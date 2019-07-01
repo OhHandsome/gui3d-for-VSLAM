@@ -7,6 +7,9 @@ int main()
 {
     gui3d::nFigure(gui3d::Engine(), 1080, 720);
     gui3d::renderFrame(sysChannel[CurCamera], I44);
-    while (1);
+    while (1)
+    {
+      gui3d::repaint();
+    }
     return 0;
 }

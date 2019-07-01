@@ -366,6 +366,10 @@ void update(hObject obj, const Pose& Twc)
 
 void repaint()
 {
+  if (!sCurrentFigure3d)
+    return;
+
+  sCurrentFigure3d->forceRepaint();
 }
 
 const std::string& workRoute()

@@ -14,7 +14,7 @@
 #include <Third-party/imguifilesystem/imguifilesystem.h>
 #include <list>
 
-#define USE_BACKEND_RENDER 1
+#define USE_BACKEND_RENDER 0
 
 namespace gui3d {
 
@@ -83,9 +83,7 @@ CDisplayWindow3D::CDisplayWindow3D(const std::string &windowCaption,
   // Setup Dear ImGui style
   ImGui::StyleColorsClassic();
 
-  m_3Dscene = mrpt::opengl::COpenGLScene::Create();
   m_GlCanvas = new CGlCanvas(m_3Dscene);
-  InitScene();
   glfwSetKeyCallback(m_Window, key_callback);
   glfwSetWindowUserPointer(m_Window, this);
 #endif
@@ -118,6 +116,10 @@ void CDisplayWindow3D::OnPreRender() {
 
   // Menu
   bool& show_scene_property_editor = (bool&)m_control.b_edit3DSceneProperty;
+  bool& openSceneFile = (bool&)m_control.b_openSceneFile;
+  bool& save3DScene = (bool&)m_control.b_save3DScene;
+  bool& save3DSceneAs = (bool&)m_control.b_save3DSceneAs;
+
   // Display [Scene] panel
   static bool show_tool_panel = true;
   if (ImGui::Begin("Scene", &show_tool_panel,
@@ -131,9 +133,9 @@ void CDisplayWindow3D::OnPreRender() {
     // menu list
     if (ImGui::BeginMenuBar()) {
       if (ImGui::BeginMenu("File")) {
-        ImGui::MenuItem("Open", "Ctrl+O",         &m_control.b_openSceneFile);
-        if (ImGui::MenuItem("Save", "Ctrl+S",     &m_control.b_save3DScene)) {}
-        if (ImGui::MenuItem("Save As..", nullptr, &m_control.b_save3DSceneAs)) {}
+        ImGui::MenuItem("Open", "Ctrl+O",         &openSceneFile);
+        if (ImGui::MenuItem("Save", "Ctrl+S",     &save3DScene)) {}
+        if (ImGui::MenuItem("Save As..", nullptr, &save3DSceneAs)) {}
         ImGui::EndMenu();
       }
 
@@ -301,7 +303,7 @@ void CDisplayWindow3D::RunOnce()
     m_GlCanvas->OnPaint();
     OnImGuiRender();
     for (auto hook : m_hookFuncs)
-        hook.userFunction(hook.userParam);
+        hook.run();
     unlockAccess3DScene();
     RequestToRefresh3DView = false;
   }

@@ -51,8 +51,11 @@ class CDisplayWindow3D : public SceneManager {
     */
   void pushRenderCallBack(TCallbackRender userFunction, void* userParam = NULL);
 
+  //!< Repaints the window. forceRepaint, repaint and updateWindow
+  //!< are all aliases of the same method
+  void forceRepaint();
+
  private:
-  void forceRepaint(); //!< Repaints the window. forceRepaint, repaint and updateWindow are all aliases of the same method
   void OnPreRender();
   void OnPostRender();
   void OnEyeShotRender();    // handle eye shot from mouse wheel
