@@ -1,5 +1,17 @@
 #include <gui3d/render/scene_manager.h>
 #include <gui3d/render/model_render.h>
+#include <Third-party/imgui/imgui.h>
+
+static void ShowHelpMarker(const char* desc) {
+  ImGui::TextDisabled("(?)");
+  if (ImGui::IsItemHovered()) {
+    ImGui::BeginTooltip();
+    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+    ImGui::TextUnformatted(desc);
+    ImGui::PopTextWrapPos();
+    ImGui::EndTooltip();
+  }
+}
 
 namespace gui3d {
 
@@ -54,6 +66,51 @@ COpenGLScene::Ptr& SceneManager::get3DSceneAndLock() {
 
 void SceneManager::unlockAccess3DScene() {
   m_access3Dscene.unlock();
+}
+
+void SceneManager::render_visiable() {
+
+  COpenGLViewport::Ptr mainVP = m_3Dscene->getViewport();
+
+  // 1. Firstly, check visible_all
+  visible_all = true;
+  for (COpenGLViewport::const_iterator itO = mainVP->begin();
+       itO!= mainVP->end();
+       ++itO) {
+    if((*itO)->getName() == m_Axis3d->getName() ||
+       (*itO)->getName() == m_ZeroPlane->getName()) // remove Axis and ZeroPlane
+      continue;
+
+    if (!(*itO)->isVisible()) {
+      visible_all = false;
+      break;
+    }
+  }
+
+  // 2. Secondly, check box
+  if (ImGui::Checkbox("[ALL]", &visible_all)) {
+    for (COpenGLViewport::iterator itO = mainVP->begin();
+         itO!= mainVP->end();
+         ++itO) {
+      if((*itO)->getName() == m_Axis3d->getName() ||
+         (*itO)->getName() == m_ZeroPlane->getName())
+        continue;
+      (*itO)->setVisibility(visible_all);
+    }
+  }
+  ImGui::SameLine();
+  ShowHelpMarker("Toggle visibility's of all objects");
+  for (COpenGLViewport::iterator itO = mainVP->begin();
+       itO!= mainVP->end();
+       ++itO) {
+    if((*itO)->getName() == m_Axis3d->getName() ||
+       (*itO)->getName() == m_ZeroPlane->getName())
+      continue;
+
+    bool visible = (*itO)->isVisible();
+    if (ImGui::Checkbox((*itO)->getName().c_str(), &visible))
+      (*itO)->setVisibility(visible);
+  }
 }
 
 // Find Channel's hObject

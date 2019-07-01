@@ -25,17 +25,6 @@ static void glfw_error_callback(int error, const char* description) {
   fprintf(stderr, "Error %d: %s\n", error, description);
 }
 
-static void ShowHelpMarker(const char* desc) {
-  ImGui::TextDisabled("(?)");
-  if (ImGui::IsItemHovered()) {
-    ImGui::BeginTooltip();
-    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-    ImGui::TextUnformatted(desc);
-    ImGui::PopTextWrapPos();
-    ImGui::EndTooltip();
-  }
-}
-
 struct GlfwContextScopeGuard {
   explicit GlfwContextScopeGuard(GLFWwindow* win){
     prev_win = glfwGetCurrentContext();
@@ -188,44 +177,7 @@ void CDisplayWindow3D::OnPreRender() {
     }
 
     get3DSceneAndLock();
-    COpenGLViewport::Ptr mainVP = m_3Dscene->getViewport();
-    visible_all = true;
-    for (COpenGLViewport::const_iterator itO = mainVP->begin();
-         itO!= mainVP->end();
-         ++itO) {
-      if((*itO)->getName() == m_Axis3d->getName() ||
-         (*itO)->getName() == m_ZeroPlane->getName()) // remove Axis and ZeroPlane
-        continue;
-
-      if (!(*itO)->isVisible()) {
-        visible_all = false;
-        break;
-      }
-    }
-
-    if (ImGui::Checkbox("[ALL]", &visible_all)) {
-      for (COpenGLViewport::iterator itO = mainVP->begin();
-           itO!= mainVP->end();
-           ++itO) {
-        if((*itO)->getName() == m_Axis3d->getName() ||
-           (*itO)->getName() == m_ZeroPlane->getName())
-          continue;
-        (*itO)->setVisibility(visible_all);
-      }
-    }
-    ImGui::SameLine();
-    ShowHelpMarker("Toggle visibility's of all objects");
-    for (COpenGLViewport::iterator itO = mainVP->begin();
-         itO!= mainVP->end();
-         ++itO) {
-      if((*itO)->getName() == m_Axis3d->getName() ||
-         (*itO)->getName() == m_ZeroPlane->getName())
-        continue;
-
-      bool visible = (*itO)->isVisible();
-      if (ImGui::Checkbox((*itO)->getName().c_str(), &visible))
-        (*itO)->setVisibility(visible);
-    }
+    SceneManager::render_visiable();
     unlockAccess3DScene();
   }
   ImGui::End();

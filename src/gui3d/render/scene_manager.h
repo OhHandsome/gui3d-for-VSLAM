@@ -44,6 +44,7 @@ public:
 
 	void reset();
 	void clear();
+	void render_visiable();
 	void render_property();
 
  public:
@@ -62,6 +63,9 @@ public:
 	std::map<Channel, CSetOfObjects::Ptr>       mSysModel3d;
 
 	std::map<Channel, CSetOfObjects::Ptr>       mSysAxis3d;
+
+ protected:
+  bool visible_all = true;
 };
 
 } // namespace gui3d
