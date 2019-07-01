@@ -113,6 +113,27 @@ void SceneManager::render_visiable() {
   }
 }
 
+void SceneManager::render_property() {
+
+  // Visible about Axis3d and ZeroPlane
+  bool visible = m_Axis3d->isVisible();
+  if (ImGui::Checkbox("Axis3d", &visible))
+    m_Axis3d->setVisibility(visible);
+  ImGui::SameLine();
+  visible = m_ZeroPlane->isVisible();
+  if (ImGui::Checkbox("XY", &visible))
+    m_ZeroPlane->setVisibility(visible);
+
+  ImGui::Text("Label:");
+  ImGui::SameLine();
+  int v[2];
+  v[0] = m_Axis3d->getFrequency();
+  v[1] = m_ZeroPlane->getGridFrequency();
+  ImGui::SliderInt2("FREQ", v, 1, 8); // Edit 1 Int using a slider from 1 to 8
+  m_Axis3d->setFrequency(v[0]);
+  m_ZeroPlane->setGridFrequency(v[1]);
+}
+
 // Find Channel's hObject
 CFrustum::Ptr SceneManager::hFrame(const Channel& name) {
   CFrustum::Ptr obj;
