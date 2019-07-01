@@ -48,12 +48,14 @@ struct tOptions {
 };
 
 // Gui3d include default window3d for vSLAM
-// Figure for 3d
 inline string Engine() {return "vSLAM for ArcSoft";}
 hObject nFigure(const string& name, int width = -1, int height = -1);
 void try_pause();
 void play_control();
 void play_stop();
+void clear();
+void repaint();
+
 
 // Render Base Complement
 const string& workRoute();
@@ -83,8 +85,6 @@ hObject viewDepth       (const cv::Mat& array2d_pt3d, const cv::Mat& im = cv::Ma
 hObject viewRgbdNormals (const cv::Mat& array2d_pt3d, const cv::Mat& normals);
 hObject auxViewAt       (const Pose& pose);    // GL Camera Pose in Aux ViewPort for Multi-View
 void    update          (hObject obj, const Pose& Twc);
-void    clear();
-void    repaint();
 
 void collectCloudFromRGBD(const cv::Mat& im, const cv::Mat& depth, PointCloud& cloud);
 void collectCloudFromDepth(const cv::Mat& depth, LandMark3dV& cloud);
@@ -92,5 +92,4 @@ void collectLinesFromRGBDNormal(const cv::Mat& depth, const cv::Mat& normal, Pos
 void saveAsPLY(const std::string& name, const Pose& Twc, const PointCloud& cloud);
 void saveAsPLY(const std::string& name, const Pose& Twc, const cv::Mat& im, const cv::Mat& depth);
 
-
-}
+} // namespace gui3d

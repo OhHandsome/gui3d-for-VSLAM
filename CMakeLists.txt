@@ -10,7 +10,7 @@ find_package(OpenCV REQUIRED)
 
 file(GLOB_RECURSE SRCS src/gui3d/*.cpp)
 list(APPEND SRCS Third-party/imguifilesystem/imguifilesystem.cpp)
-add_library(${PROJECT_NAME} ${SRCS} src/gui3d/window/CImGui.h)
+add_library(${PROJECT_NAME} ${SRCS})
 target_include_directories(${PROJECT_NAME} PRIVATE ${EIGEN3_INCLUDE_DIR} . PUBLIC src)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${MRPT_LIBS} imgui ${OpenCV_LIBRARIES}
                                       PRIVATE ${OPENGL_gl_LIBRARY} ${GLUT_LIBRARY} pthread)
