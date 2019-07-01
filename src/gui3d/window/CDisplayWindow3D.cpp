@@ -1,4 +1,4 @@
-#include <gui3d/CDisplayWindow3D.h>
+#include <gui3d/window/CDisplayWindow3D.h>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -68,15 +68,6 @@ CDisplayWindow3D::Create(const std::string &windowCaption,
                          unsigned int initialWindowWidth,
                          unsigned int initialWindowHeight) {
   return CDisplayWindow3DPtr(new CDisplayWindow3D(windowCaption, initialWindowWidth, initialWindowHeight));
-}
-
-mrpt::opengl::COpenGLScene::Ptr& CDisplayWindow3D::get3DSceneAndLock() {
-  m_access3Dscene.lock();
-  return m_3Dscene;
-}
-
-void CDisplayWindow3D::unlockAccess3DScene() {
-  m_access3Dscene.unlock();
 }
 
 bool CDisplayWindow3D::WindowClosed() const
@@ -161,35 +152,6 @@ CDisplayImagesPtr
 CDisplayWindow3D::createViewImage(const std::string &name) {
   m_subview_image = std::make_shared<CDisplayImages>(name);
   return m_subview_image;
-}
-
-void CDisplayWindow3D::InitScene(){
-  const int AXISLength  = 6;
-  // Add Axis
-  {
-    auto theScene = get3DSceneAndLock();
-    CAxis::Ptr Axis = CAxis::Create(-AXISLength, -AXISLength, -AXISLength,
-                                  AXISLength, AXISLength /* / 2.0 + 1*/, AXISLength /* / 2.0 + 1*/, 4, 2, true);
-    Axis->setTextScale(0.25f);
-    Axis->setName("CAxis");
-    Axis->enableTickMarks();
-    Axis->setFrequency(3);
-    Axis->setVisibility(false);
-    theScene->insert(Axis);
-    m_Axis3d = Axis;
-    unlockAccess3DScene();
-  }
-  // Add Plane XY
-  {
-    auto theScene = get3DSceneAndLock();
-    auto XY = CGridPlaneXY::Create(-AXISLength, AXISLength, -AXISLength, AXISLength);
-    XY->setName("CXY");
-    XY->setGridFrequency(3);
-    XY->setVisibility(false);
-    theScene->insert(XY);
-    m_ZeroPlane = XY;
-    unlockAccess3DScene();
-  }
 }
 
 void CDisplayWindow3D::OnPreRender() {
@@ -455,10 +417,9 @@ void CDisplayWindow3D::loadSceneFrom(const char* fileName)
 {
   std::cout << "load Scene: " << fileName << std::endl;
   mrpt::io::CFileGZInputStream f(fileName);
-  auto theScene = get3DSceneAndLock();
-  m_Axis3d.reset();
-  m_ZeroPlane.reset();
-  m_3Dscene->clear();
+
+  get3DSceneAndLock();
+  SceneManager::clear();
   mrpt::serialization::archiveFrom(f) >> *m_3Dscene;
   m_GlCanvas->m_openGLScene = m_3Dscene;
   m_Axis3d = m_3Dscene->getByClass<CAxis>();
@@ -536,7 +497,6 @@ void CDisplayWindow3D::backThreadRun() {
 
   m_3Dscene = mrpt::opengl::COpenGLScene::Create();
   m_GlCanvas = new CGlCanvas(m_3Dscene);
-  InitScene();
   glfwSetKeyCallback(m_Window, key_callback);
   glfwSetWindowUserPointer(m_Window, this);
 

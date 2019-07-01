@@ -12,7 +12,7 @@
 #define PathOptions             tOptions(Orange, 1.0f, tOptions::HOLD_OFF)
 #define RgbdNormals             tOptions(White, 0.02f, tOptions::HOLD_OFF)
 
-namespace gui3d{
+namespace gui3d {
 
 std::multimap<Channel, tOptions> s_option_table;
 void registerSystemChannelOptions()

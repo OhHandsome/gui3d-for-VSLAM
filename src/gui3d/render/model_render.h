@@ -1,18 +1,20 @@
 #pragma once
 
+#include <gui3d/utils/dependency.hpp>
 
-namespace gui3d{
+namespace gui3d {
 
 typedef COpenGLScene::Ptr GLScenePtr;
+struct tOptions;
+
+bool renderCartesianCoordinate(GLScenePtr theScene, CAxis::Ptr& Axis, CGridPlaneXY::Ptr& horizon, const bool visible);
 
 // Construct Model
 CFrustum::Ptr        ModelFrame (int width, int height, float fx);    // Create Camera Model
 void                 ModelFrames(CSetOfObjects* objs, const PoseV& vPose, const NameV& vLabel, const tOptions& options);
-CSetOfObjects::Ptr   ModelRGBAxis(const float lenght);
+CSetOfObjects::Ptr   ModelRGBAxis(const float length);
 CSetOfObjects::Ptr   ModelRobot ();                                    // Create iRobot Model
 
-void               ZoomObjects(CSetOfObjects::Ptr objs, float scale);
-void               ZoomAxis   (GLScenePtr theScene, float freq);
 bool               VisibleText(GLScenePtr theScene, bool bShow);
 void               saveToPlyFile(const std::string& name, CPointCloud::Ptr landmark, bool have_color = false);
 void               saveToPlyFile(const std::string& name, CPointCloudColoured::Ptr landmark, bool have_color = true);
@@ -29,11 +31,6 @@ bool renderLines (GLScenePtr theScene, CSetOfLines::Ptr&   obj, const Position3d
 
 bool renderMapPoints (GLScenePtr theScene, CPointCloud::Ptr&         obj, const Pose& Twc, const LandMark3dV& vPoints, const tOptions& options);
 bool renderPointCloud(GLScenePtr theScene, CPointCloudColoured::Ptr& obj, const Pose& Twc, const PointCloud& vPoints, const tOptions& options);
-
-
-// Render ViewPort
-bool auxViewAt(GLScenePtr theScene, COpenGLViewport::Ptr& gl_view_Camera, const Pose& pose);
-bool viewImage(GLScenePtr theScene, COpenGLViewport::Ptr& gl_view_Image,  const cv::Mat& im);
 
 
 } // namespace gui3d

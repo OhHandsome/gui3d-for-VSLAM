@@ -1,7 +1,6 @@
 #pragma once
 
-#include <gui3d/render/options.hpp>
-#include <gui3d/render/parameter.h>
+#include <gui3d/render/system.h>
 #include <gui3d/base/type_def.h>
 #include <opencv2/core.hpp>
 
@@ -24,17 +23,17 @@ namespace gui3d {
 struct tOptions{
     enum { HOLD_ON, HOLD_OFF };
 
-    tOptions& setColor(const Color& color) { _color = color; return *this;}
-    tOptions& setScale(const float scale)  { _scale = scale; return *this;}
-    tOptions& setMethod(bool method)       { _method = method; return *this;}
+    tOptions& setColor(const Color& color) { this->color = color; return *this;}
+    tOptions& setScale(const float scale)  { this->scale = scale; return *this;}
+    tOptions& setMethod(bool method)       { this->method = method; return *this;}
 
-    tOptions() : _color(Blue), _scale(0.250f), _method(HOLD_OFF){}
-    tOptions(const Color& color, float scale, bool flag) :
-        _color(color), _scale(scale), _method(flag) {}
+  tOptions() : color(Blue), scale(0.250f), method(HOLD_OFF) {}
+  tOptions(const Color& color, float scale, bool flag)
+    : color(color), scale(scale), method(flag) {}
 
-    Color _color;
-    float _scale;
-    bool  _method;
+    Color color;
+    float scale;
+    bool  method;
 };
 
 
@@ -43,11 +42,6 @@ inline string Engine() {return "vSLAM for ArcSoft";}
 
 // Figure for 3d
 hObject nFigure(const string& name, int width = -1, int height = -1);
-void setAsCurrentFigure(hObject fig); // same with gcf in matlab
-void addTextMessage(double x, double y, const string &text, size_t unique_index);
-void moveFigure(int x, int y);
-void destoryFigure(const string& name);
-void destoryFigure(hObject fig);
 void play_control();
 void waitKey(int delay_ms = 0);
 
@@ -61,7 +55,6 @@ const string& workRoute();
 const string& dataRoute();
 void setDataRoute(const char* data_path);
 void setWorkRoute(const char* cache_path = nullptr); // save debug file
-volatile Gui3dOption& Option();
 hObject renderFrame     (const Channel& name, const Pose&  Twc,          const tOptions& options = tOptions());
 hObject renderFrames    (const Channel& name, const PoseV& vTwc,         const NameV& vLabels = NameV(),
                          const tOptions& options = tOptions());

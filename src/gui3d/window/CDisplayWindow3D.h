@@ -1,11 +1,8 @@
 #pragma once
-#include <mrpt/opengl/COpenGLScene.h>
-#include <mrpt/opengl/COpenGLViewport.h>
-#include <mrpt/opengl/CAxis.h>
-#include <mrpt/opengl/CGridPlaneXY.h>
 
-#include <gui3d/CGlCanvas.h>
-#include <gui3d/CDisplayImages.h>
+#include <gui3d/render/scene_manager.h>
+#include <gui3d/window/CGlCanvas.h>
+#include <gui3d/window/CDisplayImages.h>
 #include <string>
 #include <mutex>
 #include <thread>
@@ -13,7 +10,7 @@
 class GLFWwindow;
 class ImGuiContext;
 
-namespace gui3d{
+namespace gui3d {
 
 class CDisplayWindow3D;
 using CDisplayWindow3DPtr = std::shared_ptr<CDisplayWindow3D>;
@@ -21,7 +18,7 @@ using CDisplayWindow3DPtr = std::shared_ptr<CDisplayWindow3D>;
 //!< Type for the callback function used in pushRenderCallback
 typedef void (* TCallbackRender) (void* userParam);
 
-class CDisplayWindow3D {
+class CDisplayWindow3D : public SceneManager {
  public:
   /** Constructor */
   CDisplayWindow3D(
@@ -38,20 +35,7 @@ class CDisplayWindow3D {
   /** Destructor */
   virtual ~CDisplayWindow3D();
 
-  /** Gets a reference to the smart shared pointer that holds the internal scene (carefuly read introduction in gui::CDisplayWindow3D before use!)
-    *  This also locks the critical section for accesing the scene, thus the window will not be repainted until it is unlocked.
-    * \note It is safer to use mrpt::gui::CDisplayWindow3DLocker instead.*/
-  mrpt::opengl::COpenGLScene::Ptr& get3DSceneAndLock();
-
-  /** Unlocks the access to the internal 3D scene. It is safer to use mrpt::gui::CDisplayWindow3DLocker instead.
-    *  Typically user will want to call forceRepaint after updating the scene. */
-  void unlockAccess3DScene();
-  void resize(int width, int height) {}
-  void setPos(int x, int y) {}
-  void repaint() { forceRepaint(); }
-  void addTextMessage(int , int , int, int , int ) {}
   bool WindowClosed() const;
-  void InitScene();
   CDisplayImagesPtr createViewImage(const std::string& name);
   CDisplayImagesPtr getViewImage() { return m_subview_image; }
 
@@ -81,17 +65,13 @@ class CDisplayWindow3D {
   volatile bool                         m_ReadyContext = false;
 
   CDisplayImagesPtr                     m_subview_image = nullptr;
-  mrpt::opengl::CAxis::Ptr              m_Axis3d;
-  mrpt::opengl::CGridPlaneXY::Ptr       m_ZeroPlane;
   std::vector<HookFunc>                 m_hookFuncs;
 
   bool                                   RequestToRefresh3DView;
   float                                  m_lastWheelRotation;
-  std::mutex                             m_access3Dscene;
   std::thread                            m_renderLoopThread;
   GLFWwindow*                            m_Window;
   ImGuiContext*                          m_ImGuiContext;
-  mrpt::opengl::COpenGLScene::Ptr        m_3Dscene;   //!< Internal OpenGL object (see general discussion in about usage of this object)
   CGlCanvas*                             m_GlCanvas;  //!< Internal Mouse View object
 };
 

@@ -10,294 +10,24 @@
  */
 
 #include <gui3d/utils/cast_utils.h>
-#include <gui3d/render/figure.h>
+#include <gui3d/render/scene_manager.h>
 #include <gui3d/render/model_render.h>
-#include <gui3d/render/style.h>
-#include <gui3d/base/timer.h>
-#include <gui3d/base/log.h>
-#include <gui3d/base/io.h>
-#include <opencv2/imgproc.hpp>
-
-#if HAS_IMGUI
-#include <GLFW/glfw3.h>
-#endif
+#include <gui3d/window/CDisplayWindow3D.h>
+#include <opencv2/core/base.hpp>
+#include "gui.h"
 
 namespace gui3d {
 
-Figure* sCurrentFigure3d = nullptr;
-// Engine
-class Viz
-{
-    std::map<string, FigurePtr> sSystemFigure3d;
-
-public:
-    static Viz& instance()
-    {
-        static Viz ins;
-        return ins;
-    }
-
-    Viz()
-    {
-    }
-
-    ~Viz()
-    {
-        sSystemFigure3d.clear();
-    }
-
-    void repaint()
-    {
-      for (auto& fig : sSystemFigure3d)
-        fig.second->mMainWindow->repaint();
-    }
-
-    void add(const std::string& name, FigurePtr fig)
-    {
-        sSystemFigure3d[name] = fig;
-        sCurrentFigure3d = fig.get();
-    }
-
-    FigurePtr findFigure(const std::string& name)
-    {
-        auto it = sSystemFigure3d.find(name);
-        if(it != sSystemFigure3d.end())
-        {
-            return it->second;
-        }
-        return nullptr;
-    }
-
-    void setAsCurrentFigure(hObject fig)
-    {
-        if(!bValidFigure(fig))
-        {
-            LOGE("None Valid Figure!!");
-            return;
-        }
-        sCurrentFigure3d = (Figure *)fig;
-    }
-
-    void destory(const std::string& name)
-    {
-        if (sSystemFigure3d.empty())
-            return;
-
-        auto it = sSystemFigure3d.find(name);
-        if(it != sSystemFigure3d.end())
-        {
-            LOGD("Destory Figure: %s", name.c_str());
-            FigurePtr fig = it->second;
-            if (fig.get() == sCurrentFigure3d)
-                sCurrentFigure3d = nullptr;
-
-            sSystemFigure3d.erase(it);
-            csCurFigureFromExistWindows();
-            return;
-        }
-        LOGI("None Figure: %s", name.c_str());
-    }
-
-    void destory(hObject hfig)
-    {
-        if(!bValidFigure(hfig))
-            return;
-
-        Figure* fig = (Figure*)hfig;
-        destory(fig->name);
-    }
-
-private:
-    // when delete figure, need choose and set sCurrentFigure3d
-    void csCurFigureFromExistWindows()
-    {
-        if(sSystemFigure3d.empty())
-        {
-            sCurrentFigure3d = nullptr;
-            LOGI("None sCurrentFigure3d!");
-            return;
-        }
-
-        // Engine Main Figure as sCurrentFigure3d
-        string AppName = Engine();
-        FigurePtr win = Viz::instance().findFigure(AppName);
-        if(win)
-        {
-            sCurrentFigure3d = win.get();
-            //LOGI("set sCurrentFigure3d: %s", win.c_str());
-            return;
-        }
-
-        // Latest Figure3d as sCurrentFigure3d
-        int max_id = -1;
-        for(auto& item : sSystemFigure3d)
-        {
-            if(item.second->mFigureID > max_id)
-            {
-                max_id = item.second->mFigureID;
-                sCurrentFigure3d = item.second.get();
-                LOGI("set sCurrentFigure3d: %s", item.first.c_str());
-            }
-        }
-    }
-
-    bool bValidFigure(hObject fig)
-    {
-        if(fig == nullptr) return false;
-        for(auto& item : sSystemFigure3d)
-        {
-            if(fig == item.second.get())
-                return true;
-        }
-        return false;
-    }
-
-};
-
-std::string mFileRoute =
-#ifdef _WIN32
-    "D:/gitRespo/pratice/ImCache";
-#else
-    "/media/oyg5285/developer/gitRespo/pratice/ImCache";
-#endif
-std::string mDataRoute = mFileRoute;
-
+static CDisplayWindow3DPtr sCurrentFigure3d = nullptr;
 void registerSystemChannelOptions();
 bool systemChannelOptions(const Channel& name, tOptions& options);
 
-// ----------------------- Engine Handle ----------------------------//
-// set fig as sCurrentFigure3d
-void setAsCurrentFigure(hObject fig)
-{
-    Viz::instance().setAsCurrentFigure(fig);
-}
-
-void destoryFigure(const string& name)
-{
-    Viz::instance().destory(name);
-}
-
-void destoryFigure(hObject hfig)
-{
-    Viz::instance().destory(hfig);
-}
-
 // ----------------------- Figure Handle ----------------------------//
-hObject nFigure(const string& name, int width, int height)
-{
-    if (width < 0) width = MainWidth;
-    if (height < 0) height = MainHeight;
-    FigurePtr win = Viz::instance().findFigure(name);
-    if(win)
-    {
-        win->mMainWindow->resize(width, height);
-        return (hObject)win.get();
-    }
-
-    registerSystemChannelOptions();
-    LOGD("New     Figure: %s", name.c_str());
-    FigurePtr fig = std::make_shared<Figure>(name, width, height);
-    Viz::instance().add(name, fig);
-    return (hObject)fig.get();
-}
-
-void moveFigure(int x, int y)
-{
-	if (!sCurrentFigure3d)  return;
-    auto& win = sCurrentFigure3d->mMainWindow;
-    win->setPos(x, y);
-}
-
-void play_control()
-{
-    if(!sCurrentFigure3d)
-        throw "None Found Figure3d";
-
-    volatile Gui3dOption& guiOpt = sCurrentFigure3d->mOption;
-    auto &bReadNextFrame = guiOpt.conOpt.ReadNextFrame;
-    auto &ReadFrameGap   = guiOpt.conOpt.ReadFrameGap;
-    auto &RequestToRefresh3DView = guiOpt.figOpt.RequestToRefresh3DView;
-
-    auto& win = sCurrentFigure3d->mMainWindow;
-    bool bNeedRefresh3DView = true;
-    if(ReadFrameGap > 0 )  ReadFrameGap--;
-    do
-    {
-        if(RequestToRefresh3DView || bNeedRefresh3DView)
-        {
-            win->repaint();
-            RequestToRefresh3DView = false;
-            bNeedRefresh3DView = false;
-        }
-//        (1000 * 10);
-    }
-    while (!(bReadNextFrame || ReadFrameGap > 0));
-}
-
-void waitKey(int delay_ms)
-{
-	if(!sCurrentFigure3d)
-		throw "None Found Figure3d";
-
-    volatile Gui3dOption& guiOpt = sCurrentFigure3d->mOption;
-    volatile bool &bWaitKey = guiOpt.figOpt.bWaitKey;
-    volatile bool &bExit    = guiOpt.figOpt.bExit;
-    volatile bool &RequestToRefresh3DView = guiOpt.figOpt.RequestToRefresh3DView;
-
-#if HAS_IMGUI == 0
-	auto& win = sCurrentFigure3d->mMainWindow;
-	win->addTextMessage(TEXT_RUN_STATE_X, TEXT_RUN_STATE_Y,
-                        "VSLAM Stop", TColorf(1, 0, 0),
-                        TextID::RUN_STATE, MRPT_GLUT_BITMAP_HELVETICA_12);
-    win->repaint();
-#endif
-    gui3d::Timer timer;
-    do {
-        if (RequestToRefresh3DView) {
-            repaint();
-            RequestToRefresh3DView = false;
-        }
-
-        if (bWaitKey || bExit)
-            break;
-
-        if (delay_ms > 0 && timer.timeSinceStart() * 1e-3 > delay_ms) {
-            break;
-        }
-    }
-	while (1);
-    bWaitKey = false;
-    bExit = false;
-}
-
-void waitExit(hObject hfig, int delay_ms)
-{
-    Figure* fig = (Figure *)(hfig);
-    volatile Gui3dOption& guiOpt = fig->mOption;
-    auto &bExit = guiOpt.figOpt.bExit;
-    auto &RequestToRefresh3DView = guiOpt.figOpt.RequestToRefresh3DView;
-    auto& win = fig->mMainWindow;
-
-#if HAS_IMGUI == 0
-    win->addTextMessage(TEXT_RUN_STATE_X, TEXT_RUN_STATE_Y,
-                        "VSLAM Stop", TColorf(1, 0, 0),
-                        TextID::RUN_STATE, MRPT_GLUT_BITMAP_HELVETICA_12);
-    win->repaint();
-#endif
-    gui3d::Timer timer;
-    do {
-        if (RequestToRefresh3DView) {
-            win->repaint();
-            RequestToRefresh3DView = false;
-        }
-
-        if (bExit)
-            break;
-
-        if (delay_ms > 0 && timer.timeSinceStart() * 1e-3 > delay_ms)
-            break;
-    }
-    while (1);
+hObject nFigure(const string& name, int width, int height) {
+  CV_Assert(sCurrentFigure3d == nullptr);
+  registerSystemChannelOptions();
+  sCurrentFigure3d = CDisplayWindow3D::Create(name, width, height);
+  return (hObject) sCurrentFigure3d.get();
 }
 
 // ----------------------- Render Handle ----------------------------//
@@ -310,7 +40,7 @@ hObject renderFrame(const Channel& name, const Pose& Twc, const tOptions& option
     systemChannelOptions(name, real_options);
 
     CFrustum::Ptr obj = sCurrentFigure3d->hFrame(name);
-    auto win = sCurrentFigure3d->mMainWindow;
+    auto win = sCurrentFigure3d;
     auto theScene = win->get3DSceneAndLock();
     renderFrame(theScene, obj, Twc, real_options);
     if(obj) obj->setName(name);
