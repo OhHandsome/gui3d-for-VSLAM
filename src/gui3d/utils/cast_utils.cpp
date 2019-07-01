@@ -2,7 +2,7 @@
 #include <gui3d/base/type_def.h>
 #include <gui3d/utils/cast_utils.h>
 
-define OPENGL_MATRIX  1
+#define OPENGL_MATRIX 1
 
 namespace gui3d {
 

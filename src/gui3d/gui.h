@@ -51,8 +51,9 @@ struct tOptions {
 // Figure for 3d
 inline string Engine() {return "vSLAM for ArcSoft";}
 hObject nFigure(const string& name, int width = -1, int height = -1);
+void try_pause();
 void play_control();
-void waitKey(int delay_ms = 0);
+void play_stop();
 
 // Render Base Complement
 const string& workRoute();

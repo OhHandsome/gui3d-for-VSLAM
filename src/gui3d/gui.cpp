@@ -15,8 +15,8 @@
 #include <gui3d/window/CDisplayWindow3D.h>
 #include <opencv2/core/base.hpp>
 #include <opencv/cv.hpp>
-#include <src/gui3d/base/io.h>
-#include "gui.h"
+#include <gui3d/base/io.h>
+#include <gui3d/gui.h>
 
 namespace gui3d {
 
@@ -37,7 +37,47 @@ hObject nFigure(const string& name, int width, int height) {
   CV_Assert(sCurrentFigure3d == nullptr);
   registerSystemChannelOptions();
   sCurrentFigure3d = CDisplayWindow3D::Create(name, width, height);
+  setWorkRoute(mFileRoute.c_str());
   return (hObject) sCurrentFigure3d.get();
+}
+
+void try_pause() {
+  if (!sCurrentFigure3d)
+    return;
+
+  sCurrentFigure3d->m_control.ReadNextFrame = false;
+}
+
+void play_control() {
+  if (!sCurrentFigure3d)
+    return;
+
+  volatile bool& bReadNextFrame = sCurrentFigure3d->m_control.ReadNextFrame;
+  volatile int& ReadFrameGap = sCurrentFigure3d->m_control.ReadFrameGap;
+  if(ReadFrameGap > 0 )  ReadFrameGap--;
+  do {
+    cv::waitKey(1);
+  }
+  while (!(bReadNextFrame || ReadFrameGap > 0));
+}
+
+void play_stop() {
+  try_pause();
+  play_control();
+}
+
+void repaint() {
+  if (!sCurrentFigure3d)
+    return;
+
+  sCurrentFigure3d->forceRepaint();
+}
+
+void clear() {
+  if (!sCurrentFigure3d)
+    return;
+
+  sCurrentFigure3d->reset();
 }
 
 // ----------------------- Render Handle ----------------------------//
@@ -339,20 +379,6 @@ void update(hObject obj, const Pose& Twc) {
   sCurrentFigure3d->get3DSceneAndLock();
   o->setPose(castPose(Twc));
   sCurrentFigure3d->unlockAccess3DScene();
-}
-
-void repaint() {
-  if (!sCurrentFigure3d)
-    return;
-
-  sCurrentFigure3d->forceRepaint();
-}
-
-void clear() {
-  if (!sCurrentFigure3d)
-    return;
-
-  sCurrentFigure3d->reset();
 }
 
 const std::string& workRoute() {
