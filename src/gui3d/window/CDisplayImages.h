@@ -3,7 +3,6 @@
 #include <opencv2/core.hpp>
 #include <string>
 #include <memory>
-#include <Third-party/imgui/imgui.h>
 #include <GL/gl.h>
 
 namespace gui3d {

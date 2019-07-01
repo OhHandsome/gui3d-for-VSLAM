@@ -1,4 +1,6 @@
 #include <gui3d/window/CDisplayImages.h>
+#include <Third-party/imgui/imgui.h>
+#include <GL/gl.h>
 
 namespace gui3d {
 

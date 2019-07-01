@@ -1,5 +1,6 @@
 #pragma once
 
+#include <gui3d/window/CDisplayWindow3D.h>
 #include <gui3d/render/system.h>
 #include <gui3d/base/type_def.h>
 #include <opencv2/core.hpp>
@@ -55,13 +56,15 @@ void play_control();
 void play_stop();
 void clear();
 void repaint();
+CDisplayWindow3DPtr instance();
 
-
-// Render Base Complement
 const string& workRoute();
 const string& dataRoute();
 void setDataRoute(const char* data_path);
 void setWorkRoute(const char* cache_path = nullptr); // save debug file
+
+
+// Render Base Complement
 hObject renderFrame     (const Channel& name, const Pose&  Twc,          const tOptions& options = tOptions());
 hObject renderFrames    (const Channel& name, const PoseV& vTwc,         const NameV& vLabels = NameV(),
                          const tOptions& options = tOptions());

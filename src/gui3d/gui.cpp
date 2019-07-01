@@ -80,6 +80,10 @@ void clear() {
   sCurrentFigure3d->reset();
 }
 
+CDisplayWindow3DPtr instance() {
+  return sCurrentFigure3d;
+}
+
 // ----------------------- Render Handle ----------------------------//
 hObject renderFrame(const Channel& name, const Pose& Twc, const tOptions& options) {
   if (!sCurrentFigure3d)
