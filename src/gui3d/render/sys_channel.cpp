@@ -15,35 +15,34 @@
 namespace gui3d {
 
 std::multimap<Channel, tOptions> s_option_table;
-void registerSystemChannelOptions()
-{
-    static bool bregister = false;
-    if(bregister)  return;
 
-    s_option_table.clear();
-    #define RegisterOptions(CH)  s_option_table.insert(std::make_pair(sysChannel[CH], CH##Options))
-    RegisterOptions(CurCamera);
-    RegisterOptions(PrediectCamera);
-    RegisterOptions(GTCamera);
-    RegisterOptions(RefMapPoints);
-    RegisterOptions(GlobalMapPoints);
-    RegisterOptions(LocalFrames);
-    RegisterOptions(KeyFrames);
-    RegisterOptions(Path);
-    RegisterOptions(DepthPointCloud);
-    RegisterOptions(Model3d);
-    assert(s_option_table.size() == Model3d + 1);
-    bregister = true;
+void registerSystemChannelOptions() {
+  static bool bregister = false;
+  if (bregister) return;
+
+  s_option_table.clear();
+#define RegisterOptions(CH)  s_option_table.insert(std::make_pair(sysChannel[CH], CH##Options))
+  RegisterOptions(CurCamera);
+  RegisterOptions(PrediectCamera);
+  RegisterOptions(GTCamera);
+  RegisterOptions(RefMapPoints);
+  RegisterOptions(GlobalMapPoints);
+  RegisterOptions(LocalFrames);
+  RegisterOptions(KeyFrames);
+  RegisterOptions(Path);
+  RegisterOptions(DepthPointCloud);
+  RegisterOptions(Model3d);
+  assert(s_option_table.size() == Model3d + 1);
+  bregister = true;
 }
 
-bool systemChannelOptions(const Channel& name, tOptions& options)
-{
-    auto it = s_option_table.find(name);
-    if(it == s_option_table.end())
-        return false;
+bool systemChannelOptions(const Channel& name, tOptions& options) {
+  auto it = s_option_table.find(name);
+  if (it == s_option_table.end())
+    return false;
 
-    options = it->second;
-    return true;
+  options = it->second;
+  return true;
 }
 
 }// namespace gui3d

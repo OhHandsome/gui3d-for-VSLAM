@@ -3,9 +3,10 @@
 #include "log.h"
 #include <fstream>
 #include <Eigen/Core>
+
 #define CMV_MAX_BUF 2048
 
-namespace io{
+namespace io {
 
 /**
  *  Scene Format is
@@ -24,77 +25,68 @@ namespace io{
 /*
  *   skip over useless string in line
  */
-inline void nop(std::fstream &fp)
-{
-    char buf[CMV_MAX_BUF];
-    fp.getline(buf, CMV_MAX_BUF);
-    LOGD("%s",buf);
+inline void nop(std::fstream& fp) {
+  char buf[CMV_MAX_BUF];
+  fp.getline(buf, CMV_MAX_BUF);
+  LOGD("%s", buf);
 }
 
 /*
 *   read one number in line
 */
 template<typename T>
-inline T readByte(std::fstream& fp)
-{
-    char buf[CMV_MAX_BUF];
-    double x;
-    fp >> x;
-    fp.getline(buf, '\n');
-    LOGD("%lf", x);
-    return T(x);
+inline T readByte(std::fstream& fp) {
+  char buf[CMV_MAX_BUF];
+  double x;
+  fp >> x;
+  fp.getline(buf, '\n');
+  LOGD("%lf", x);
+  return T(x);
 }
 
 /*
 *   read MxN number in line
 */
 template<typename T, int rows, int cols>
-inline Eigen::Matrix<T, rows, cols> readMxN(std::fstream& fp)
-{
-    char buf[CMV_MAX_BUF];
-    Eigen::Matrix<T, rows, cols> Dmxn;
-    for(int i = 0; i < rows; i++)
-    {
-        for(int j = 0; j < cols; j++)
-        {
-            double x;
-            fp >> x;
-            Dmxn(i,j) = T(x);
-            print("%lf ", x);
-        }
-        fp.getline(buf, '\n');
-        print("\n");
+inline Eigen::Matrix<T, rows, cols> readMxN(std::fstream& fp) {
+  char buf[CMV_MAX_BUF];
+  Eigen::Matrix<T, rows, cols> Dmxn;
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+      double x;
+      fp >> x;
+      Dmxn(i, j) = T(x);
+      print("%lf ", x);
     }
-    return Dmxn;
+    fp.getline(buf, '\n');
+    print("\n");
+  }
+  return Dmxn;
 }
 
 /*
 *   read MxN number in column
 */
 template<typename T, int rows, int cols>
-inline Eigen::Matrix<T, rows, cols> readMxNbyColumn(std::fstream& fp)
-{
-    Eigen::Matrix<T, rows, cols> Dmxn;
-    for(int i = 0; i < rows; i++) {
-        for(int j = 0; j < cols; j++) {
-            Dmxn(i,j) = readByte<T>(fp);
-        }
+inline Eigen::Matrix<T, rows, cols> readMxNbyColumn(std::fstream& fp) {
+  Eigen::Matrix<T, rows, cols> Dmxn;
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+      Dmxn(i, j) = readByte<T>(fp);
     }
-    return Dmxn;
+  }
+  return Dmxn;
 }
 
-
 template<typename T, int rows, int cols>
-inline void writeMxN(std::fstream& fp, const Eigen::Matrix<T, rows, cols>& Dmxn)
-{
-    fp << Dmxn << std::endl;
+inline void writeMxN(std::fstream& fp, const Eigen::Matrix<T, rows, cols>& Dmxn) {
+  fp << Dmxn << std::endl;
 }
 
 template<typename T>
-inline void writeItem(std::fstream& fp, const char* name, T count)
-{
-    fp << name << std::endl
-       << count << std::endl;
+inline void writeItem(std::fstream& fp, const char* name, T count) {
+  fp << name << std::endl
+     << count << std::endl;
 }
 
 }

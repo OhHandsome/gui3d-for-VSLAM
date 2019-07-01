@@ -20,27 +20,36 @@ namespace gui3d {
 */
 
 // Render Parameter
-struct tOptions{
-    enum { HOLD_ON, HOLD_OFF };
+struct tOptions {
+  enum { HOLD_ON, HOLD_OFF};
 
-    tOptions& setColor(const Color& color) { this->color = color; return *this;}
-    tOptions& setScale(const float scale)  { this->scale = scale; return *this;}
-    tOptions& setMethod(bool method)       { this->method = method; return *this;}
+  tOptions& setColor(const Color& color) {
+    this->color = color;
+    return *this;
+  }
+
+  tOptions& setScale(const float scale) {
+    this->scale = scale;
+    return *this;
+  }
+
+  tOptions& setMethod(bool method) {
+    this->method = method;
+    return *this;
+  }
 
   tOptions() : color(Blue), scale(0.250f), method(HOLD_OFF) {}
   tOptions(const Color& color, float scale, bool flag)
     : color(color), scale(scale), method(flag) {}
 
-    Color color;
-    float scale;
-    bool  method;
+  Color color;
+  float scale;
+  bool method;
 };
 
-
 // Gui3d include default window3d for vSLAM
-inline string Engine() {return "vSLAM for ArcSoft";}
-
 // Figure for 3d
+inline string Engine() {return "vSLAM for ArcSoft";}
 hObject nFigure(const string& name, int width = -1, int height = -1);
 void play_control();
 void waitKey(int delay_ms = 0);
@@ -61,7 +70,7 @@ hObject renderPolygon   (const Channel& name, // name
 hObject renderMapPoints (const Channel& name, const LandMark3dV& vPoint, const tOptions& options = tOptions());
 hObject renderPointCloud(const Channel& name, const PointCloud& cloud,   const tOptions& options = tOptions());
 
-hObject renderRGBAxis(const Channel &name, const Pose &Twb, const tOptions &options = tOptions());
+hObject renderRGBAxis   (const Channel &name, const Pose &Twb, const tOptions &options = tOptions());
 hObject renderModel3d   (const Channel& name,
                          const PoseV&   Twc , const PointCloudV& cloud,  const tOptions& options = tOptions());
 hObject renderRobot     (const Channel& name, const Pose& Twb,           const tOptions& options = tOptions());
