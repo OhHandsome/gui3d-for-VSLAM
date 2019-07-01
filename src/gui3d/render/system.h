@@ -14,6 +14,8 @@
 #define OrangeRed        gui3d::Color(255,69,0,255)
 #define Snow             gui3d::Color(255,250,250,255)
 
+#define I44              gui3d::Pose::Identity()
+
 static const char* sysChannel[] = {
     "CurCamera",       // Camera Channel
     "PrediectCamera",

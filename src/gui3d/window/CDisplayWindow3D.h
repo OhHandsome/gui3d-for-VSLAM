@@ -11,28 +11,34 @@ class ImGuiContext;
 
 namespace gui3d {
 
+//!< Type for the callback function used in pushRenderCallback
+typedef void (* TCallbackRender) (void* userParam);
+struct HookFunc {
+  TCallbackRender userFunction;
+  void* userParam = nullptr;
+  void run() {
+    if (userFunction)
+      userFunction(userParam);
+  }
+};
+
 class CDisplayWindow3D;
 using CDisplayWindow3DPtr = std::shared_ptr<CDisplayWindow3D>;
 
-//!< Type for the callback function used in pushRenderCallback
-typedef void (* TCallbackRender) (void* userParam);
-
-
 class CDisplayWindow3D : public SceneManager {
  public:
-  /** Constructor */
-  CDisplayWindow3D(
-    const std::string	&windowCaption = "Arcsoft3d",
-    unsigned int		initialWindowWidth = 1080,
-    unsigned int		initialWindowHeight = 720 );
-
-  /** Class factory returning a smart pointer */
+ /** Class factory returning a smart pointer */
   static CDisplayWindow3DPtr Create(
     const std::string	&windowCaption,
     unsigned int		initialWindowWidth = 1080,
     unsigned int		initialWindowHeight = 720 );
 
-  /** Destructor */
+ public:
+  CDisplayWindow3D(
+    const std::string	&windowCaption = "Arcsoft3d",
+    unsigned int		initialWindowWidth = 1080,
+    unsigned int		initialWindowHeight = 720 );
+
   virtual ~CDisplayWindow3D();
 
   bool WindowClosed() const;
@@ -53,11 +59,6 @@ class CDisplayWindow3D : public SceneManager {
   void loadSceneFrom(const char* fileName);
   void backThreadRun();
   void RunOnce();
-
-  struct HookFunc{
-      TCallbackRender userFunction;
-      void* userParam = nullptr;
-  };
 
   std::string                           m_windowCaption;
   int                                   m_initialWindowWidth;

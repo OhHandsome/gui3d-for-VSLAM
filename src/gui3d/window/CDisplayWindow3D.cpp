@@ -242,12 +242,6 @@ void CDisplayWindow3D::OnEyeShotRender()
 
 void CDisplayWindow3D::OnPostRender()
 {
-//  ImGui::Spacing();
-//  if (ImGui::CollapsingHeader("Plots")) {
-//      static float arr[] = { 0.6f, 0.1f, 1.0f, 0.5f, 0.92f, 0.1f, 0.2f };
-//      ImGui::PlotLines("Frame Times", arr, IM_ARRAYSIZE(arr));
-//  }
-
   if (openSceneFile)
   {
     const char* startingFolder = ".";
@@ -390,8 +384,6 @@ void CDisplayWindow3D::backThreadRun() {
   // Setup Dear ImGui style
   //ImGui::StyleColorsDark();
   ImGui::StyleColorsClassic();
-
-  m_3Dscene = mrpt::opengl::COpenGLScene::Create();
   m_GlCanvas = new CGlCanvas(m_3Dscene);
   glfwSetKeyCallback(m_Window, key_callback);
   glfwSetWindowUserPointer(m_Window, this);
