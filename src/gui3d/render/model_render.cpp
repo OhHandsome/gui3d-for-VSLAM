@@ -67,21 +67,21 @@ void ModelFrames(CSetOfObjects* objs, const PoseV& vPose, const NameV& vLabel, c
   }
 }
 
-CSetOfObjects::Ptr ModelRGBAxis(const float lenght) {
+CSetOfObjects::Ptr ModelRGBAxis(const float length) {
   CSetOfObjects::Ptr obj = CSetOfObjects::Create();
 
   CSimpleLine::Ptr x = CSimpleLine::Create(0.0f, 0.0f, 0.0f,
-                                           lenght, 0.0f, 0.0f, 1.0f);
+                                           length, 0.0f, 0.0f, 1.0f);
   x->setColor(TColorf(1, 0, 0));
   obj->insert(x);
 
   CSimpleLine::Ptr y = CSimpleLine::Create(0.0f, 0.0f, 0.0f,
-                                           0.0f, lenght * 1.0f, 0.0f, 1.0f);
+                                           0.0f, length * 1.0f, 0.0f, 1.0f);
   y->setColor(TColorf(0, 1, 0));
   obj->insert(y);
 
   CSimpleLine::Ptr z = CSimpleLine::Create(0.0f, 0.0f, 0.0f,
-                                           0.0f, 0.0f, lenght * 1.0f, 1.0f);
+                                           0.0f, 0.0f, length * 1.0f, 1.0f);
   z->setColor(TColorf(0, 0, 1));
   obj->insert(z);
   return obj;
@@ -314,7 +314,8 @@ bool renderPointCloud(GLScenePtr theScene, CPointCloudColoured::Ptr& obj, const 
                                            vPoints[i](3), vPoints[i](4), vPoints[i](5));
       obj->setPoint(i, pt);
     }
-  } else {
+  }
+  else {
     obj->reserve(obj->size() + vPoints.size());
     for (int i = 0; i < (int) vPoints.size(); ++i)
       obj->push_back(vPoints[i](0), vPoints[i](1), vPoints[i](2),

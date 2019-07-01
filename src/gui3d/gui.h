@@ -73,7 +73,7 @@ hObject renderRobot     (const Channel& name, const Pose& Twb,           const t
 
 hObject plot3D          (const Channel& name, const cv::Mat& array2d);
 
-hObject viewImage       (const cv::Mat& im);  // Render ViewPort, for example, imshow(), Aux Viewport
+void    viewImage       (const cv::Mat& im);  // Render ViewPort, for example, imshow(), Aux Viewport
 hObject viewDepth       (const cv::Mat& array2d_pt3d, const cv::Mat& im = cv::Mat());
 hObject viewRgbdNormals (const cv::Mat& array2d_pt3d, const cv::Mat& normals);
 hObject auxViewAt       (const Pose& pose);    // GL Camera Pose in Aux ViewPort for Multi-View

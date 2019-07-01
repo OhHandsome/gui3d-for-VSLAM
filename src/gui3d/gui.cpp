@@ -14,11 +14,21 @@
 #include <gui3d/render/model_render.h>
 #include <gui3d/window/CDisplayWindow3D.h>
 #include <opencv2/core/base.hpp>
+#include <opencv/cv.hpp>
+#include <src/gui3d/base/io.h>
 #include "gui.h"
 
 namespace gui3d {
 
 static CDisplayWindow3DPtr sCurrentFigure3d = nullptr;
+std::string mFileRoute =
+#ifdef _WIN32
+  "D:/gitRespo/pratice/ImCache";
+#else
+  "/media/oyg5285/developer/gitRespo/pratice/ImCache";
+#endif
+std::string mDataRoute = mFileRoute;
+
 void registerSystemChannelOptions();
 bool systemChannelOptions(const Channel& name, tOptions& options);
 
@@ -58,7 +68,7 @@ hObject renderFrames(const Channel& name, const PoseV& vTwc, const NameV& vLabel
     systemChannelOptions(name, real_options);
 
     CSetOfObjects::Ptr obj = sCurrentFigure3d->hPoseList(name);
-    auto win = sCurrentFigure3d->mMainWindow;
+    auto win = sCurrentFigure3d;
     auto theScene = win->get3DSceneAndLock();
     renderFrames(theScene, obj, vTwc, vLabels, real_options);
     if(obj) obj->setName(name);
@@ -76,7 +86,7 @@ hObject renderLines(const Channel& name, const Pose& Twq, const Position3dV& vPo
     systemChannelOptions(name, real_options);
 
     CSetOfLines::Ptr obj = sCurrentFigure3d->hLine(name);
-    auto win = sCurrentFigure3d->mMainWindow;
+    auto win = sCurrentFigure3d;
     auto theScene = win->get3DSceneAndLock();
     renderLines(theScene, obj, vPoint, real_options);
     obj->setPose(castPose(Twq));
@@ -121,7 +131,7 @@ hObject renderMapPoints(const Channel& name, const LandMark3dV& vPoint,const tOp
     systemChannelOptions(name, real_options);
 
 	CPointCloud::Ptr obj = sCurrentFigure3d->hMapPoint(name);
-	auto win = sCurrentFigure3d->mMainWindow;
+	auto win = sCurrentFigure3d;
 	auto theScene = win->get3DSceneAndLock();
     const Pose Twc = Pose::Identity();
     renderMapPoints(theScene, obj, Twc, vPoint, real_options);
@@ -140,7 +150,7 @@ hObject renderPointCloud(const Channel& name, const PointCloud& cloud,  const tO
     systemChannelOptions(name, real_options);
 
     CPointCloudColoured::Ptr obj = sCurrentFigure3d->hPointCloud(name);
-	auto win = sCurrentFigure3d->mMainWindow;
+	auto win = sCurrentFigure3d;
 	auto theScene = win->get3DSceneAndLock();
     const Pose Twc = Pose::Identity();
     renderPointCloud(theScene, obj, Twc, cloud, real_options);
@@ -159,7 +169,7 @@ hObject renderRGBAxis(const Channel &name, const Pose &Twb, const tOptions &opti
     systemChannelOptions(name, real_options);
 
     CSetOfObjects::Ptr obj = sCurrentFigure3d->hAxis3d(name);
-    auto win = sCurrentFigure3d->mMainWindow;
+    auto win = sCurrentFigure3d;
     auto theScene = win->get3DSceneAndLock();
     renderRGBAxis(theScene, obj, Twb, real_options);
     if(obj) obj->setName(name);
@@ -180,7 +190,7 @@ hObject renderModel3d(const Channel& name, const PoseV& vTwc, const PointCloudV&
     CSetOfObjects::Ptr obj = sCurrentFigure3d->hModel3d(name);
     if(obj) obj->clear();
     else    obj = CSetOfObjects::Create();
-    auto win = sCurrentFigure3d->mMainWindow;
+    auto win = sCurrentFigure3d;
     auto theScene = win->get3DSceneAndLock();
     for(int i = 0; i < vTwc.size(); i++)
     {
@@ -204,7 +214,7 @@ hObject renderRobot(const Channel& name, const Pose& Twb, const tOptions& option
     systemChannelOptions(name, real_options);
 
 	CSetOfObjects::Ptr obj = sCurrentFigure3d->hRobot(name);
-	auto win = sCurrentFigure3d->mMainWindow;
+	auto win = sCurrentFigure3d;
 	auto theScene = win->get3DSceneAndLock();
 	renderRobot(theScene, obj, Twb, real_options);
     if(obj) obj->setName(name);
@@ -253,7 +263,7 @@ hObject plot3D(const Channel& name, const cv::Mat& array2d)
         }
     }
 
-    auto win = sCurrentFigure3d->mMainWindow;
+    auto win = sCurrentFigure3d;
     auto theScene = win->get3DSceneAndLock();
     CPointCloudColoured::Ptr obj = sCurrentFigure3d->hPointCloud(name);
     renderPointCloud(theScene, obj, Pose::Identity(), cloud, options);
@@ -268,35 +278,19 @@ hObject plot3D(const Channel& name, const cv::Mat& array2d)
     return (hObject)(obj.get());
 }
 
-hObject viewImage(const cv::Mat &im)
+void viewImage(const cv::Mat &im)
 {
     if(!sCurrentFigure3d)
         nFigure("default", 640, 480);
 
-    COpenGLViewport::Ptr &obj = sCurrentFigure3d->mGLViewImage;
-    auto win = sCurrentFigure3d->mMainWindow;
+    auto win = sCurrentFigure3d;
     auto theScene = win->get3DSceneAndLock();
-#if HAS_IMGUI
     CDisplayImagesPtr sub_view = win->getViewImage();
     if (!sub_view) {
         sub_view = win->createViewImage("im");
-        sub_view->setViewPosition(MainWidth  - im.cols * ZoomOfImage,
-                                  0,
-                                  im.cols * ZoomOfImage,
-                                  im.rows * ZoomOfImage);
     }
-    sub_view->setImageView_fast(im);
-#else
-    viewImage(theScene, obj, im);
-#endif
+    sub_view->setImageView(im);
     win->unlockAccess3DScene();
-
-    static size_t num = 0;
-    num++;
-    auto &bCacheIm = sCurrentFigure3d->mOption.conOpt.bCacheIm;
-    if (bCacheIm)
-        cv::imwrite(mFileRoute + cv::format("/%d.jpg", num), im);
-    return (hObject)(obj.get());
 }
 
 hObject viewDepth(const cv::Mat& depth_pts, const cv::Mat& im)
@@ -310,7 +304,7 @@ hObject viewDepth(const cv::Mat& depth_pts, const cv::Mat& im)
     const Pose Twc = Pose::Identity();
     if (!im.empty())
     {
-        auto win = sCurrentFigure3d->mMainWindow;
+        auto win = sCurrentFigure3d;
         auto theScene = win->get3DSceneAndLock();
         CPointCloudColoured::Ptr obj = sCurrentFigure3d->hPointCloud(name);
         PointCloud cloud;
@@ -323,7 +317,7 @@ hObject viewDepth(const cv::Mat& depth_pts, const cv::Mat& im)
     }
     else
     {
-        auto win = sCurrentFigure3d->mMainWindow;
+        auto win = sCurrentFigure3d;
         auto theScene = win->get3DSceneAndLock();
         CPointCloud::Ptr obj = sCurrentFigure3d->hMapPoint(name);
         LandMark3dV cloud;
@@ -346,7 +340,7 @@ hObject viewRgbdNormals(const cv::Mat& array2d_pt3d, const cv::Mat& normals)
     systemChannelOptions(name, options);
 
     const Pose Twc = Pose::Identity();
-    auto win = sCurrentFigure3d->mMainWindow;
+    auto win = sCurrentFigure3d;
     auto theScene = win->get3DSceneAndLock();
     CSetOfLines::Ptr obj = sCurrentFigure3d->hLine(name);
     Position3dV lines;
@@ -358,21 +352,6 @@ hObject viewRgbdNormals(const cv::Mat& array2d_pt3d, const cv::Mat& normals)
     return (hObject)(obj.get());
 }
 
-
-
-hObject auxViewAt(const Pose &pose)
-{
-    if(!sCurrentFigure3d)
-		throw "None Found Figure3d";
-
-	COpenGLViewport::Ptr &obj = sCurrentFigure3d->mGLSubView;
-	auto win = sCurrentFigure3d->mMainWindow;
-	auto theScene = win->get3DSceneAndLock();
-    auxViewAt(theScene, obj, pose);
-	win->unlockAccess3DScene();
-	return (hObject)(obj.get());
-}
-
 void update(hObject obj, const Pose& Twc)
 {
     if(!sCurrentFigure3d)
@@ -380,88 +359,13 @@ void update(hObject obj, const Pose& Twc)
     if(obj == nullptr)
         return;
     CRenderizable* o = reinterpret_cast<CRenderizable *>(obj);
-    sCurrentFigure3d->lock();
+    sCurrentFigure3d->get3DSceneAndLock();
     o->setPose(castPose(Twc));
-    sCurrentFigure3d->unlock();
+    sCurrentFigure3d->unlockAccess3DScene();
 }
 
 void repaint()
 {
-//	if(!sCurrentFigure3d)
-//		return;
-//
-//  sCurrentFigure3d->mMainWindow->repaint();
-  Viz::instance().repaint();
-	//sCurrentFigure3d->mMainWindow->RunOnce();
-}
-
-void clear()
-{
-    if(!sCurrentFigure3d)
-        return;
-
-    sCurrentFigure3d->clear();
-}
-
-
-// ---------------------------- image display ----------------------------//
-// Same as OpenCV::im_show()
-hObject imshow(const string& name, const cv::Mat& im)
-{
-#if HAS_IMGUI == 0
-    FigurePtr fig = Viz::instance().findFigure(name);
-    if (!fig)
-    {
-        fig = std::make_shared<Figure>(name, im.cols, im.rows);
-        Viz::instance().add(name, fig);
-    }
-
-    sCurrentFigure3d = fig.get();
-    auto win = fig->mMainWindow;
-    CImage cim = castImage_clone(im);
-    win->setImageView(cim);
-    win->resize((unsigned int)im.cols, (unsigned int)im.rows);
-    win->repaint();
-    return (hObject)fig.get();
-#else
-    cv::imshow(name, im);
-    cv::waitKey(10);
-#endif
-}
-
-hObject imshow(const string& name, const cv::Mat& im, const cv::Mat& depth)
-{
-    FigurePtr fig = Viz::instance().findFigure(name);
-    if (!fig)
-    {
-        fig = std::make_shared<Figure>(name, im.cols, im.rows);
-        Viz::instance().add(name, fig);
-    }
-    sCurrentFigure3d = fig.get();
-
-    PointCloud cloud;
-    collectCloudFromRGBD(im, depth, cloud);
-    const Pose Twc = Pose::Identity();
-    auto win = fig->mMainWindow;
-    auto theScene = win->get3DSceneAndLock();
-    CPointCloudColoured::Ptr obj;
-    tOptions options;
-    systemChannelOptions(sysChannel[DepthPointCloud], options);
-    renderPointCloud(theScene, obj, Twc, cloud, options);
-    win->unlockAccess3DScene();
-    win->repaint();
-    return (hObject)fig.get();
-}
-
-
-
-// ---------------------------- Engine Utils -----------------------------//
-volatile Gui3dOption& Option()
-{
-  if (!sCurrentFigure3d)
-      throw "None Found Figure3d";
-
-	return sCurrentFigure3d->Options();
 }
 
 const std::string& workRoute()
@@ -487,16 +391,6 @@ void setWorkRoute(const char* cache_path)
         mFileRoute = std::string(cache_path);
     }
     removeAllFile(mFileRoute);
-}
-
-void addTextMessage(double x, double y, const string &text, size_t unique_index)
-{
-#if HAS_IMGUI == 0
-    if(!sCurrentFigure3d)
-        throw "None Found Figure3d";
-    auto& win = sCurrentFigure3d->mMainWindow;
-    win->addTextMessage(x, y, text, TColorf(0, 1, 1), unique_index, MRPT_GLUT_BITMAP_HELVETICA_12);
-#endif
 }
 
 }
