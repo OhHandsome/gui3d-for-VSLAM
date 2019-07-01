@@ -20,7 +20,7 @@ set(LIB_INC
         imstb_textedit.h
         imstb_truetype.h)
 add_library(${PROJECT_NAME} ${LIB_SRCS} ${LIB_INC})
-target_include_directories(${PROJECT_NAME} PUBLIC ..)
+target_include_directories(${PROJECT_NAME} PUBLIC ../imgui)
 
 option(BUILD_IMGUI_DEMO "build example for imgui demo" OFF)
 if (BUILD_IMGUI_DEMO)
