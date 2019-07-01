@@ -1,4 +1,11 @@
 #include <gui3d/window/CDisplayWindow3D.h>
+#include <gui3d/window/CImGui.h>
+#include <gui3d/render/model_render.h>
+#include <gui3d/gui.h>
+
+#include <mrpt/io/CFileGZInputStream.h>
+#include <mrpt/serialization/archiveFrom_std_streams.h>
+
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -7,51 +14,16 @@
 #include <Third-party/imguifilesystem/imguifilesystem.h>
 #include <list>
 
-#include <mrpt/io/CFileGZInputStream.h>
-#include <mrpt/serialization/archiveFrom_std_streams.h>
-
 #define USE_BACKEND_RENDER 1
-
-using namespace mrpt;
-using namespace mrpt::opengl;
-static std::list<std::function<void(void)>> destoryOpenGLResourcesOnExit;
 
 namespace gui3d {
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
 static void glfw_error_callback(int error, const char* description) {
   fprintf(stderr, "Error %d: %s\n", error, description);
 }
 
-struct GlfwContextScopeGuard {
-  explicit GlfwContextScopeGuard(GLFWwindow* win){
-    prev_win = glfwGetCurrentContext();
-    glfwMakeContextCurrent(win);
-  }
-
-  ~GlfwContextScopeGuard(){
-    glfwMakeContextCurrent(prev_win);
-  }
-  GLFWwindow* prev_win;
-};
-
-struct ImGuiContextScopeGuard {
-  explicit ImGuiContextScopeGuard(ImGuiContext* ctx) {
-    prev_ctx = ImGui::GetCurrentContext();
-    ImGui::SetCurrentContext(ctx);
-  }
-
-  ~ImGuiContextScopeGuard() {
-    ImGui::SetCurrentContext(prev_ctx);
-  }
-
-  ImGuiContext* prev_ctx;
-};
-
-static bool openSceneFile = false;
-static bool saveSceneAs = false;
 CDisplayWindow3DPtr
 CDisplayWindow3D::Create(const std::string &windowCaption,
                          unsigned int initialWindowWidth,
@@ -131,7 +103,6 @@ CDisplayWindow3D::~CDisplayWindow3D() {
   ImGui_ImplOpenGL2_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
-  for (auto& f : destoryOpenGLResourcesOnExit) f();
 
   glfwDestroyWindow(m_Window);
   glfwTerminate();
@@ -146,7 +117,7 @@ CDisplayWindow3D::createViewImage(const std::string &name) {
 void CDisplayWindow3D::OnPreRender() {
 
   // Menu
-  static bool show_scene_property_editor = false;
+  bool& show_scene_property_editor = (bool&)m_control.b_edit3DSceneProperty;
   // Display [Scene] panel
   static bool show_tool_panel = true;
   if (ImGui::Begin("Scene", &show_tool_panel,
@@ -156,15 +127,13 @@ void CDisplayWindow3D::OnPreRender() {
 
     ImGui::Text("Arcsoft VSLAM Team: ");
     ImGui::NewLine();
+
+    // menu list
     if (ImGui::BeginMenuBar()) {
       if (ImGui::BeginMenu("File")) {
-        ImGui::MenuItem("Open", "Ctrl+O", &openSceneFile);
-        if (ImGui::MenuItem("Save", "Ctrl+S")) {
-            auto theScene = get3DSceneAndLock();
-            //gui3d::SaveScene(theScene, dataRoute());
-            unlockAccess3DScene();
-        }
-        if (ImGui::MenuItem("Save As..", nullptr, &saveSceneAs)) {}
+        ImGui::MenuItem("Open", "Ctrl+O",         &m_control.b_openSceneFile);
+        if (ImGui::MenuItem("Save", "Ctrl+S",     &m_control.b_save3DScene)) {}
+        if (ImGui::MenuItem("Save As..", nullptr, &m_control.b_save3DSceneAs)) {}
         ImGui::EndMenu();
       }
 
@@ -175,6 +144,7 @@ void CDisplayWindow3D::OnPreRender() {
       ImGui::EndMenuBar();
     }
 
+    // visiable
     get3DSceneAndLock();
     SceneManager::render_visiable();
     unlockAccess3DScene();
@@ -227,6 +197,7 @@ void CDisplayWindow3D::OnEyeShotRender()
 
 void CDisplayWindow3D::OnPostRender()
 {
+  auto& openSceneFile = (bool&)m_control.b_openSceneFile;
   if (openSceneFile)
   {
     const char* startingFolder = ".";
@@ -252,6 +223,7 @@ void CDisplayWindow3D::OnPostRender()
     ImGui::End();
   }
 
+  auto& saveSceneAs = (bool&)m_control.b_save3DSceneAs;
   if (saveSceneAs)
   {
     if (ImGui::Begin("FileSystem",
@@ -409,7 +381,7 @@ void CDisplayWindow3D::backThreadRun() {
       OnImGuiRender();
       m_GlCanvas->OnPaint();
       for (auto hook : m_hookFuncs)
-          hook.userFunction(hook.userParam);
+          hook.run();
       unlockAccess3DScene();
       RequestToRefresh3DView = false;
     }
@@ -430,7 +402,6 @@ void CDisplayWindow3D::backThreadRun() {
   ImGui_ImplOpenGL2_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
-  for (auto& f : destoryOpenGLResourcesOnExit) f();
 
   glfwDestroyWindow(m_Window);
   glfwTerminate();
@@ -446,78 +417,70 @@ void CDisplayWindow3D::pushRenderCallBack(gui3d::TCallbackRender userFunction, v
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-//  void* userPointer = glfwGetWindowUserPointer(window);
-//  CDisplayWindow3D* window3d = (CDisplayWindow3D*) userPointer;
-//
-//  volatile FigureOption& fig_option = window3d->Options().figOpt;
-//  volatile ControlOption& con_option = window3d->Options().conOpt;
-//  volatile SceneOption& scene_option = window3d->Options().sceneOpt;
-//  auto& ReadNextFrame = con_option.ReadNextFrame;
-//  auto& ReadFrameGap = con_option.ReadFrameGap;
-//  auto& bCacheIm = con_option.bCacheIm;
-//
-//  auto& bExit = fig_option.bExit;
-//  auto& bViewPort = fig_option.bViewPort;
-//  auto& bSave3DScene = fig_option.bSave3DScene;
-//  auto& RequestToRefresh3DView = fig_option.RequestToRefresh3DView;
-//
-//  auto& bOpenOptimizerPlot = scene_option.bOpenOptimizerPlot;
-//  auto& bViewAprilTags = scene_option.bViewAprilTags;
-//  auto& bWaitKey = fig_option.bWaitKey;
-//
-//  if (action != GLFW_PRESS)
-//    return;
-//
-//  switch (key) {
-//    case GLFW_KEY_ESCAPE:
-//    case GLFW_KEY_Q:
-//      glfwSetWindowShouldClose(window, true);
-//      bExit = true;
-//      break;
-//
-//    case GLFW_KEY_SPACE:
-//      ReadNextFrame ^= true;
-//      break;
-//
-//    case GLFW_KEY_RIGHT:
-//      ReadFrameGap += FRAME_GAP_LENGTH;
-//      break;
-//
-//    case GLFW_KEY_S:
-//    {
-//      if (mods & GLFW_MOD_CONTROL) {
-//          COpenGLScene::Ptr theScene = window3d->get3DSceneAndLock();
-//          gui3d::SaveScene(theScene, dataRoute());
-//          window3d->unlockAccess3DScene();
-//      }
-//    }
-//      break;
-//
-//    case GLFW_KEY_O:
-//    {
-//      if (mods & GLFW_MOD_CONTROL) {
-//        openSceneFile = true;
-//      }
-//    }
-//      break;
-//
-//    case 'p':
-//    case 'P':
-//    {
-//      bViewAprilTags ^= true;
-//      RequestToRefresh3DView = true;
-//    }
-//      break;
-//
-//    case 'i':
-//    case 'I':
-//      bCacheIm ^= true;
-//      break;
-//
-//    default:
-//      bWaitKey = true;
-//      printf("Key pushed: %c\n", key);
-//  };
+  void* userPointer = glfwGetWindowUserPointer(window);
+  CDisplayWindow3D* window3d = (CDisplayWindow3D*) userPointer;
+  volatile ControlOptions& con_option = window3d->m_control;
+
+  auto& ReadNextFrame = con_option.ReadNextFrame;
+  auto& ReadFrameGap = con_option.ReadFrameGap;
+  auto& bWaitKey = con_option.bWaitKey;
+  auto& RequestToRefresh3DView = con_option.RequestToRefresh3DView;
+
+  auto& b_openSceneFile = con_option.b_openSceneFile;
+  auto& b_save3DScene = con_option.b_save3DScene;
+  auto& b_edit3DSceneProperty = con_option.b_edit3DSceneProperty;
+  auto& bViewAprilTags = con_option.bViewAprilTags;
+
+  if (action != GLFW_PRESS)
+    return;
+
+  switch (key) {
+    case GLFW_KEY_ESCAPE:
+    case GLFW_KEY_Q:
+      glfwSetWindowShouldClose(window, true);
+      break;
+
+    case GLFW_KEY_SPACE:
+      ReadNextFrame ^= true;
+      break;
+
+    case GLFW_KEY_RIGHT:
+      ReadFrameGap += FRAME_GAP_LENGTH;
+      break;
+
+    case GLFW_KEY_S: {
+      if (mods & GLFW_MOD_CONTROL) {
+        b_save3DScene = true;
+      }
+    }
+      break;
+
+    case GLFW_KEY_O: {
+      if (mods & GLFW_MOD_CONTROL) {
+        b_openSceneFile ^= true;
+        std::cout << "openFile" << std::endl;
+      }
+    }
+      break;
+
+    case GLFW_KEY_T: {
+      if (mods & GLFW_MOD_CONTROL) {
+        b_edit3DSceneProperty ^= true;
+      }
+    }
+      break;
+
+    case 'p':
+    case 'P': {
+      bViewAprilTags ^= true;
+      RequestToRefresh3DView = true;
+    }
+      break;
+
+    default:
+      bWaitKey = true;
+      //printf("Key pushed: %c\n", key);
+  };
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes

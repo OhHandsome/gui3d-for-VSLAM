@@ -3,6 +3,7 @@
 #include <gui3d/render/scene_manager.h>
 #include <gui3d/window/CGlCanvas.h>
 #include <gui3d/window/CDisplayImages.h>
+#include <gui3d/window/CImGui.h>
 #include <string>
 #include <thread>
 
@@ -74,6 +75,9 @@ class CDisplayWindow3D : public SceneManager {
   GLFWwindow*                            m_Window;
   ImGuiContext*                          m_ImGuiContext;
   CGlCanvas*                             m_GlCanvas;  //!< Internal Mouse View object
+
+ public:
+  volatile ControlOptions                m_control;
 };
 
 } // namespace gui3d
