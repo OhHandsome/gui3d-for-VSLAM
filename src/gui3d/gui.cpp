@@ -57,6 +57,7 @@ void play_control() {
   if(ReadFrameGap > 0 )  ReadFrameGap--;
   do {
     cv::waitKey(1);
+    sCurrentFigure3d->forceRepaint();
   }
   while (!(bReadNextFrame || ReadFrameGap > 0));
 }

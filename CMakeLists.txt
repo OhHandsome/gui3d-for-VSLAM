@@ -19,6 +19,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC ${MRPT_LIBS} imgui ${OpenCV_LIBRARI
 add_subdirectory(Third-party)
 
 ## instance
-add_executable(example_gui3d_instance main.cpp)
+add_executable(example_gui3d_instance example_instance.cpp)
 target_link_libraries(example_gui3d_instance gui3d)
 target_include_directories(example_gui3d_instance PRIVATE ${EIGEN3_INCLUDE_DIR})
