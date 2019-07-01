@@ -96,7 +96,6 @@ CDisplayWindow3D::~CDisplayWindow3D() {
   delete m_GlCanvas;
   m_3Dscene.reset();
 
-
   // glfw: terminate, clearing all previously allocated GLFW resources.
   ImGui_ImplOpenGL2_Shutdown();
   ImGui_ImplGlfw_Shutdown();
@@ -251,6 +250,14 @@ void CDisplayWindow3D::OnPostRender()
       }
     }
     ImGui::End();
+  }
+
+  auto& saveScene = (bool&)m_control.b_save3DScene;
+  if (saveScene) {
+    get3DSceneAndLock();
+    gui3d::SaveScene(m_3Dscene, gui3d::dataRoute());
+    unlockAccess3DScene();
+    saveScene = false;
   }
 }
 
