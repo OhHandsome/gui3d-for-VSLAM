@@ -24,6 +24,66 @@ void removeObject(COpenGLViewport::Ptr mainVP, std::map<Channel, T>& m) {
   m.clear();
 }
 
+// common edit
+template <class Object>
+void editObjects(
+  const std::string& name,
+  std::map<std::string, Object>& map_objects)
+{
+  if (map_objects.empty())
+    return;
+
+  if (ImGui::TreeNode(name.c_str())) {
+    for (auto& item : map_objects) {
+      auto obj = item.second;
+      if (ImGui::TreeNode(obj->getName().c_str())) {
+        // scale
+        float s = obj->getScaleX();
+        if (ImGui::InputFloat("scale", &s, 0.1f, 1.0f, "%.3f")) {
+          obj->setScale(s);
+        }
+        // color
+        TColorf tmp = obj->getColor();
+        float color[3] = {tmp.R, tmp.G, tmp.B};
+        if (ImGui::ColorEdit3("color", (float*)&color)) {  // Edit 3 floats representing a color
+          obj->setColor(TColorf(color[0], color[1], color[2]));
+        }
+        ImGui::TreePop();
+      }
+    }
+    ImGui::TreePop();
+  }
+}
+
+void editObjects(
+  const std::string& name,
+  std::map<std::string, CSetOfObjects::Ptr>& map_poselist){
+
+  if (map_poselist.empty())
+    return;
+
+  if (ImGui::TreeNode(name.c_str())) {
+    for (auto& item : map_poselist) {
+      auto obj = item.second;
+      if (ImGui::TreeNode(obj->getName().c_str())) {
+        // scale
+        float s = (*obj->begin())->getScaleX();
+        if (ImGui::InputFloat("scale", &s, 0.1f, 1.0f, "%.3f")) {
+          for (auto itO = obj->begin(); itO != obj->end(); ++itO)
+            (*itO)->setScale(s);
+        }
+        // color
+        TColorf tmp = obj->getColor();
+        float color[3] = {tmp.R, tmp.G, tmp.B};
+        if (ImGui::ColorEdit3("color", (float*)&color)) {  // Edit 3 floats representing a color
+          obj->setColor(TColorf(color[0], color[1], color[2]));
+        }
+        ImGui::TreePop();
+      }
+    }
+    ImGui::TreePop();
+  }
+}
 
 SceneManager::SceneManager() {
   m_3Dscene = COpenGLScene::Create();
@@ -42,7 +102,7 @@ void SceneManager::clear() {
   mSysPointCloud.clear();
   mSysLine.clear();
   mSysModel3d.clear();
-  mSysAxis3d.clear();
+  mSysRgbAxis3d.clear();
 }
 
 void SceneManager::reset() {
@@ -132,6 +192,16 @@ void SceneManager::render_property() {
   ImGui::SliderInt2("FREQ", v, 1, 8); // Edit 1 Int using a slider from 1 to 8
   m_Axis3d->setFrequency(v[0]);
   m_ZeroPlane->setGridFrequency(v[1]);
+
+  if (ImGui::CollapsingHeader("TheScene", true)) {
+    editObjects("Frame",        mSysFrame);
+    editObjects("Frames",       mSysPoseList);
+    editObjects("Robot",        mSysRobot);
+    editObjects("MapPoint",     mSysMapPoint);
+    editObjects("PointCloud",   mSysPointCloud);
+    editObjects("Model",        mSysModel3d);
+    editObjects("RgbAxis3d",    mSysRgbAxis3d);
+  }
 }
 
 // Find Channel's hObject
@@ -186,8 +256,8 @@ CSetOfObjects::Ptr SceneManager::hModel3d(const Channel& name) {
 
 CSetOfObjects::Ptr SceneManager::hAxis3d(const Channel& name) {
   CSetOfObjects::Ptr obj;
-  auto it = mSysAxis3d.find(name);
-  if (it != mSysAxis3d.end()) obj = it->second;
+  auto it = mSysRgbAxis3d.find(name);
+  if (it != mSysRgbAxis3d.end()) obj = it->second;
   return obj;
 }
 

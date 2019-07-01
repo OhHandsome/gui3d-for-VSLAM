@@ -208,7 +208,7 @@ hObject renderRGBAxis(const Channel& name, const Pose& Twb, const tOptions& opti
   renderRGBAxis(theScene, obj, Twb, real_options);
   if (obj) obj->setName(name);
   win->unlockAccess3DScene();
-  sCurrentFigure3d->mSysAxis3d[name] = obj;
+  sCurrentFigure3d->mSysRgbAxis3d[name] = obj;
   return (hObject) (obj.get());
 }
 

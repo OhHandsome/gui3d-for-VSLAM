@@ -62,7 +62,7 @@ public:
 	std::map<Channel, CSetOfLines::Ptr>         mSysLine;
 	std::map<Channel, CSetOfObjects::Ptr>       mSysModel3d;
 
-	std::map<Channel, CSetOfObjects::Ptr>       mSysAxis3d;
+	std::map<Channel, CSetOfObjects::Ptr>       mSysRgbAxis3d;
 
  protected:
   bool visible_all = true;
