@@ -148,7 +148,6 @@ void CDisplayWindow3D::OnPreRender() {
   // Menu
   static bool show_scene_property_editor = false;
   // Display [Scene] panel
-  static bool visible_all;
   static bool show_tool_panel = true;
   if (ImGui::Begin("Scene", &show_tool_panel,
        ImGuiWindowFlags_AlwaysAutoResize |
@@ -208,15 +207,6 @@ void CDisplayWindow3D::OnPreRender() {
       ImGui::SliderInt2("FREQ", v, 1, 8); // Edit 1 Int using a slider from 1 to 8
       m_Axis3d->setFrequency(v[0]);
       m_ZeroPlane->setGridFrequency(v[1]);
-
-      /*
-      auto& im_visiable = m_Observer.figOpt.bViewPort;
-      COpenGLViewport::Ptr vp = theScene->getViewport("Image");
-      if (vp.get() != nullptr) {
-        if (ImGui::Checkbox("im", (bool *)&im_visiable)) {
-          vp->resetCloneView();
-        }
-      }*/
       unlockAccess3DScene();
     }
     ImGui::End();

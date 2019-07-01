@@ -4,7 +4,6 @@
 #include <gui3d/window/CGlCanvas.h>
 #include <gui3d/window/CDisplayImages.h>
 #include <string>
-#include <mutex>
 #include <thread>
 
 class GLFWwindow;
@@ -17,6 +16,7 @@ using CDisplayWindow3DPtr = std::shared_ptr<CDisplayWindow3D>;
 
 //!< Type for the callback function used in pushRenderCallback
 typedef void (* TCallbackRender) (void* userParam);
+
 
 class CDisplayWindow3D : public SceneManager {
  public:

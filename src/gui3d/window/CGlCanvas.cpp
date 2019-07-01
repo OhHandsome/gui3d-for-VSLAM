@@ -1,4 +1,4 @@
-#include <gui3d/CGlCanvas.h>
+#include <gui3d/window/CGlCanvas.h>
 
 #include <GL/gl.h>
 #include <GL/glu.h>
