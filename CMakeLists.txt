@@ -22,3 +22,7 @@ add_subdirectory(Third-party)
 add_executable(example_gui3d_instance example_instance.cpp)
 target_link_libraries(example_gui3d_instance gui3d)
 target_include_directories(example_gui3d_instance PRIVATE ${EIGEN3_INCLUDE_DIR})
+
+add_executable(example_opengl_objects example_opengl_objects.cpp)
+target_link_libraries(example_opengl_objects gui3d)
+target_include_directories(example_opengl_objects PRIVATE ${EIGEN3_INCLUDE_DIR})

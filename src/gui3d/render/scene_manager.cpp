@@ -153,7 +153,8 @@ void SceneManager::render_visiable() {
          itO!= mainVP->end();
          ++itO) {
       if((*itO)->getName() == m_Axis3d->getName() ||
-         (*itO)->getName() == m_ZeroPlane->getName())
+         (*itO)->getName() == m_ZeroPlane->getName() ||
+         (*itO)->getName().empty())
         continue;
       (*itO)->setVisibility(visible_all);
     }
@@ -164,7 +165,8 @@ void SceneManager::render_visiable() {
        itO!= mainVP->end();
        ++itO) {
     if((*itO)->getName() == m_Axis3d->getName() ||
-       (*itO)->getName() == m_ZeroPlane->getName())
+       (*itO)->getName() == m_ZeroPlane->getName() ||
+      (*itO)->getName().empty())
       continue;
 
     bool visible = (*itO)->isVisible();
