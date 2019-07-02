@@ -8,8 +8,8 @@
   ![image](./demo.bmp)
  - **Dependency**  
   [wxWidgets 2.9+][1]  
-  [mrpt1.5+][2]
-    - sudo add-apt-repository ppa:joseluisblancoc/mrpt-1.5
+  [mrpt2.0+][2]
+    - sudo add-apt-repository ppa:joseluisblancoc/mrpt
     - sudo apt-get update  
     - sudo apt-get install libmrpt-common mrpt-apps  `
 
