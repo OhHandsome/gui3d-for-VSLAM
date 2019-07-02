@@ -14,7 +14,7 @@
 #include <Third-party/imguifilesystem/imguifilesystem.h>
 #include <list>
 
-#define USE_BACKEND_RENDER 0
+#define USE_BACKEND_RENDER 1
 
 namespace gui3d {
 
@@ -25,15 +25,22 @@ static void glfw_error_callback(int error, const char* description) {
 }
 
 CDisplayWindow3DPtr
-CDisplayWindow3D::Create(const std::string &windowCaption,
+CDisplayWindow3D::Create(const std::string& windowCaption,
                          unsigned int initialWindowWidth,
                          unsigned int initialWindowHeight) {
-  return CDisplayWindow3DPtr(new CDisplayWindow3D(windowCaption, initialWindowWidth, initialWindowHeight));
+  return CDisplayWindow3DPtr(
+    new CDisplayWindow3D(
+      windowCaption,
+      initialWindowWidth,
+      initialWindowHeight));
 }
 
-bool CDisplayWindow3D::WindowClosed() const
-{
+bool CDisplayWindow3D::WindowClosed() const {
   return glfwWindowShouldClose(m_Window);
+}
+
+void CDisplayWindow3D::Exit() {
+  glfwSetWindowShouldClose(m_Window, true);
 }
 
 void CDisplayWindow3D::forceRepaint() {
@@ -43,12 +50,11 @@ void CDisplayWindow3D::forceRepaint() {
     RunOnce();
 }
 
-CDisplayWindow3D::CDisplayWindow3D(const std::string &windowCaption,
+CDisplayWindow3D::CDisplayWindow3D(const std::string& windowCaption,
                                    unsigned int initialWindowWidth,
                                    unsigned int initialWindowHeight)
-   : m_windowCaption(windowCaption)
-   , m_initialWindowWidth(initialWindowWidth)
-   , m_initialWindowHeight(initialWindowHeight) {
+  : m_windowCaption(windowCaption), m_initialWindowWidth(initialWindowWidth),
+    m_initialWindowHeight(initialWindowHeight) {
 
 #if USE_BACKEND_RENDER
   m_renderLoopThread = std::thread(&CDisplayWindow3D::backThreadRun, this);
@@ -96,6 +102,7 @@ CDisplayWindow3D::~CDisplayWindow3D() {
   delete m_GlCanvas;
   m_3Dscene.reset();
 
+#if !USE_BACKEND_RENDER
   // glfw: terminate, clearing all previously allocated GLFW resources.
   ImGui_ImplOpenGL2_Shutdown();
   ImGui_ImplGlfw_Shutdown();
@@ -103,10 +110,11 @@ CDisplayWindow3D::~CDisplayWindow3D() {
 
   glfwDestroyWindow(m_Window);
   glfwTerminate();
+#endif
 }
 
 CDisplayImagesPtr
-CDisplayWindow3D::createViewImage(const std::string &name) {
+CDisplayWindow3D::createViewImage(const std::string& name) {
   m_subview_image = std::make_shared<CDisplayImages>(name);
   return m_subview_image;
 }
@@ -114,17 +122,17 @@ CDisplayWindow3D::createViewImage(const std::string &name) {
 void CDisplayWindow3D::OnPreRender() {
 
   // Menu
-  bool& show_scene_property_editor = (bool&)m_control.b_edit3DSceneProperty;
-  bool& openSceneFile = (bool&)m_control.b_openSceneFile;
-  bool& save3DScene = (bool&)m_control.b_save3DScene;
-  bool& save3DSceneAs = (bool&)m_control.b_save3DSceneAs;
+  bool& show_scene_property_editor = (bool&) m_control.b_edit3DSceneProperty;
+  bool& openSceneFile = (bool&) m_control.b_openSceneFile;
+  bool& save3DScene = (bool&) m_control.b_save3DScene;
+  bool& save3DSceneAs = (bool&) m_control.b_save3DSceneAs;
 
   // Display [Scene] panel
   static bool show_tool_panel = true;
   if (ImGui::Begin("Scene", &show_tool_panel,
-       ImGuiWindowFlags_AlwaysAutoResize |
-       ImGuiWindowFlags_NoScrollbar |
-       ImGuiWindowFlags_MenuBar)) {
+                   ImGuiWindowFlags_AlwaysAutoResize |
+                   ImGuiWindowFlags_NoScrollbar |
+                   ImGuiWindowFlags_MenuBar)) {
 
     ImGui::Text("Arcsoft VSLAM Team: ");
     ImGui::NewLine();
@@ -132,8 +140,8 @@ void CDisplayWindow3D::OnPreRender() {
     // menu list
     if (ImGui::BeginMenuBar()) {
       if (ImGui::BeginMenu("File")) {
-        ImGui::MenuItem("Open", "Ctrl+O",         &openSceneFile);
-        if (ImGui::MenuItem("Save", "Ctrl+S",     &save3DScene)) {}
+        ImGui::MenuItem("Open", "Ctrl+O", &openSceneFile);
+        if (ImGui::MenuItem("Save", "Ctrl+S", &save3DScene)) {}
         if (ImGui::MenuItem("Save As..", nullptr, &save3DSceneAs)) {}
         ImGui::EndMenu();
       }
@@ -153,12 +161,11 @@ void CDisplayWindow3D::OnPreRender() {
   ImGui::End();
 
   // Show Scene Property
-  if (show_scene_property_editor)
-  {
+  if (show_scene_property_editor) {
     // Display panel
-    if(ImGui::Begin("System", &show_scene_property_editor,
-                    ImGuiWindowFlags_NoScrollbar |
-                    ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (ImGui::Begin("System", &show_scene_property_editor,
+                     ImGuiWindowFlags_NoScrollbar |
+                     ImGuiWindowFlags_AlwaysAutoResize)) {
 
       // Visible about Axis3d and ZeroPlane
       auto& theScene = get3DSceneAndLock();
@@ -169,44 +176,41 @@ void CDisplayWindow3D::OnPreRender() {
   }
 }
 
-void CDisplayWindow3D::OnEyeShotRender()
-{
-  ImGuiIO& io = ImGui::GetIO(); (void)io;
-  if(!io.WantCaptureMouse || !io.WantCaptureKeyboard){
+void CDisplayWindow3D::OnEyeShotRender() {
+  ImGuiIO& io = ImGui::GetIO();
+  (void) io;
+  if (!io.WantCaptureMouse || !io.WantCaptureKeyboard) {
     MouseEvent event;
     event.setFromIO(io);
 
-    if(io.MouseDown[0] || io.MouseDown[1]) {
+    if (io.MouseDown[0] || io.MouseDown[1]) {
       double distance = std::sqrt(io.MouseDelta[0] * io.MouseDelta[0] + io.MouseDelta[1] * io.MouseDelta[1]);
-      if(distance > 1.0 && distance < 200.0) {
+      if (distance > 1.0 && distance < 200.0) {
         m_GlCanvas->OnMouseMove(event);
         RequestToRefresh3DView = true;
       }
       m_GlCanvas->OnMouseDown(event);
-    }
-    else if(io.MouseReleased[0] || io.MouseReleased[1]) {
+    } else if (io.MouseReleased[0] || io.MouseReleased[1]) {
       m_GlCanvas->OnMouseUp(event);
     }
 
-    if(event.GetWheelRotation() - m_lastWheelRotation > 0.5 ||
-       event.GetWheelRotation() - m_lastWheelRotation < -0.5) {
+    if (event.GetWheelRotation() - m_lastWheelRotation > 0.5 ||
+        event.GetWheelRotation() - m_lastWheelRotation < -0.5) {
       m_GlCanvas->OnMouseWheel(event);
       RequestToRefresh3DView = true;
     }
   }
 }
 
-void CDisplayWindow3D::OnPostRender()
-{
-  auto& openSceneFile = (bool&)m_control.b_openSceneFile;
-  if (openSceneFile)
-  {
+void CDisplayWindow3D::OnPostRender() {
+  auto& openSceneFile = (bool&) m_control.b_openSceneFile;
+  if (openSceneFile) {
     const char* startingFolder = ".";
     const char* optionalFileExtensionFilterString = ".3Dscene";//".jpg;.jpeg;.png;.tiff;.bmp;.gif;.txt";
     if (ImGui::Begin("FileSystem",
                      &openSceneFile,
                      ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize)
-       ) {
+      ) {
       ImGui::Text("Please choose a file:  ");
       ImGui::SameLine();
       const bool browseButtonPressed = ImGui::Button("...");
@@ -214,7 +218,7 @@ void CDisplayWindow3D::OnPostRender()
       const char* chosenPath = fsInstance.chooseFileDialog(browseButtonPressed,
                                                            startingFolder,
                                                            optionalFileExtensionFilterString);
-      if (strlen(chosenPath)>0) {
+      if (strlen(chosenPath) > 0) {
         // A path (chosenPath) has been chosen right now.
         // However we can retrieve it later using: fsInstance.getChosenPath()
         loadSceneFrom(fsInstance.getChosenPath());
@@ -224,9 +228,8 @@ void CDisplayWindow3D::OnPostRender()
     ImGui::End();
   }
 
-  auto& saveSceneAs = (bool&)m_control.b_save3DSceneAs;
-  if (saveSceneAs)
-  {
+  auto& saveSceneAs = (bool&) m_control.b_save3DSceneAs;
+  if (saveSceneAs) {
     if (ImGui::Begin("FileSystem",
                      &saveSceneAs,
                      ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize)
@@ -236,10 +239,10 @@ void CDisplayWindow3D::OnPostRender()
       const bool browseButtonPressed3 = ImGui::Button("...##3");
       static ImGuiFs::Dialog fsInstance3;
       const char* savePath = fsInstance3.saveFileDialog(
-                                    browseButtonPressed3,
-                                    ".", "final.3Dscene");
+        browseButtonPressed3,
+        ".", "final.3Dscene");
 
-      if (strlen(savePath)>0) {
+      if (strlen(savePath) > 0) {
         // A path (chosenPath) has been chosen right now.
         // However we can retrieve it later using: fsInstance.getChosenPath()
         COpenGLScene::Ptr theScene = get3DSceneAndLock();
@@ -252,7 +255,7 @@ void CDisplayWindow3D::OnPostRender()
     ImGui::End();
   }
 
-  auto& saveScene = (bool&)m_control.b_save3DScene;
+  auto& saveScene = (bool&) m_control.b_save3DScene;
   if (saveScene) {
     get3DSceneAndLock();
     gui3d::SaveScene(m_3Dscene, gui3d::dataRoute());
@@ -269,8 +272,7 @@ void CDisplayWindow3D::OnImGuiRender() {
   m_subview_image->render();
 }
 
-void CDisplayWindow3D::loadSceneFrom(const char* fileName)
-{
+void CDisplayWindow3D::loadSceneFrom(const char* fileName) {
   std::cout << "load Scene: " << fileName << std::endl;
   mrpt::io::CFileGZInputStream f(fileName);
 
@@ -283,8 +285,7 @@ void CDisplayWindow3D::loadSceneFrom(const char* fileName)
   unlockAccess3DScene();
 }
 
-void CDisplayWindow3D::RunOnce()
-{
+void CDisplayWindow3D::RunOnce() {
   GlfwContextScopeGuard gl_ctx_guard(m_Window);
   ImGuiContextScopeGuard imgui_ctx_guard(m_ImGuiContext);
   ImVec4 clear_color = ImVec4(0.6f, 0.6f, 0.60f, 0.00f);
@@ -310,7 +311,7 @@ void CDisplayWindow3D::RunOnce()
     m_GlCanvas->OnPaint();
     OnImGuiRender();
     for (auto hook : m_hookFuncs)
-        hook.run();
+      hook.run();
     unlockAccess3DScene();
     RequestToRefresh3DView = false;
   }
@@ -329,11 +330,11 @@ void CDisplayWindow3D::backThreadRun() {
 
   glfwSetErrorCallback(glfw_error_callback);
   if (!glfwInit())
-      return ;
+    return;
 
   m_Window = glfwCreateWindow(m_initialWindowWidth, m_initialWindowHeight, m_windowCaption.c_str(), NULL, NULL);
   if (m_Window == NULL)
-      return ;
+    return;
 
   glfwMakeContextCurrent(m_Window);
   glfwSwapInterval(1); // Enable vsync
@@ -342,7 +343,8 @@ void CDisplayWindow3D::backThreadRun() {
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   m_ImGuiContext = ImGui::CreateContext();
-  ImGuiIO& io = ImGui::GetIO(); (void)io;
+  ImGuiIO& io = ImGui::GetIO();
+  (void) io;
   //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
   //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
   m_lastWheelRotation = io.MouseWheel;
@@ -390,7 +392,7 @@ void CDisplayWindow3D::backThreadRun() {
       OnImGuiRender();
       m_GlCanvas->OnPaint();
       for (auto hook : m_hookFuncs)
-          hook.run();
+        hook.run();
       unlockAccess3DScene();
       RequestToRefresh3DView = false;
     }
@@ -416,16 +418,14 @@ void CDisplayWindow3D::backThreadRun() {
   glfwTerminate();
 }
 
-void CDisplayWindow3D::pushRenderCallBack(gui3d::TCallbackRender userFunction, void *userParam)
-{
-    HookFunc hook;
-    hook.userFunction = userFunction;
-    hook.userParam = userParam;
-    m_hookFuncs.push_back(hook);
+void CDisplayWindow3D::pushRenderCallBack(gui3d::TCallbackRender userFunction, void* userParam) {
+  HookFunc hook;
+  hook.userFunction = userFunction;
+  hook.userParam = userParam;
+  m_hookFuncs.push_back(hook);
 }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   void* userPointer = glfwGetWindowUserPointer(window);
   CDisplayWindow3D* window3d = (CDisplayWindow3D*) userPointer;
   volatile ControlOptions& con_option = window3d->m_control;
@@ -433,6 +433,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
   auto& ReadNextFrame = con_option.ReadNextFrame;
   auto& ReadFrameGap = con_option.ReadFrameGap;
   auto& bWaitKey = con_option.bWaitKey;
+  auto& bExit = con_option.bExit;
   auto& RequestToRefresh3DView = con_option.RequestToRefresh3DView;
 
   auto& b_openSceneFile = con_option.b_openSceneFile;
@@ -446,6 +447,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
   switch (key) {
     case GLFW_KEY_ESCAPE:
     case GLFW_KEY_Q:
+      bExit = true;
       glfwSetWindowShouldClose(window, true);
       break;
 
@@ -467,7 +469,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     case GLFW_KEY_O: {
       if (mods & GLFW_MOD_CONTROL) {
         b_openSceneFile ^= true;
-        std::cout << "openFile" << std::endl;
       }
     }
       break;
@@ -488,7 +489,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
     default:
       bWaitKey = true;
-      //printf("Key pushed: %c\n", key);
+      printf("Key pushed: %c\n", key);
   };
 }
 
@@ -504,16 +505,16 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
  * @param io
  *     mouse manipulation
  */
-void MouseEvent::setFromIO(const ImGuiIO &io){
-    const ImVec2 mouse_pos = io.MousePos;
-    m_x = mouse_pos.x;
-    m_y = mouse_pos.y;
-    m_leftDown = io.MouseDown[0];
-    m_rightDown = io.MouseDown[1];
-    m_controlDown = io.KeyCtrl;
-    m_shiftDown = io.KeyShift;
-    m_wheelRotation = io.MouseWheel;
-    //printf("m_x: %f, m_y: %f, m_leftDown: %s\n", m_x, m_y, m_leftDown ? "True" : "False");
+void MouseEvent::setFromIO(const ImGuiIO& io) {
+  const ImVec2 mouse_pos = io.MousePos;
+  m_x = mouse_pos.x;
+  m_y = mouse_pos.y;
+  m_leftDown = io.MouseDown[0];
+  m_rightDown = io.MouseDown[1];
+  m_controlDown = io.KeyCtrl;
+  m_shiftDown = io.KeyShift;
+  m_wheelRotation = io.MouseWheel;
+  //printf("m_x: %f, m_y: %f, m_leftDown: %s\n", m_x, m_y, m_leftDown ? "True" : "False");
 }
 
 } // namespace gui3d

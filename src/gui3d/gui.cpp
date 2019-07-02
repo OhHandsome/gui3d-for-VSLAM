@@ -41,6 +41,14 @@ hObject nFigure(const string& name, int width, int height) {
   return (hObject) sCurrentFigure3d.get();
 }
 
+void destroy() {
+  if (!sCurrentFigure3d)
+    return;
+
+  sCurrentFigure3d->Exit();
+  sCurrentFigure3d.reset();
+}
+
 void try_pause() {
   if (!sCurrentFigure3d)
     return;
@@ -52,14 +60,15 @@ void play_control() {
   if (!sCurrentFigure3d)
     return;
 
-  volatile bool& bReadNextFrame = sCurrentFigure3d->m_control.ReadNextFrame;
-  volatile int& ReadFrameGap = sCurrentFigure3d->m_control.ReadFrameGap;
+  auto& m_control = sCurrentFigure3d->m_control;
+  auto& ReadFrameGap = m_control.ReadFrameGap;
   if(ReadFrameGap > 0 )  ReadFrameGap--;
   do {
-    cv::waitKey(1);
     sCurrentFigure3d->forceRepaint();
+    std::cout << (m_control.ReadNextFrame ? "True" : "False") << std::endl;
+    cv::waitKey(1);
   }
-  while (!(bReadNextFrame || ReadFrameGap > 0));
+  while (!(m_control.ReadNextFrame || m_control.ReadFrameGap > 0));
 }
 
 void play_stop() {

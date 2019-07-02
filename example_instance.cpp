@@ -25,6 +25,7 @@ int main(int argc, char** argv) {
 
   RunShowScene(argc, argv);
   play_stop();
+  destroy();
   return 0;
 }
 
@@ -46,9 +47,9 @@ int RunShowScene(int argc, char** argv) {
     return -1;
   }
 #else
-  if (!ReadGT(route.c_str(), _vWindowKeyframePoses)){
-      printf("Usage: [exec] trajectory.txt\n");
-      return -1;
+  if (!ReadGT(route.c_str(), _vWindowKeyframePoses)) {
+    printf("Usage: [exec] trajectory.txt\n");
+    return -1;
   }
 #endif
 

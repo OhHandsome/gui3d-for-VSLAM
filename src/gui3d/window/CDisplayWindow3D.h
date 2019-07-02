@@ -43,6 +43,8 @@ class CDisplayWindow3D : public SceneManager {
   virtual ~CDisplayWindow3D();
 
   bool WindowClosed() const;
+  void Exit();
+
   CDisplayImagesPtr createViewImage(const std::string& name);
   CDisplayImagesPtr getViewImage() { return m_subview_image; }
 

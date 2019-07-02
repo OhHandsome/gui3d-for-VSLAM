@@ -51,6 +51,7 @@ struct tOptions {
 // Gui3d include default window3d for vSLAM
 inline string Engine() {return "vSLAM for ArcSoft";}
 hObject nFigure(const string& name, int width = -1, int height = -1);
+void destroy();
 void try_pause();
 void play_control();
 void play_stop();
